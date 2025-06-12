@@ -247,22 +247,77 @@ body {
 /* Print Styles */
 @media print {
   .header,
-  .button {
-    display: none;
+  .nav-container,
+  .nav-links {
+    display: none !important;
   }
 
   .main-content {
-    margin-top: 0;
-    padding: 0;
+    margin-top: 0 !important;
+    padding: 0 !important;
   }
 
   .card {
-    box-shadow: none;
-    border: 1px solid #ddd;
+    box-shadow: none !important;
+    margin: 0 !important;
   }
 
   body {
-    background-color: white;
+    background-color: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  /* Hide buttons and interactive elements when printing */
+  button,
+  .MuiButton-root,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  /* Typography adjustments for print */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  /* Grid adjustments for print */
+  .MuiGrid-container {
+    margin: 0 !important;
+  }
+
+  .MuiGrid-item {
+    padding: 8px !important;
+  }
+
+  /* Patient details specific styling */
+  .patient-detail-section {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+
+  .patient-field {
+    margin-bottom: 10px;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 5px;
+  }
+
+  .patient-field-label {
+    font-weight: bold;
+    color: #333 !important;
+  }
+
+  .patient-field-value {
+    margin-top: 2px;
+    color: #000 !important;
   }
 }
 
