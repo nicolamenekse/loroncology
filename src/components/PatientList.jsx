@@ -22,12 +22,24 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const API_URL = '/api';
 
@@ -37,6 +49,9 @@ const PatientList = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [sortBy, setSortBy] = useState('dateDesc');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -95,101 +110,211 @@ const PatientList = () => {
     return tur === 'Kedi' ? '🐱' : '🐕';
   };
 
+  const filteredPatients = patients.filter(patient => {
+    const matchesSearch = patient.hastaAdi.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === '' || patient.tur === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  const sortedPatients = filteredPatients.sort((a, b) => {
+    if (sortBy === 'dateDesc') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    } else if (sortBy === 'dateAsc') {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    } else if (sortBy === 'nameAsc') {
+      return a.hastaAdi.localeCompare(b.hastaAdi);
+    } else if (sortBy === 'nameDesc') {
+      return b.hastaAdi.localeCompare(a.hastaAdi);
+    }
+    return 0;
+  });
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/')}
-          sx={{ mb: 2 }}
-        >
-          Ana Sayfaya Dön
-        </Button>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Kayıtlı Hastalar
-        </Typography>
-      </Box>
+    <div className="fade-in">
+      <Container maxWidth="lg">
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3,
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 }
+          }}>
+            <Typography variant="h4" component="h1" sx={{ 
+              color: '#2c3e50',
+              fontWeight: 600,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+            }}>
+              Hasta Listesi
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/patients/new')}
+              size="large"
+              fullWidth={isMobile}
+              sx={{ 
+                py: 1.5,
+                fontSize: { xs: '1rem', sm: '1.1rem' }
+              }}
+            >
+              Yeni Hasta Ekle
+            </Button>
+          </Box>
 
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
+          {/* Arama ve Filtreleme */}
+          <Box sx={{ mb: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label="Hasta Adı ile Ara"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Tür</InputLabel>
+                  <Select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    label="Tür"
+                  >
+                    <MenuItem value="">Tümü</MenuItem>
+                    <MenuItem value="Kedi">🐱 Kedi</MenuItem>
+                    <MenuItem value="Köpek">🐕 Köpek</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sıralama</InputLabel>
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    label="Sıralama"
+                  >
+                    <MenuItem value="dateDesc">Tarih (Yeni-Eski)</MenuItem>
+                    <MenuItem value="dateAsc">Tarih (Eski-Yeni)</MenuItem>
+                    <MenuItem value="nameAsc">İsim (A-Z)</MenuItem>
+                    <MenuItem value="nameDesc">İsim (Z-A)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Box>
 
-      {error && (
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError(null)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
-            {error}
-          </Alert>
-        </Snackbar>
-      )}
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Protokol No</TableCell>
-              <TableCell>Hasta Adı</TableCell>
-              <TableCell>Hasta Sahibi</TableCell>
-              <TableCell>Tür</TableCell>
-              <TableCell>Irk</TableCell>
-              <TableCell>Yaş</TableCell>
-              <TableCell>VKS</TableCell>
-              <TableCell>İşlemler</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {patients.map((patient) => (
-              <TableRow key={patient._id}>
-                <TableCell>{patient.protokolNo}</TableCell>
-                <TableCell>{patient.hastaAdi}</TableCell>
-                <TableCell>{patient.hastaSahibi}</TableCell>
-                <TableCell>
-                  <Chip
-                    icon={<PetsIcon />}
-                    label={`${getTurEmoji(patient.tur)} ${patient.tur}`}
-                    color={patient.tur === 'Kedi' ? 'primary' : 'secondary'}
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell>{patient.irk}</TableCell>
-                <TableCell>{patient.yas}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={`VKS: ${patient.vks}`}
-                    color={patient.vks > 5 ? 'success' : 'warning'}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Detay">
-                      <IconButton
+          {/* Hasta Listesi */}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          ) : sortedPatients.length === 0 ? (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {searchTerm || filterType ? 'Arama kriterlerine uygun hasta bulunamadı.' : 'Henüz hasta kaydı bulunmuyor.'}
+            </Alert>
+          ) : (
+            <Grid container spacing={2}>
+              {sortedPatients.map((patient) => (
+                <Grid item xs={12} sm={6} md={4} key={patient._id}>
+                  <Card 
+                    sx={{ 
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 3
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 2
+                      }}>
+                        <Typography variant="h6" component="div" sx={{ 
+                          fontWeight: 600,
+                          fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                        }}>
+                          {patient.hastaAdi}
+                        </Typography>
+                        <Chip 
+                          label={patient.tur} 
+                          color={patient.tur === 'Kedi' ? 'primary' : 'secondary'}
+                          size="small"
+                        />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <strong>Protokol No:</strong> {patient.protokolNo}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <strong>Sahibi:</strong> {patient.hastaSahibi}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <strong>Irk:</strong> {patient.irk}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <strong>Yaş:</strong> {patient.yas} yaş
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>VKS:</strong> {patient.vks}
+                      </Typography>
+                    </CardContent>
+                    <CardActions sx={{ 
+                      p: 2, 
+                      pt: 0,
+                      display: 'flex',
+                      gap: 1,
+                      flexDirection: { xs: 'column', sm: 'row' }
+                    }}>
+                      <Button
+                        size="small"
+                        variant="contained"
                         color="primary"
-                        onClick={() => navigate(`/hasta/${patient._id}`)}
+                        fullWidth
+                        onClick={() => navigate(`/patients/${patient._id}`)}
+                        startIcon={<VisibilityIcon />}
                       >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Sil">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDeleteClick(patient)}
+                        Detaylar
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        fullWidth
+                        onClick={() => navigate(`/patients/${patient._id}/edit`)}
+                        startIcon={<EditIcon />}
                       >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                        Düzenle
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Paper>
+      </Container>
 
       <Dialog
         open={deleteDialogOpen}
@@ -219,7 +344,7 @@ const PatientList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 

@@ -127,334 +127,297 @@ const PatientEdit = () => {
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(`/hasta/${id}`)}
-          sx={{ mb: 2 }}
-        >
-          Hasta Detayına Dön
-        </Button>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Hasta Bilgilerini Düzenle
-        </Typography>
-      </Box>
-
-      <Paper sx={{ p: 4 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {/* Temel Bilgiler */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                Temel Bilgiler
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Protokol No"
-                name="protokolNo"
-                value={formData.protokolNo}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Hasta Adı"
-                name="hastaAdi"
-                value={formData.hastaAdi}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Hasta Sahibi"
-                name="hastaSahibi"
-                value={formData.hastaSahibi}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth required>
-                <InputLabel>Tür</InputLabel>
-                <Select
+    <div className="fade-in">
+      <Container maxWidth="lg">
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ 
+            color: '#2c3e50',
+            fontWeight: 600,
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+          }}>
+            Hasta Düzenle
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              {/* Hasta Bilgileri */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Hasta Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Protokol No"
+                  name="protokolNo"
+                  value={formData.protokolNo}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Hasta Adı"
+                  name="hastaAdi"
+                  value={formData.hastaAdi}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Hasta Sahibi"
+                  name="hastaSahibi"
+                  value={formData.hastaSahibi}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Tür"
                   name="tur"
                   value={formData.tur}
                   onChange={handleChange}
-                  label="Tür"
-                >
-                  <MenuItem value="Kedi">🐱 Kedi</MenuItem>
-                  <MenuItem value="Köpek">🐕 Köpek</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Irk"
-                name="irk"
-                value={formData.irk}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth required>
-                <InputLabel>Cinsiyet</InputLabel>
-                <Select
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Irk"
+                  name="irk"
+                  value={formData.irk}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Cinsiyet"
                   name="cinsiyet"
                   value={formData.cinsiyet}
                   onChange={handleChange}
-                  label="Cinsiyet"
-                >
-                  <MenuItem value="Erkek">Erkek</MenuItem>
-                  <MenuItem value="Dişi">Dişi</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Yaş"
+                  name="yas"
+                  type="number"
+                  value={formData.yas}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Kilo"
+                  name="kilo"
+                  type="number"
+                  value={formData.kilo}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="VKS"
+                  name="vks"
+                  type="number"
+                  value={formData.vks}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  inputProps={{ min: 1, max: 9 }}
+                />
+              </Grid>
 
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Yaş"
-                name="yas"
-                type="number"
-                value={formData.yas}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
+              {/* Klinik Bilgileri */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mt: 2,
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Klinik Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Anamnez"
+                  name="anamnez"
+                  value={formData.anamnez}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Klinik Bulgular"
+                  name="klinikBulgular"
+                  value={formData.klinikBulgular}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
 
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Kilo (kg)"
-                name="kilo"
-                type="number"
-                value={formData.kilo}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
+              {/* Patoloji ve Biyopsi Bilgileri */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mt: 2,
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Patoloji ve Biyopsi Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl component="fieldset" fullWidth>
+                  <FormLabel component="legend">Biyopsi Türü</FormLabel>
+                  <FormGroup row sx={{ 
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: { xs: 1, sm: 2 }
+                  }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.biyopsi?.iiab}
+                          onChange={handleChange}
+                          name="iiab"
+                        />
+                      }
+                      label="İİAB (ince iğne aspirasyon biyopsisi)"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.biyopsi?.tuse}
+                          onChange={handleChange}
+                          name="tuse"
+                        />
+                      }
+                      label="Tuşe"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.biyopsi?.trucat}
+                          onChange={handleChange}
+                          name="trucat"
+                        />
+                      }
+                      label="Trucat Biyopsi"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.biyopsi?.operasyon}
+                          onChange={handleChange}
+                          name="operasyon"
+                        />
+                      }
+                      label="Operasyon"
+                    />
+                  </FormGroup>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Biyopsi Notları"
+                  name="biyopsiNot"
+                  value={formData.biyopsiNot}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
 
-            <Grid item xs={12} md={4}>
-              <Typography component="legend">Vücut Kondisyon Skoru (VKS)</Typography>
-              <Rating
-                name="vks"
-                value={formData.vks}
-                onChange={(event, newValue) => {
-                  setFormData(prev => ({ ...prev, vks: newValue }));
-                }}
-                max={9}
-              />
+              {/* Butonlar */}
+              <Grid item xs={12} sx={{ mt: 2 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2,
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  justifyContent: 'center'
+                }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    fullWidth
+                    sx={{ 
+                      py: 1.5,
+                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                    }}
+                  >
+                    Kaydet
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                    fullWidth
+                    onClick={() => navigate(`/patients/${id}`)}
+                    sx={{ 
+                      py: 1.5,
+                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                    }}
+                  >
+                    İptal
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-
-            {/* Klinik Bilgiler */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mt: 2 }}>
-                Klinik Bilgiler
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Anamnez"
-                name="anamnez"
-                multiline
-                rows={4}
-                value={formData.anamnez}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Radyolojik Bulgular"
-                name="radyolojikBulgular"
-                multiline
-                rows={4}
-                value={formData.radyolojikBulgular}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Ultrasonografik Bulgular"
-                name="ultrasonografikBulgular"
-                multiline
-                rows={4}
-                value={formData.ultrasonografikBulgular}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Tomografi Bulguları"
-                name="tomografiBulgular"
-                multiline
-                rows={4}
-                value={formData.tomografiBulgular}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            {/* Patoloji ve Biyopsi Bilgileri */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                Patoloji ve Biyopsi Bilgileri
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl component="fieldset">
-                <FormLabel component="legend">Biyopsi Türü</FormLabel>
-                <FormGroup row>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.biyopsi?.iiab || false}
-                        onChange={handleChange}
-                        name="iiab"
-                      />
-                    }
-                    label="İİAB (İnce İğne Aspirasyon Biyopsisi)"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.biyopsi?.tuse || false}
-                        onChange={handleChange}
-                        name="tuse"
-                      />
-                    }
-                    label="Tuşe"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.biyopsi?.trucat || false}
-                        onChange={handleChange}
-                        name="trucat"
-                      />
-                    }
-                    label="Trucat Biyopsi"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.biyopsi?.operasyon || false}
-                        onChange={handleChange}
-                        name="operasyon"
-                      />
-                    }
-                    label="Operasyon"
-                  />
-                </FormGroup>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Biyopsi Notları"
-                name="biyopsiNot"
-                value={formData.biyopsiNot || ''}
-                onChange={handleChange}
-                placeholder="Biyopsi ile ilgili eklemek istediğiniz notları buraya yazabilirsiniz..."
-              />
-            </Grid>
-
-            {/* Tedavi ve Laboratuvar */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mt: 2 }}>
-                Tedavi ve Laboratuvar
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Tedavi"
-                name="tedavi"
-                multiline
-                rows={4}
-                value={formData.tedavi}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Hemogram"
-                name="hemogram"
-                multiline
-                rows={4}
-                value={formData.hemogram}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Biyokimya"
-                name="biyokimya"
-                multiline
-                rows={4}
-                value={formData.biyokimya}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Reçete"
-                name="recete"
-                multiline
-                rows={4}
-                value={formData.recete}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  startIcon={<SaveIcon />}
-                >
-                  Değişiklikleri Kaydet
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-    </Container>
+          </form>
+        </Paper>
+      </Container>
+    </div>
   );
 };
 

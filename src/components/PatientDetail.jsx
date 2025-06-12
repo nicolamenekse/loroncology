@@ -10,6 +10,7 @@ import {
   Divider,
   Chip,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
@@ -19,6 +20,7 @@ import PrintIcon from '@mui/icons-material/Print';
 const PatientDetail = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -38,6 +40,7 @@ const PatientDetail = () => {
     } catch (error) {
       console.error('Error:', error);
       alert(error.message);
+      setError(error.message);
       setLoading(false);
     }
   };
@@ -46,211 +49,254 @@ const PatientDetail = () => {
     window.print();
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!patient) {
-    return (
-      <Container>
-        <Typography variant="h5" color="error" sx={{ mt: 4 }}>
-          Hasta bulunamadı
-        </Typography>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/hastalar')}
-        >
-          Hasta Listesine Dön
-        </Button>
-        <Box>
-          <Button
-            startIcon={<EditIcon />}
-            variant="contained"
-            color="primary"
-            onClick={() => navigate(`/hasta-duzenle/${id}`)}
-            sx={{ mr: 2 }}
-          >
-            Düzenle
-          </Button>
-          <Button
-            startIcon={<PrintIcon />}
-            variant="outlined"
-            onClick={handlePrint}
-          >
-            Yazdır
-          </Button>
-        </Box>
-      </Box>
-
-      <Paper sx={{ p: 4 }}>
-        <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h4" component="h1">
-            {patient.hastaAdi}
-          </Typography>
-          <Chip
-            icon={<PetsIcon />}
-            label={`${patient.tur === 'Kedi' ? '🐱' : '🐕'} ${patient.tur}`}
-            color={patient.tur === 'Kedi' ? 'primary' : 'secondary'}
-            variant="outlined"
-          />
-        </Box>
-
-        <Grid container spacing={4}>
-          {/* Temel Bilgiler */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Temel Bilgiler
+    <div className="fade-in">
+      <Container maxWidth="lg">
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3,
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 }
+          }}>
+            <Typography variant="h4" component="h1" sx={{ 
+              color: '#2c3e50',
+              fontWeight: 600,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+            }}>
+              Hasta Detayları
             </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Protokol No</Typography>
-                <Typography variant="body1">{patient.protokolNo}</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Hasta Sahibi</Typography>
-                <Typography variant="body1">{patient.hastaSahibi}</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Irk</Typography>
-                <Typography variant="body1">{patient.irk}</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Cinsiyet</Typography>
-                <Typography variant="body1">{patient.cinsiyet}</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Yaş</Typography>
-                <Typography variant="body1">{patient.yas} yaş</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">Kilo</Typography>
-                <Typography variant="body1">{patient.kilo} kg</Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" color="text.secondary">VKS</Typography>
-                <Chip
-                  label={`VKS: ${patient.vks}`}
-                  color={patient.vks > 5 ? 'success' : 'warning'}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2,
+              flexDirection: { xs: 'column', sm: 'row' },
+              width: { xs: '100%', sm: 'auto' }
+            }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => navigate('/patients')}
+                fullWidth
+                sx={{ 
+                  py: 1.5,
+                  fontSize: { xs: '1rem', sm: '1.1rem' }
+                }}
+              >
+                Geri Dön
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate(`/patients/${id}/edit`)}
+                fullWidth
+                sx={{ 
+                  py: 1.5,
+                  fontSize: { xs: '1rem', sm: '1.1rem' }
+                }}
+              >
+                Düzenle
+              </Button>
+            </Box>
+          </Box>
 
-          {/* Klinik Bilgiler */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Klinik Bilgiler
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          ) : patient ? (
+            <Grid container spacing={3}>
+              {/* Hasta Bilgileri */}
               <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Anamnez</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.anamnez}</Typography>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Hasta Bilgileri
+                </Typography>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Radyolojik Bulgular</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.radyolojikBulgular || '-'}</Typography>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Protokol No
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.protokolNo}
+                </Typography>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Ultrasonografik Bulgular</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.ultrasonografikBulgular || '-'}</Typography>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Hasta Adı
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.hastaAdi}
+                </Typography>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Tomografi Bulguları</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.tomografiBulgular || '-'}</Typography>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Hasta Sahibi
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.hastaSahibi}
+                </Typography>
               </Grid>
-            </Grid>
-          </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Tür
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.tur}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Irk
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.irk}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Cinsiyet
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.cinsiyet}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Yaş
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.yas} yaş
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Kilo
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.kilo} kg
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  VKS
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.vks}
+                </Typography>
+              </Grid>
 
-          {/* Patoloji Bilgileri */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Patoloji ve Biyopsi Bilgileri
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
+              {/* Klinik Bilgileri */}
               <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Biyopsi Türü</Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mt: 2,
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Klinik Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Anamnez
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  {patient.anamnez}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Klinik Bulgular
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  {patient.klinikBulgular}
+                </Typography>
+              </Grid>
+
+              {/* Patoloji ve Biyopsi Bilgileri */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mt: 2,
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Patoloji ve Biyopsi Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Biyopsi Türü
+                </Typography>
+                <Box sx={{ mt: 1 }}>
                   {patient.biyopsi?.iiab && (
-                    <Chip label="İİAB" color="primary" variant="outlined" />
+                    <Chip 
+                      label="İİAB (ince iğne aspirasyon biyopsisi)" 
+                      color="primary" 
+                      variant="outlined" 
+                      sx={{ m: 0.5 }}
+                    />
                   )}
                   {patient.biyopsi?.tuse && (
-                    <Chip label="Tuşe" color="primary" variant="outlined" />
+                    <Chip 
+                      label="Tuşe" 
+                      color="primary" 
+                      variant="outlined" 
+                      sx={{ m: 0.5 }}
+                    />
                   )}
                   {patient.biyopsi?.trucat && (
-                    <Chip label="Trucat Biyopsi" color="primary" variant="outlined" />
+                    <Chip 
+                      label="Trucat Biyopsi" 
+                      color="primary" 
+                      variant="outlined" 
+                      sx={{ m: 0.5 }}
+                    />
                   )}
                   {patient.biyopsi?.operasyon && (
-                    <Chip label="Operasyon" color="primary" variant="outlined" />
+                    <Chip 
+                      label="Operasyon" 
+                      color="primary" 
+                      variant="outlined" 
+                      sx={{ m: 0.5 }}
+                    />
                   )}
                   {!patient.biyopsi?.iiab && !patient.biyopsi?.tuse && 
                    !patient.biyopsi?.trucat && !patient.biyopsi?.operasyon && (
-                    <Typography variant="body2" color="text.secondary">Biyopsi yapılmadı</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Biyopsi yapılmadı
+                    </Typography>
                   )}
                 </Box>
               </Grid>
               {patient.biyopsiNot && (
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">Biyopsi Notları</Typography>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.biyopsiNot}</Typography>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Biyopsi Notları
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {patient.biyopsiNot}
+                  </Typography>
                 </Grid>
               )}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Patoloji</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.patoloji || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Mikroskopisi</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.mikroskopisi || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Patolojik Teşhis</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.patolojikTeshis || '-'}</Typography>
-              </Grid>
             </Grid>
-          </Grid>
-
-          {/* Tedavi ve Laboratuvar */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Tedavi ve Laboratuvar
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Tedavi</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.tedavi || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Hemogram</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.hemogram || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Biyokimya</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.biyokimya || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary">Reçete</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.recete || '-'}</Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
+          ) : (
+            <Alert severity="info">
+              Hasta bulunamadı.
+            </Alert>
+          )}
+        </Paper>
+      </Container>
+    </div>
   );
 };
 
