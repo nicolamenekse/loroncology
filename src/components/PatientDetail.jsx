@@ -177,10 +177,37 @@ const PatientDetail = () => {
           {/* Patoloji Bilgileri */}
           <Grid item xs={12}>
             <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Patoloji Bilgileri
+              Patoloji ve Biyopsi Bilgileri
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="text.secondary">Biyopsi Türü</Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                  {patient.biyopsi?.iiab && (
+                    <Chip label="İİAB" color="primary" variant="outlined" />
+                  )}
+                  {patient.biyopsi?.tuse && (
+                    <Chip label="Tuşe" color="primary" variant="outlined" />
+                  )}
+                  {patient.biyopsi?.trucat && (
+                    <Chip label="Trucat Biyopsi" color="primary" variant="outlined" />
+                  )}
+                  {patient.biyopsi?.operasyon && (
+                    <Chip label="Operasyon" color="primary" variant="outlined" />
+                  )}
+                  {!patient.biyopsi?.iiab && !patient.biyopsi?.tuse && 
+                   !patient.biyopsi?.trucat && !patient.biyopsi?.operasyon && (
+                    <Typography variant="body2" color="text.secondary">Biyopsi yapılmadı</Typography>
+                  )}
+                </Box>
+              </Grid>
+              {patient.biyopsiNot && (
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary">Biyopsi Notları</Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.biyopsiNot}</Typography>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="text.secondary">Patoloji</Typography>
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{patient.patoloji || '-'}</Typography>

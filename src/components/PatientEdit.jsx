@@ -14,6 +14,10 @@ import {
   MenuItem,
   Rating,
   CircularProgress,
+  Checkbox,
+  FormGroup,
+  FormLabel,
+  FormControlLabel,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
@@ -43,6 +47,13 @@ const PatientEdit = () => {
     hemogram: '',
     biyokimya: '',
     recete: '',
+    biyopsi: {
+      iiab: false,
+      tuse: false,
+      trucat: false,
+      operasyon: false,
+    },
+    biyopsiNot: '',
   });
 
   useEffect(() => {
@@ -66,11 +77,22 @@ const PatientEdit = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        biyopsi: {
+          ...prev.biyopsi,
+          [name]: checked,
+        },
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -295,46 +317,69 @@ const PatientEdit = () => {
               />
             </Grid>
 
-            {/* Patoloji Bilgileri */}
+            {/* Patoloji ve Biyopsi Bilgileri */}
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mt: 2 }}>
-                Patoloji Bilgileri
+              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+                Patoloji ve Biyopsi Bilgileri
               </Typography>
             </Grid>
-
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Patoloji"
-                name="patoloji"
-                multiline
-                rows={4}
-                value={formData.patoloji}
-                onChange={handleChange}
-              />
+              <FormControl component="fieldset">
+                <FormLabel component="legend">Biyopsi Türü</FormLabel>
+                <FormGroup row>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi?.iiab || false}
+                        onChange={handleChange}
+                        name="iiab"
+                      />
+                    }
+                    label="İİAB (İnce İğne Aspirasyon Biyopsisi)"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi?.tuse || false}
+                        onChange={handleChange}
+                        name="tuse"
+                      />
+                    }
+                    label="Tuşe"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi?.trucat || false}
+                        onChange={handleChange}
+                        name="trucat"
+                      />
+                    }
+                    label="Trucat Biyopsi"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi?.operasyon || false}
+                        onChange={handleChange}
+                        name="operasyon"
+                      />
+                    }
+                    label="Operasyon"
+                  />
+                </FormGroup>
+              </FormControl>
             </Grid>
-
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Mikroskopisi"
-                name="mikroskopisi"
                 multiline
                 rows={4}
-                value={formData.mikroskopisi}
+                label="Biyopsi Notları"
+                name="biyopsiNot"
+                value={formData.biyopsiNot || ''}
                 onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Patolojik Teşhis"
-                name="patolojikTeshis"
-                multiline
-                rows={4}
-                value={formData.patolojikTeshis}
-                onChange={handleChange}
+                placeholder="Biyopsi ile ilgili eklemek istediğiniz notları buraya yazabilirsiniz..."
               />
             </Grid>
 

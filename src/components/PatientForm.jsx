@@ -15,6 +15,9 @@ import {
   Radio,
   Rating,
   Container,
+  Checkbox,
+  FormGroup,
+  FormLabel,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -43,14 +46,32 @@ const PatientForm = () => {
     hemogram: '',
     biyokimya: '',
     recete: '',
+    biyopsi: {
+      iiab: false,
+      tuse: false,
+      trucat: false,
+      operasyon: false,
+    },
+    biyopsiNot: '',
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData((prev) => ({
+        ...prev,
+        biyopsi: {
+          ...prev.biyopsi,
+          [name]: checked,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -374,6 +395,72 @@ const PatientForm = () => {
                 onChange={handleChange}
                 multiline
                 rows={4}
+              />
+            </Grid>
+
+            {/* Biyopsi Seçenekleri */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                Biyopsi Seçenekleri
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">Biyopsi Türü</FormLabel>
+                <FormGroup row>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi.iiab}
+                        onChange={handleChange}
+                        name="iiab"
+                      />
+                    }
+                    label="İİAB (İnce İğne Aspirasyon Biyopsisi)"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi.tuse}
+                        onChange={handleChange}
+                        name="tuse"
+                      />
+                    }
+                    label="Tuşe"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi.trucat}
+                        onChange={handleChange}
+                        name="trucat"
+                      />
+                    }
+                    label="Trucat Biyopsi"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.biyopsi.operasyon}
+                        onChange={handleChange}
+                        name="operasyon"
+                      />
+                    }
+                    label="Operasyon"
+                  />
+                </FormGroup>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Biyopsi Notları"
+                name="biyopsiNot"
+                value={formData.biyopsiNot}
+                onChange={handleChange}
+                placeholder="Biyopsi ile ilgili eklemek istediğiniz notları buraya yazabilirsiniz..."
               />
             </Grid>
 
