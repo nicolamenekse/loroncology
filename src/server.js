@@ -61,12 +61,12 @@ const patientSchema = new mongoose.Schema({
   hastaAdi: { type: String, required: true },
   hastaSahibi: { type: String, required: true },
   tur: { type: String, required: true },
-  irk: { type: String, required: true },
-  cinsiyet: { type: String, required: true },
+  irk: String,
+  cinsiyet: String,
   yas: { type: String, required: true },
-  kilo: { type: String, required: true },
+  kilo: String,
   vks: { type: Number, required: true },
-  anamnez: { type: String, required: true },
+  anamnez: String,
   radyolojikBulgular: String,
   ultrasonografikBulgular: String,
   tomografiBulgular: String,
@@ -104,7 +104,7 @@ app.post('/api/patients', async (req, res) => {
     console.log('POST /api/patients - Gelen istek:', req.body);
 
     // Gelen veriyi kontrol et
-    const requiredFields = ['protokolNo', 'hastaAdi', 'hastaSahibi', 'tur', 'irk', 'cinsiyet', 'yas', 'kilo', 'vks', 'anamnez'];
+    const requiredFields = ['protokolNo', 'hastaAdi', 'hastaSahibi', 'tur', 'yas', 'vks'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {

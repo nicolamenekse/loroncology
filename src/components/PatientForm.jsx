@@ -79,8 +79,7 @@ const PatientForm = () => {
     try {
       // Form verilerini kontrol et
       if (!formData.protokolNo || !formData.hastaAdi || !formData.hastaSahibi || 
-          !formData.tur || !formData.irk || !formData.cinsiyet || 
-          !formData.yas || !formData.kilo || !formData.vks || !formData.anamnez) {
+          !formData.tur || !formData.yas || !formData.vks) {
         throw new Error('Lütfen tüm zorunlu alanları doldurun.');
       }
 
@@ -198,7 +197,6 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  
                   label="Irk"
                   name="irk"
                   value={formData.irk}
@@ -210,7 +208,6 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  
                   label="Cinsiyet"
                   name="cinsiyet"
                   value={formData.cinsiyet}
@@ -222,7 +219,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  
+                  required
                   label="Yaş"
                   name="yas"
                   type="number"
@@ -235,7 +232,6 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  
                   label="Kilo"
                   name="kilo"
                   type="number"
@@ -274,7 +270,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  required
                   label="Anamnez"
                   name="anamnez"
                   value={formData.anamnez}
