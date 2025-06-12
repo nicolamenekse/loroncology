@@ -198,7 +198,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  required
+                  
                   label="Irk"
                   name="irk"
                   value={formData.irk}
@@ -210,7 +210,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  required
+                  
                   label="Cinsiyet"
                   name="cinsiyet"
                   value={formData.cinsiyet}
@@ -222,7 +222,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  required
+                  
                   label="Yaş"
                   name="yas"
                   type="number"
@@ -235,7 +235,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  required
+                  
                   label="Kilo"
                   name="kilo"
                   type="number"
@@ -284,11 +284,31 @@ const PatientForm = () => {
                   rows={3}
                   size="small"
                 />
+
+
+
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  required
+                  
+                  label="radyolojik bulgular"
+                  name="radyolojikBulgular"
+                  value={formData.radyolojikBulgular}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+
+
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
                   label="Klinik Bulgular"
                   name="klinikBulgular"
                   value={formData.klinikBulgular}
@@ -300,7 +320,77 @@ const PatientForm = () => {
                 />
               </Grid>
 
-              {/* Patoloji ve Biyopsi Bilgileri */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Ultrasonografik bulgular"
+                  name="ultrasonografikBulgular"
+                  value={formData.ultrasonografikBulgular}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Tomografi bulgular"
+                  name="tomografiBulgular"
+                  value={formData.tomografiBulgular}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Patoloji"
+                  name="patoloji"
+                  value={formData.patoloji}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Mikroskopisi"
+                  name="mikroskopisi"
+                  value={formData.mikroskopisi}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Patolojik Teshıs"
+                  name="patolojikTeshis"
+                  value={formData.patolojikTeshis}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
                   color: '#2c3e50',
@@ -374,6 +464,71 @@ const PatientForm = () => {
                   size="small"
                 />
               </Grid>
+
+             
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Hemogram"
+                  name="hemogram"
+                  value={formData.hemogram}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Biyokimya"
+                  name="biyokimya"
+                  value={formData.biyokimya}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Tedavi"
+                  name="tedavi"
+                  value={formData.tedavi}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  
+                  label="Recete"
+                  name="recete"
+                  value={formData.recete}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  size="small"
+                />
+              </Grid>
+
+
+              {/* Patoloji ve Biyopsi Bilgileri */}
+             
 
               {/* Butonlar */}
               <Grid item xs={12} sx={{ mt: 2 }}>

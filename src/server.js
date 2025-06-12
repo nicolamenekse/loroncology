@@ -16,6 +16,8 @@ const corsOptions = {
   credentials: true
 };
 
+
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -226,10 +228,13 @@ app.delete('/api/patients/:id', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/healthz', (req, res) => {
   res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
 }); 
+

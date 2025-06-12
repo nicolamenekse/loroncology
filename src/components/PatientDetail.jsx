@@ -45,10 +45,6 @@ const PatientDetail = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="fade-in">
       <Container maxWidth="lg">
@@ -77,7 +73,7 @@ const PatientDetail = () => {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={() => navigate('/patients')}
+                onClick={() => navigate('/hastalar')}
                 fullWidth
                 sx={{ 
                   py: 1.5,
@@ -89,7 +85,7 @@ const PatientDetail = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate(`/patients/${id}/edit`)}
+                onClick={() => navigate(`/hasta-duzenle/${id}`)}
                 fullWidth
                 sx={{ 
                   py: 1.5,
@@ -205,20 +201,100 @@ const PatientDetail = () => {
                   Klinik Bilgileri
                 </Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6} md={4}>
                 <Typography variant="subtitle1" color="text.secondary">
                   Anamnez
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" gutterBottom>
                   {patient.anamnez}
                 </Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6} md={4}>
                 <Typography variant="subtitle1" color="text.secondary">
-                  Klinik Bulgular
+                  Radyolojik Bulgular
                 </Typography>
-                <Typography variant="body1" paragraph>
-                  {patient.klinikBulgular}
+                <Typography variant="body1" gutterBottom>
+                  {patient.radyolojikBulgular}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Ultrasonografik Bulgular
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.ultrasonografikBulgular}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Tomografi Bulgular
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.tomografiBulgular}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Patoloji
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.patoloji}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Mikroskopisi
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.mikroskopisi}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Patolojik Teşhis
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.patolojikTeshis}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Tedavi
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.tedavi}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Hemogram
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.hemogram}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Biyokimya
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.biyokimya}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Reçete
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.recete}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Biyopsi Not
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {patient.biyopsiNot}
                 </Typography>
               </Grid>
 
@@ -278,16 +354,6 @@ const PatientDetail = () => {
                   )}
                 </Box>
               </Grid>
-              {patient.biyopsiNot && (
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Biyopsi Notları
-                  </Typography>
-                  <Typography variant="body1" paragraph>
-                    {patient.biyopsiNot}
-                  </Typography>
-                </Grid>
-              )}
             </Grid>
           ) : (
             <Alert severity="info">

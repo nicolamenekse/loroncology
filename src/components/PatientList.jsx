@@ -32,6 +32,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -40,10 +42,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import SearchIcon from '@mui/icons-material/Search';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const PatientList = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [patients, setPatients] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -61,7 +66,7 @@ const PatientList = () => {
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/patients`);
+      const response = await fetch(`${API_URL}/api/patients`);
       if (!response.ok) {
         throw new Error('Hastalar yüklenirken bir hata oluştu');
       }
@@ -76,14 +81,9 @@ const PatientList = () => {
     }
   };
 
-  const handleDeleteClick = (patient) => {
-    setSelectedPatient(patient);
-    setDeleteDialogOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
     try {
-      const response = await fetch(`${API_URL}/patients/${selectedPatient._id}`, {
+      const response = await fetch(`${API_URL}/api/patients/${selectedPatient._id}`, {
         method: 'DELETE',
       });
 
@@ -106,10 +106,6 @@ const PatientList = () => {
     setSelectedPatient(null);
   };
 
-  const getTurEmoji = (tur) => {
-    return tur === 'Kedi' ? '🐱' : '🐕';
-  };
-
   const filteredPatients = patients.filter(patient => {
     const matchesSearch = patient.hastaAdi.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === '' || patient.tur === filterType;
@@ -128,6 +124,14 @@ const PatientList = () => {
     }
     return 0;
   });
+
+  const handleViewDetails = (id) => {
+    navigate(`/hasta/${id}`);
+  };
+
+  const handleEditPatient = (id) => {
+    navigate(`/hasta-duzenle/${id}`);
+  };
 
   return (
     <div className="fade-in">
@@ -152,7 +156,7 @@ const PatientList = () => {
               variant="contained"
               color="primary"
               startIcon={<AddIcon />}
-              onClick={() => navigate('/patients/new')}
+              onClick={() => navigate('/yeni-hasta')}
               size="large"
               fullWidth={isMobile}
               sx={{ 
@@ -292,7 +296,7 @@ const PatientList = () => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        onClick={() => navigate(`/patients/${patient._id}`)}
+                        onClick={() => handleViewDetails(patient._id)}
                         startIcon={<VisibilityIcon />}
                       >
                         Detaylar
@@ -302,10 +306,23 @@ const PatientList = () => {
                         variant="outlined"
                         color="primary"
                         fullWidth
-                        onClick={() => navigate(`/patients/${patient._id}/edit`)}
+                        onClick={() => handleEditPatient(patient._id)}
                         startIcon={<EditIcon />}
                       >
                         Düzenle
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        fullWidth
+                        onClick={() => {
+                          setSelectedPatient(patient);
+                          setDeleteDialogOpen(true);
+                        }}
+                        startIcon={<DeleteIcon />}
+                      >
+                        Sil
                       </Button>
                     </CardActions>
                   </Card>
