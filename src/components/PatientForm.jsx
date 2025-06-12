@@ -23,6 +23,9 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
 
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
+
 const PatientForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -88,8 +91,11 @@ const PatientForm = () => {
         throw new Error('VKS değeri 1-9 arasında olmalıdır.');
       }
 
+      console.log('API URL:', API_URL);
       console.log('Form verileri gönderiliyor:', formData);
-      const response = await fetch('/api/patients', {
+      console.log('Posting to:', `${API_URL}/api/patients`);
+      
+      const response = await fetch(`${API_URL}/api/patients`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +103,11 @@ const PatientForm = () => {
         body: JSON.stringify(formData),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -279,14 +289,10 @@ const PatientForm = () => {
                   rows={3}
                   size="small"
                 />
-
-
-
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="radyolojik bulgular"
                   name="radyolojikBulgular"
                   value={formData.radyolojikBulgular}
@@ -297,13 +303,9 @@ const PatientForm = () => {
                   size="small"
                 />
               </Grid>
-
-
-
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Klinik Bulgular"
                   name="klinikBulgular"
                   value={formData.klinikBulgular}
@@ -314,11 +316,9 @@ const PatientForm = () => {
                   size="small"
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Ultrasonografik bulgular"
                   name="ultrasonografikBulgular"
                   value={formData.ultrasonografikBulgular}
@@ -332,7 +332,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Tomografi bulgular"
                   name="tomografiBulgular"
                   value={formData.tomografiBulgular}
@@ -346,7 +345,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Patoloji"
                   name="patoloji"
                   value={formData.patoloji}
@@ -360,7 +358,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Mikroskopisi"
                   name="mikroskopisi"
                   value={formData.mikroskopisi}
@@ -374,7 +371,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Patolojik Teshıs"
                   name="patolojikTeshis"
                   value={formData.patolojikTeshis}
@@ -465,7 +461,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Hemogram"
                   name="hemogram"
                   value={formData.hemogram}
@@ -480,7 +475,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Biyokimya"
                   name="biyokimya"
                   value={formData.biyokimya}
@@ -495,7 +489,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Tedavi"
                   name="tedavi"
                   value={formData.tedavi}
@@ -509,7 +502,6 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  
                   label="Recete"
                   name="recete"
                   value={formData.recete}

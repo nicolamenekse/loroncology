@@ -22,6 +22,9 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
 
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
+
 const PatientEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -62,7 +65,7 @@ const PatientEdit = () => {
 
   const fetchPatientData = async () => {
     try {
-      const response = await fetch(`/api/patients/${id}`);
+      const response = await fetch(`${API_URL}/api/patients/${id}`);
       if (!response.ok) {
         throw new Error('Hasta bilgileri yüklenirken bir hata oluştu');
       }
@@ -98,7 +101,7 @@ const PatientEdit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/patients/${id}`, {
+      const response = await fetch(`${API_URL}/api/patients/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

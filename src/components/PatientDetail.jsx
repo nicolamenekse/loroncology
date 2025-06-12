@@ -17,6 +17,9 @@ import PetsIcon from '@mui/icons-material/Pets';
 import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
+
 const PatientDetail = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +33,7 @@ const PatientDetail = () => {
 
   const fetchPatientDetails = async () => {
     try {
-      const response = await fetch(`/api/patients/${id}`);
+      const response = await fetch(`${API_URL}/api/patients/${id}`);
       if (!response.ok) {
         throw new Error('Hasta bilgileri yüklenirken bir hata oluştu');
       }

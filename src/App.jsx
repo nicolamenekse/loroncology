@@ -60,29 +60,16 @@ const theme = createTheme({
   },
 });
 
-// API URL'sini environment variable'dan al
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-// API isteklerini güncelle
-const fetchPatients = async () => {
-  try {
-    const response = await fetch(`${API_URL}/api/patients`);
-    if (!response.ok) {
-      throw new Error('Hasta listesi alınamadı');
-    }
-    const data = await response.json();
-    setPatients(data);
-  } catch (error) {
-    console.error('Hasta listesi alınırken hata:', error);
-    setError('Hasta listesi alınamadı');
-  }
-};
-
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router 
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <div className="app">
           <header className="header">
             <nav className="nav-container">

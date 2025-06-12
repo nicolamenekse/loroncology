@@ -44,7 +44,8 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
 
 const PatientList = () => {
   const theme = useTheme();
@@ -66,16 +67,23 @@ const PatientList = () => {
   const fetchPatients = async () => {
     try {
       setLoading(true);
+      console.log('API URL:', API_URL);
+      console.log('Fetching patients from:', `${API_URL}/api/patients`);
+      
       const response = await fetch(`${API_URL}/api/patients`);
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (!response.ok) {
-        throw new Error('Hastalar yüklenirken bir hata oluştu');
+        throw new Error(`HTTP ${response.status}: Hastalar yüklenirken bir hata oluştu`);
       }
       const data = await response.json();
+      console.log('Fetched patients:', data.length, 'patients');
       setPatients(data);
       setError(null);
     } catch (error) {
-      console.error('Error:', error);
-      setError(error.message);
+      console.error('Fetch patients error:', error);
+      setError(`Bağlantı hatası: ${error.message}`);
     } finally {
       setLoading(false);
     }
