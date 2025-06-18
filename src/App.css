@@ -1,0 +1,338 @@
+/* Modern Veteriner Hastanesi Tasarımı */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --background-color: #f5f6fa;
+  --text-color: #2c3e50;
+  --white: #ffffff;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+/* Header Styles */
+.header {
+  background-color: var(--white);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: var(--primary-color);
+}
+
+.logo-link h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Navigation Styles */
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.nav-links a:hover {
+  background-color: var(--secondary-color);
+  color: var(--white);
+}
+
+/* Main Content Styles */
+.main-content {
+  margin-top: 80px;
+  padding: 1rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Button Styles */
+.button {
+  background-color: var(--secondary-color);
+  color: var(--white);
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--white);
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  background-color: var(--white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.5rem;
+  }
+
+  .nav-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .nav-links a {
+    display: block;
+    text-align: center;
+    padding: 0.8rem;
+    background-color: var(--background-color);
+    border-radius: 4px;
+  }
+
+  .main-content {
+    margin-top: 120px;
+    padding: 0.5rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px; /* iOS'ta zoom sorununu önler */
+  }
+}
+
+/* Form Layout for Mobile */
+@media (max-width: 768px) {
+  .MuiGrid-item {
+    padding: 0.5rem !important;
+  }
+
+  .MuiFormControl-root {
+    margin-bottom: 1rem !important;
+  }
+
+  .MuiFormGroup-root {
+    flex-direction: column !important;
+  }
+
+  .MuiFormControlLabel-root {
+    margin-left: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .header,
+  .nav-container,
+  .nav-links {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-top: 0 !important;
+    padding: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  /* Hide buttons and interactive elements when printing */
+  button,
+  .MuiButton-root,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  /* Typography adjustments for print */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  /* Grid adjustments for print */
+  .MuiGrid-container {
+    margin: 0 !important;
+  }
+
+  .MuiGrid-item {
+    padding: 8px !important;
+  }
+
+  /* Patient details specific styling */
+  .patient-detail-section {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+
+  .patient-field {
+    margin-bottom: 10px;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 5px;
+  }
+
+  .patient-field-label {
+    font-weight: bold;
+    color: #333 !important;
+  }
+
+  .patient-field-value {
+    margin-top: 2px;
+    color: #000 !important;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
