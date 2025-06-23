@@ -76,6 +76,15 @@ const patientSchema = new mongoose.Schema({
   recete: {
     type: String,
   },
+  biyopsi: {
+    iiab: { type: Boolean, default: false },
+    tuse: { type: Boolean, default: false },
+    trucat: { type: Boolean, default: false },
+    operasyon: { type: Boolean, default: false }
+  },
+  biyopsiNot: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

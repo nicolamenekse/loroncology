@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import PatientHistory from './models/PatientHistory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -126,7 +127,8 @@ const patientSchema = new mongoose.Schema({
     operasyon: { type: Boolean, default: false }
   },
   biyopsiNot: String,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 const Patient = mongoose.model('Patient', patientSchema);
@@ -252,18 +254,92 @@ app.get('/api/patients/:id', async (req, res) => {
 
 app.put('/api/patients/:id', async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!patient) {
+    console.log('PUT /api/patients/:id - Hasta güncelleniyor:', req.params.id);
+    
+    // Önce mevcut hasta bilgilerini al (history için)
+    const currentPatient = await Patient.findById(req.params.id);
+    if (!currentPatient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
-    res.json(patient);
+
+    // Mevcut hasta verilerini history tablosuna kaydet
+    const historyCount = await PatientHistory.countDocuments({ patientId: req.params.id });
+    const historyRecord = new PatientHistory({
+      patientId: req.params.id,
+      previousData: {
+        protokolNo: currentPatient.protokolNo,
+        hastaAdi: currentPatient.hastaAdi,
+        hastaSahibi: currentPatient.hastaSahibi,
+        tur: currentPatient.tur,
+        irk: currentPatient.irk,
+        cinsiyet: currentPatient.cinsiyet,
+        yas: currentPatient.yas,
+        kilo: currentPatient.kilo,
+        vks: currentPatient.vks,
+        anamnez: currentPatient.anamnez,
+        radyolojikBulgular: currentPatient.radyolojikBulgular,
+        ultrasonografikBulgular: currentPatient.ultrasonografikBulgular,
+        tomografiBulgular: currentPatient.tomografiBulgular,
+        patoloji: currentPatient.patoloji,
+        mikroskopisi: currentPatient.mikroskopisi,
+        patolojikTeshis: currentPatient.patolojikTeshis,
+        tedavi: currentPatient.tedavi,
+        hemogram: currentPatient.hemogram,
+        biyokimya: currentPatient.biyokimya,
+        recete: currentPatient.recete,
+        biyopsi: currentPatient.biyopsi,
+        biyopsiNot: currentPatient.biyopsiNot,
+      },
+      version: historyCount + 1,
+      changeReason: req.body.changeReason || 'Hasta bilgileri düzenlendi',
+      modifiedBy: req.body.modifiedBy || 'System User'
+    });
+
+    // History kaydını veritabanına kaydet
+    await historyRecord.save();
+    console.log('History kaydı oluşturuldu, versiyon:', historyRecord.version);
+
+    // Hasta bilgilerini güncelle
+    const updatedPatient = await Patient.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        updatedAt: new Date() // Güncelleme tarihini ekle
+      },
+      { new: true, runValidators: true }
+    );
+
+    console.log('Hasta bilgileri başarıyla güncellendi');
+    res.json({
+      message: 'Hasta bilgileri başarıyla güncellendi',
+      patient: updatedPatient,
+      historyVersion: historyRecord.version
+    });
   } catch (error) {
     console.error('Error updating patient:', error);
-    res.status(400).json({ message: 'Hasta bilgileri güncellenirken bir hata oluştu' });
+    res.status(400).json({ 
+      message: 'Hasta bilgileri güncellenirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Get patient history
+app.get('/api/patients/:id/history', async (req, res) => {
+  try {
+    console.log('Hasta geçmişi getiriliyor:', req.params.id);
+    const history = await PatientHistory.find({ patientId: req.params.id })
+      .sort({ changeDate: -1 }) // En yeni değişiklik en üstte
+      .select('previousData changeDate changeReason modifiedBy version');
+    
+    console.log(`${history.length} geçmiş kaydı bulundu`);
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching patient history:', error);
+    res.status(500).json({ 
+      message: 'Hasta geçmişi yüklenirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -273,6 +349,11 @@ app.delete('/api/patients/:id', async (req, res) => {
     if (!patient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
+    
+    // Hasta silindiğinde history kayıtlarını da sil
+    await PatientHistory.deleteMany({ patientId: req.params.id });
+    console.log('Hasta ve geçmiş kayıtları silindi:', req.params.id);
+    
     res.json({ message: 'Hasta başarıyla silindi' });
   } catch (error) {
     console.error('Error deleting patient:', error);

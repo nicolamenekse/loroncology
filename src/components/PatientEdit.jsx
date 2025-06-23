@@ -57,6 +57,7 @@ const PatientEdit = () => {
       operasyon: false,
     },
     biyopsiNot: '',
+    changeReason: '',
   });
 
   useEffect(() => {
@@ -482,6 +483,32 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                />
+              </Grid>
+
+              {/* Değişiklik Nedeni */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  color: '#2c3e50',
+                  mt: 2,
+                  mb: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}>
+                  Değişiklik Bilgileri
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Değişiklik Nedeni (Opsiyonel)"
+                  name="changeReason"
+                  value={formData.changeReason}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={2}
+                  size="small"
+                  placeholder="Bu düzenlemenin neden yapıldığını açıklayın..."
                 />
               </Grid>
 
