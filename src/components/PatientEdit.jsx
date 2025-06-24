@@ -21,6 +21,13 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ParameterInput from './ParameterInput';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '@mui/material';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -47,8 +54,17 @@ const PatientEdit = () => {
     mikroskopisi: '',
     patolojikTeshis: '',
     tedavi: '',
-    hemogram: '',
-    biyokimya: '',
+    hemogram: {
+      WBC: '', 'Neu#': '', 'Lym#': '', 'Mon#': '', 'Eos#': '', 
+      'Neu%': '', 'Lym%': '', 'Mon%': '', 'Eos%': '', 
+      RBC: '', HGB: '', HCT: '', MCV: '', MCH: '', MCHC: '', 
+      'RDW-CV': '', 'RDW-SD': '', PLT: '', MPV: '', PDW: '', PCT: ''
+    },
+    biyokimya: {
+      TP: '', ALB: '', GLD: '', 'A/G': '', TBIL: '', ALT: '', AST: '', 'AST/ALT': '', 
+      GGT: '', ALP: '', TBA: '', CK: '', AMY: '', TG: '', CHOL: '', GLU: '', 
+      CRE: '', BUN: '', 'BUN/CRE': '', tCO2: '', Ca: '', P: '', 'Ca*P': '', Mg: ''
+    },
     recete: '',
     biyopsi: {
       iiab: false,
@@ -97,6 +113,18 @@ const PatientEdit = () => {
         [name]: value,
       }));
     }
+  };
+
+  // Hemogram ve biyokimya parametreleri için özel handleChange
+  const handleParameterChange = (parameterType, parameter) => (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [parameterType]: {
+        ...prev[parameterType],
+        [parameter]: value,
+      },
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -452,28 +480,443 @@ const PatientEdit = () => {
                   size="small"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="Hemogram"
-                  name="hemogram"
-                  value={formData.hemogram}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
+              
+              {/* Hemogram Parametreleri - Accordion */}
+              <Grid item xs={12}>
+                <Accordion sx={{ mt: 2 }}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="hemogram-content"
+                    id="hemogram-header"
+                    sx={{
+                      backgroundColor: '#f8f9fa',
+                      '&:hover': {
+                        backgroundColor: '#e9ecef',
+                      },
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ 
+                      color: '#2c3e50',
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                      fontWeight: 600
+                    }}>
+                      🔬 Hemogram Parametreleri
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+              
+              {/* Lökosit Parametreleri */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="WBC"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.WBC || ''}
+                  onChange={handleParameterChange('hemogram', 'WBC')}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="Biyokimya"
-                  name="biyokimya"
-                  value={formData.biyokimya}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Neu#"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Neu#'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Neu#')}
                 />
               </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Lym#"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Lym#'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Lym#')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Mon#"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Mon#'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Mon#')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Eos#"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Eos#'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Eos#')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Neu%"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Neu%'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Neu%')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Lym%"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Lym%'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Lym%')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Mon%"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Mon%'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Mon%')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Eos%"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['Eos%'] || ''}
+                  onChange={handleParameterChange('hemogram', 'Eos%')}
+                />
+              </Grid>
+
+              {/* Eritrosit Parametreleri */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="RBC"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.RBC || ''}
+                  onChange={handleParameterChange('hemogram', 'RBC')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="HGB"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.HGB || ''}
+                  onChange={handleParameterChange('hemogram', 'HGB')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="HCT"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.HCT || ''}
+                  onChange={handleParameterChange('hemogram', 'HCT')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="MCV"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.MCV || ''}
+                  onChange={handleParameterChange('hemogram', 'MCV')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="MCH"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.MCH || ''}
+                  onChange={handleParameterChange('hemogram', 'MCH')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="MCHC"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.MCHC || ''}
+                  onChange={handleParameterChange('hemogram', 'MCHC')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="RDW-CV"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['RDW-CV'] || ''}
+                  onChange={handleParameterChange('hemogram', 'RDW-CV')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="RDW-SD"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.['RDW-SD'] || ''}
+                  onChange={handleParameterChange('hemogram', 'RDW-SD')}
+                />
+              </Grid>
+
+              {/* Trombosit Parametreleri */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="PLT"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.PLT || ''}
+                  onChange={handleParameterChange('hemogram', 'PLT')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="MPV"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.MPV || ''}
+                  onChange={handleParameterChange('hemogram', 'MPV')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="PDW"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.PDW || ''}
+                  onChange={handleParameterChange('hemogram', 'PDW')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="PCT"
+                  parameterType="hemogram"
+                  value={formData.hemogram?.PCT || ''}
+                  onChange={handleParameterChange('hemogram', 'PCT')}
+                />
+              </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+
+              {/* Biyokimya Parametreleri - Accordion */}
+              <Grid item xs={12}>
+                <Accordion sx={{ mt: 2 }}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="biyokimya-content"
+                    id="biyokimya-header"
+                    sx={{
+                      backgroundColor: '#f8f9fa',
+                      '&:hover': {
+                        backgroundColor: '#e9ecef',
+                      },
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ 
+                      color: '#2c3e50',
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                      fontWeight: 600
+                    }}>
+                      ⚗️ Biyokimya Parametreleri
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+
+              {/* Protein Parametreleri */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="TP"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.TP || ''}
+                  onChange={handleParameterChange('biyokimya', 'TP')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="ALB"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.ALB || ''}
+                  onChange={handleParameterChange('biyokimya', 'ALB')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="GLD"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.GLD || ''}
+                  onChange={handleParameterChange('biyokimya', 'GLD')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="A/G"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.['A/G'] || ''}
+                  onChange={handleParameterChange('biyokimya', 'A/G')}
+                />
+              </Grid>
+
+              {/* Karaciğer Enzimleri */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="TBIL"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.TBIL || ''}
+                  onChange={handleParameterChange('biyokimya', 'TBIL')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="ALT"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.ALT || ''}
+                  onChange={handleParameterChange('biyokimya', 'ALT')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="AST"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.AST || ''}
+                  onChange={handleParameterChange('biyokimya', 'AST')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="AST/ALT"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.['AST/ALT'] || ''}
+                  onChange={handleParameterChange('biyokimya', 'AST/ALT')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="GGT"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.GGT || ''}
+                  onChange={handleParameterChange('biyokimya', 'GGT')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="ALP"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.ALP || ''}
+                  onChange={handleParameterChange('biyokimya', 'ALP')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="TBA"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.TBA || ''}
+                  onChange={handleParameterChange('biyokimya', 'TBA')}
+                />
+              </Grid>
+
+              {/* Diğer Enzimler */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="CK"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.CK || ''}
+                  onChange={handleParameterChange('biyokimya', 'CK')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="AMY"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.AMY || ''}
+                  onChange={handleParameterChange('biyokimya', 'AMY')}
+                />
+              </Grid>
+
+              {/* Lipidler */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="TG"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.TG || ''}
+                  onChange={handleParameterChange('biyokimya', 'TG')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="CHOL"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.CHOL || ''}
+                  onChange={handleParameterChange('biyokimya', 'CHOL')}
+                />
+              </Grid>
+
+              {/* Glukoz ve Böbrek Fonksiyonları */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="GLU"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.GLU || ''}
+                  onChange={handleParameterChange('biyokimya', 'GLU')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="CRE"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.CRE || ''}
+                  onChange={handleParameterChange('biyokimya', 'CRE')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="BUN"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.BUN || ''}
+                  onChange={handleParameterChange('biyokimya', 'BUN')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="BUN/CRE"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.['BUN/CRE'] || ''}
+                  onChange={handleParameterChange('biyokimya', 'BUN/CRE')}
+                />
+              </Grid>
+
+              {/* Elektrolitler */}
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="tCO2"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.tCO2 || ''}
+                  onChange={handleParameterChange('biyokimya', 'tCO2')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Ca"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.Ca || ''}
+                  onChange={handleParameterChange('biyokimya', 'Ca')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="P"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.P || ''}
+                  onChange={handleParameterChange('biyokimya', 'P')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Ca*P"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.['Ca*P'] || ''}
+                  onChange={handleParameterChange('biyokimya', 'Ca*P')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <ParameterInput
+                  parameter="Mg"
+                  parameterType="biyokimya"
+                  value={formData.biyokimya?.Mg || ''}
+                  onChange={handleParameterChange('biyokimya', 'Mg')}
+                />
+              </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+              
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth

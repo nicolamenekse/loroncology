@@ -31,6 +31,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 import HistoryIcon from '@mui/icons-material/History';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ParameterInput from './ParameterInput';
+import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -359,22 +361,100 @@ const PatientDetail = () => {
                     {patient.tedavi}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Hemogram
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.hemogram}
-                  </Typography>
+                {/* Hemogram Parametreleri - Accordion */}
+                <Grid item xs={12}>
+                  <Accordion sx={{ mt: 2 }}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="hemogram-content"
+                      id="hemogram-header"
+                      sx={{
+                        backgroundColor: '#f8f9fa',
+                        '&:hover': {
+                          backgroundColor: '#e9ecef',
+                        },
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ 
+                        color: '#2c3e50',
+                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                        fontWeight: 600
+                      }}>
+                        🔬 Hemogram Parametreleri
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                
+                {patient.hemogram && Object.entries(hemogramParameters).map(([key]) => {
+                  const value = patient.hemogram[key];
+                  if (!value) return null;
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={3} key={key}>
+                      <ParameterInput
+                        parameter={key}
+                        parameterType="hemogram"
+                        value={value}
+                        onChange={() => {}} // Read-only mode
+                        size="small"
+                        InputProps={{ readOnly: true }}
+                      />
+                    </Grid>
+                  );
+                })}
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Biyokimya
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.biyokimya}
-                  </Typography>
+
+                {/* Biyokimya Parametreleri - Accordion */}
+                <Grid item xs={12}>
+                  <Accordion sx={{ mt: 2 }}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="biyokimya-content"
+                      id="biyokimya-header"
+                      sx={{
+                        backgroundColor: '#f8f9fa',
+                        '&:hover': {
+                          backgroundColor: '#e9ecef',
+                        },
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ 
+                        color: '#2c3e50',
+                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                        fontWeight: 600
+                      }}>
+                        ⚗️ Biyokimya Parametreleri
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                
+                {patient.biyokimya && Object.entries(biyokimyaParameters).map(([key]) => {
+                  const value = patient.biyokimya[key];
+                  if (!value) return null;
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={3} key={key}>
+                      <ParameterInput
+                        parameter={key}
+                        parameterType="biyokimya"
+                        value={value}
+                        onChange={() => {}} // Read-only mode
+                        size="small"
+                        InputProps={{ readOnly: true }}
+                      />
+                    </Grid>
+                  );
+                })}
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
                 </Grid>
+                
                 <Grid item xs={12} sm={6} md={4}>
                   <Typography variant="subtitle1" color="text.secondary">
                     Reçete
@@ -665,22 +745,79 @@ const PatientDetail = () => {
                                   {record.previousData.tedavi || '-'}
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Hemogram
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.hemogram || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Biyokimya
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.biyokimya || '-'}
+                              
+                              {/* Hemogram Parametreleri - History */}
+                              <Grid item xs={12}>
+                                <Typography variant="h6" sx={{ 
+                                  color: '#2c3e50',
+                                  mt: 2,
+                                  mb: 2,
+                                  fontSize: { xs: '1rem', sm: '1.1rem' }
+                                }}>
+                                  Hemogram Parametreleri (Önceki Değerler)
                                 </Typography>
                               </Grid>
+                              
+                              {record.previousData.hemogram && typeof record.previousData.hemogram === 'object' ? 
+                                Object.entries(record.previousData.hemogram).map(([key, value]) => {
+                                  if (!value) return null;
+                                  return (
+                                    <Grid item xs={12} sm={6} md={3} key={`history-hemogram-${key}`}>
+                                      <ParameterInput
+                                        parameter={key}
+                                        parameterType="hemogram"
+                                        value={value}
+                                        onChange={() => {}} // Read-only mode
+                                        size="small"
+                                        InputProps={{ readOnly: true }}
+                                      />
+                                    </Grid>
+                                  );
+                                })
+                                :
+                                <Grid item xs={12}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {record.previousData.hemogram || 'Hemogram verisi yok'}
+                                  </Typography>
+                                </Grid>
+                              }
+
+                              {/* Biyokimya Parametreleri - History */}
+                              <Grid item xs={12}>
+                                <Typography variant="h6" sx={{ 
+                                  color: '#2c3e50',
+                                  mt: 3,
+                                  mb: 2,
+                                  fontSize: { xs: '1rem', sm: '1.1rem' }
+                                }}>
+                                  Biyokimya Parametreleri (Önceki Değerler)
+                                </Typography>
+                              </Grid>
+                              
+                              {record.previousData.biyokimya && typeof record.previousData.biyokimya === 'object' ? 
+                                Object.entries(record.previousData.biyokimya).map(([key, value]) => {
+                                  if (!value) return null;
+                                  return (
+                                    <Grid item xs={12} sm={6} md={3} key={`history-biyokimya-${key}`}>
+                                      <ParameterInput
+                                        parameter={key}
+                                        parameterType="biyokimya"
+                                        value={value}
+                                        onChange={() => {}} // Read-only mode
+                                        size="small"
+                                        InputProps={{ readOnly: true }}
+                                      />
+                                    </Grid>
+                                  );
+                                })
+                                :
+                                <Grid item xs={12}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {record.previousData.biyokimya || 'Biyokimya verisi yok'}
+                                  </Typography>
+                                </Grid>
+                              }
+
                               <Grid item xs={12}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                   Reçete
