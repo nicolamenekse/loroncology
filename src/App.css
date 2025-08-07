@@ -547,6 +547,58 @@ body {
   }
 }
 
+.patient-edit-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+  padding: 2rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.patient-edit-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
+}
+
+.patient-edit-accordion {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 16px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.patient-edit-accordion .MuiAccordionSummary-root {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.patient-edit-accordion .MuiAccordionSummary-root:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root.Mui-focused {
+  background: rgba(255, 255, 255, 1);
+}
+
 .patient-form-container {
   background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
   min-height: 100vh;

@@ -159,11 +159,11 @@ const PatientEdit = () => {
   }
 
   return (
-    <div className="fade-in">
+    <div className="patient-edit-wrapper fade-in">
       <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+        <Paper elevation={3} className="patient-edit-paper" sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
           <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ 
-            color: '#2c3e50',
+            color: '#3B82F6',
             fontWeight: 600,
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
           }}>
@@ -174,7 +174,7 @@ const PatientEdit = () => {
               {/* Hasta Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
+                  color: '#3B82F6',
                   mb: 2,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
                 }}>
@@ -191,6 +191,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -203,6 +204,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -215,6 +217,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -227,6 +230,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -239,6 +243,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -251,6 +256,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -264,6 +270,7 @@ const PatientEdit = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  className="patient-edit-textfield"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -297,7 +304,7 @@ const PatientEdit = () => {
               {/* Klinik Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
+                  color: '#3B82F6',
                   mt: 2,
                   mb: 2,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
@@ -365,7 +372,7 @@ const PatientEdit = () => {
               {/* Patoloji ve Biyopsi Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
+                  color: '#3B82F6',
                   mt: 2,
                   mb: 2,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
@@ -483,20 +490,14 @@ const PatientEdit = () => {
               
               {/* Hemogram Parametreleri - Accordion */}
               <Grid item xs={12}>
-                <Accordion sx={{ mt: 2 }}>
+                <Accordion className="patient-edit-accordion" sx={{ mt: 2 }}>
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="hemogram-content"
                     id="hemogram-header"
-                    sx={{
-                      backgroundColor: '#f8f9fa',
-                      '&:hover': {
-                        backgroundColor: '#e9ecef',
-                      },
-                    }}
                   >
                     <Typography variant="h6" sx={{ 
-                      color: '#2c3e50',
+                      color: '#3B82F6',
                       fontSize: { xs: '1.1rem', sm: '1.25rem' },
                       fontWeight: 600
                     }}>
@@ -507,14 +508,14 @@ const PatientEdit = () => {
                     <Grid container spacing={2}>
               
               {/* Lökosit Parametreleri */}
-              {/* <Grid item xs={12} sm={6} md={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <ParameterInput
                   parameter="WBC"
                   parameterType="hemogram"
                   value={formData.hemogram?.WBC || ''}
                   onChange={handleParameterChange('hemogram', 'WBC')}
                 />
-              </Grid> */}
+              </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <ParameterInput
                   parameter="Neu#"
@@ -686,20 +687,14 @@ const PatientEdit = () => {
 
               {/* Biyokimya Parametreleri - Accordion */}
               <Grid item xs={12}>
-                <Accordion sx={{ mt: 2 }}>
+                <Accordion className="patient-edit-accordion" sx={{ mt: 2 }}>
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="biyokimya-content"
                     id="biyokimya-header"
-                    sx={{
-                      backgroundColor: '#f8f9fa',
-                      '&:hover': {
-                        backgroundColor: '#e9ecef',
-                      },
-                    }}
                   >
                     <Typography variant="h6" sx={{ 
-                      color: '#2c3e50',
+                      color: '#3B82F6',
                       fontSize: { xs: '1.1rem', sm: '1.25rem' },
                       fontWeight: 600
                     }}>
@@ -932,7 +927,7 @@ const PatientEdit = () => {
               {/* Değişiklik Nedeni */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
+                  color: '#3B82F6',
                   mt: 2,
                   mb: 2,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
