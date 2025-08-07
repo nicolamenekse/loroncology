@@ -352,7 +352,8 @@ body {
   animation: fadeIn 0.5s ease-out;
 }
 
-.patient-form-wrapper {
+.patient-form-wrapper,
+.patient-list-wrapper {
   min-height: 100vh;
   width: 100%;
   background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
@@ -363,6 +364,27 @@ body {
   right: 0;
   bottom: 0;
   overflow-y: auto;
+}
+
+.patient-list-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
+}
+
+.patient-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease-in-out !important;
+}
+
+.patient-card:hover {
+  transform: translateY(-4px) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
 .patient-form-container {
