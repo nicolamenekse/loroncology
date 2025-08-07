@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
@@ -62,6 +62,7 @@ const theme = createTheme({
 });
 
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -75,14 +76,22 @@ function App() {
           <header className="header">
             <nav className="nav-container">
               <Link to="/" className="logo-link">
-                <PetsIcon sx={{ fontSize: 24, color: 'black' }} />
+                <PetsIcon sx={{ fontSize: 24, color: 'white' }} />
                 <h1>Loroncology</h1>
               </Link>
-              <ul className="nav-links">
-                <li><Link to="/">Ana Sayfa</Link></li>
-                <li><Link to="/yeni-hasta">Yeni Hasta</Link></li>
-                <li><Link to="/hastalar">Hastalar</Link></li>
-              </ul>
+              <button className="hamburger-menu" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                {isMenuOpen ? '✕' : '☰'}
+              </button>
+              {isMenuOpen && (
+                <div className="menu-overlay" onClick={() => setIsMenuOpen(false)} />
+              )}
+              <div className={`mobile-nav ${isMenuOpen ? 'active' : ''}`}>
+                <ul className="nav-links">
+                  <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Ana Sayfa</Link></li>
+                  <li><Link to="/yeni-hasta" onClick={() => setIsMenuOpen(false)}>Yeni Hasta</Link></li>
+                  <li><Link to="/hastalar" onClick={() => setIsMenuOpen(false)}>Hastalar</Link></li>
+                </ul>
+              </div>
             </nav>
           </header>
           <main className="main-content fade-in">
