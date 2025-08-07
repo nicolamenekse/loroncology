@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
+import PetsIcon from '@mui/icons-material/Pets';
 import CssBaseline from '@mui/material/CssBaseline';
 import Home from './components/Home';
 import PatientForm from './components/PatientForm';
@@ -74,7 +75,8 @@ function App() {
           <header className="header">
             <nav className="nav-container">
               <Link to="/" className="logo-link">
-                <h1 style={{ margin: 0, color: '#2c3e50', fontSize: '1.5rem' }}>Loroncology</h1>
+                <PetsIcon sx={{ fontSize: 24, color: 'black' }} />
+                <h1>Loroncology</h1>
               </Link>
               <ul className="nav-links">
                 <li><Link to="/">Ana Sayfa</Link></li>

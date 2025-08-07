@@ -20,11 +20,17 @@ const Home = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a2980 0%, #26D0CE 100%)',
+      width: '100vw',
+      background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
       display: 'flex',
       alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      overflow: 'auto',
+      fontFamily: '"Inter", "Roboto", sans-serif',
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -72,9 +78,10 @@ const Home = () => {
             component="h1" 
             gutterBottom 
             sx={{
-              fontWeight: 900,
+              fontFamily: '"Poppins", "Montserrat", sans-serif',
+              fontWeight: 700,
               color: 'white',
-              textShadow: '2px 4px 8px rgba(0,0,0,0.2)',
+              textShadow: '2px 4px 8px rgba(0,0,0,0.15)',
               fontSize: { xs: '2.75rem', md: '4rem' },
               letterSpacing: '0.02em',
               mb: 2,
@@ -125,7 +132,7 @@ const Home = () => {
             <Card
               sx={{
                 height: { xs: '280px', sm: '320px' },
-                background: 'rgba(255,255,255,0.85)',
+                background: '#F9FAFB',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(255,255,255,0.3)',
                 borderRadius: 4,
@@ -139,10 +146,11 @@ const Home = () => {
                 alignItems: 'center',
                 '&:hover': {
                   transform: 'translateY(-8px) scale(1.02)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-                  background: 'rgba(255,255,255,0.95)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
+                  background: '#FFFFFF',
                   '& .action-icon': {
                     transform: 'scale(1.15) rotate(5deg)',
+                    color: '#3B82F6'
                   }
                 },
                 '&::before': {
@@ -200,11 +208,10 @@ const Home = () => {
                     textAlign: 'center'
                   }}
                 >
-                  Yeni onkoloji hastası kaydı oluşturun
+                  Yeni hasta kaydı oluşturun
                 </Typography>
                 <Button 
                   variant="contained" 
-                  color="success"
                   sx={{ 
                     px: 3, 
                     py: 1.2,
@@ -212,9 +219,11 @@ const Home = () => {
                     fontWeight: 600,
                     fontSize: { xs: '0.9rem', sm: '1rem' },
                     textTransform: 'none',
-                    boxShadow: '0 4px 12px rgba(76,175,80,0.3)',
+                    bgcolor: '#10B981',
+                    boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
                     '&:hover': {
-                      boxShadow: '0 6px 16px rgba(76,175,80,0.4)',
+                      bgcolor: '#059669',
+                      boxShadow: '0 6px 16px rgba(16,185,129,0.4)',
                     }
                   }}
                 >
@@ -228,7 +237,7 @@ const Home = () => {
             <Card
               sx={{
                 height: { xs: '280px', sm: '320px' },
-                background: 'rgba(255,255,255,0.85)',
+                background: '#F9FAFB',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(255,255,255,0.3)',
                 borderRadius: 4,
@@ -242,10 +251,11 @@ const Home = () => {
                 alignItems: 'center',
                 '&:hover': {
                   transform: 'translateY(-8px) scale(1.02)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-                  background: 'rgba(255,255,255,0.95)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
+                  background: '#FFFFFF',
                   '& .action-icon': {
                     transform: 'scale(1.15) rotate(5deg)',
+                    color: '#3B82F6'
                   }
                 },
                 '&::before': {
@@ -307,7 +317,6 @@ const Home = () => {
                 </Typography>
                 <Button 
                   variant="contained" 
-                  color="primary"
                   sx={{ 
                     px: 3, 
                     py: 1.2,
@@ -315,9 +324,11 @@ const Home = () => {
                     fontWeight: 600,
                     fontSize: { xs: '0.9rem', sm: '1rem' },
                     textTransform: 'none',
-                    boxShadow: '0 4px 12px rgba(33,150,243,0.3)',
+                    bgcolor: '#3B82F6',
+                    boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
                     '&:hover': {
-                      boxShadow: '0 6px 16px rgba(33,150,243,0.4)',
+                      bgcolor: '#2563EB',
+                      boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
                     }
                   }}
                 >
@@ -333,6 +344,10 @@ const Home = () => {
           sx={{ 
             py: 6, 
             textAlign: 'center',
+            mt: 4,
+            backgroundColor: 'rgba(249,250,251,0.1)',
+            backdropFilter: 'blur(8px)',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
             position: 'relative',
             '&::before': {
               content: '""',
@@ -349,10 +364,11 @@ const Home = () => {
           <Typography 
             variant="body2" 
             sx={{ 
-              color: 'rgba(255,255,255,0.8)',
+              color: 'rgba(255,255,255,0.9)',
               fontSize: '0.95rem',
               fontWeight: 500,
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              fontFamily: '"Inter", "Roboto", sans-serif',
             }}
           >
             © 2025 Loronkoloji - Veteriner Onkoloji Hasta Takip Sistemi

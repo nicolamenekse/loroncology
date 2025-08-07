@@ -157,13 +157,25 @@ const PatientForm = () => {
   };
 
   return (
-    <div className="fade-in">
-      <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+    <div className="patient-form-wrapper fade-in">
+      <Container maxWidth="lg" sx={{ mt: 8 }}>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: { xs: 2, sm: 3, md: 4 }, 
+            mt: 2,
+            borderRadius: 2,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }}
+        >
           <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ 
-            color: '#2c3e50',
-            fontWeight: 600,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+            color: '#3B82F6',
+            fontWeight: 700,
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+            mb: 4,
+            textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
           }}>
             Yeni Hasta Kaydı
           </Typography>
@@ -172,9 +184,21 @@ const PatientForm = () => {
               {/* Hasta Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Hasta Bilgileri
                 </Typography>
@@ -189,6 +213,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -201,6 +236,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -213,6 +259,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -225,6 +282,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -236,6 +304,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -247,6 +326,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -260,6 +350,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -272,6 +373,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -285,6 +397,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                   inputProps={{ min: 1, max: 9 }}
                 />
               </Grid>
@@ -292,10 +415,22 @@ const PatientForm = () => {
               {/* Klinik Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mt: 2,
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mt: 4,
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Klinik Bilgileri
                 </Typography>
@@ -407,10 +542,22 @@ const PatientForm = () => {
 
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mt: 2,
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mt: 4,
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Patoloji ve Biyopsi Bilgileri
                 </Typography>
@@ -533,7 +680,14 @@ const PatientForm = () => {
                     fullWidth
                     sx={{ 
                       py: 1.5,
-                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                      fontSize: { xs: '1rem', sm: '1.1rem' },
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
+                        transform: 'translateY(-1px)'
+                      }
                     }}
                   >
                     Kaydet
@@ -546,7 +700,14 @@ const PatientForm = () => {
                     onClick={() => navigate('/patients')}
                     sx={{ 
                       py: 1.5,
-                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                      fontSize: { xs: '1rem', sm: '1.1rem' },
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
+                        transform: 'translateY(-1px)'
+                      }
                     }}
                   >
                     İptal
