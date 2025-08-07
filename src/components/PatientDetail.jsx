@@ -34,6 +34,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ParameterInput from './ParameterInput';
 import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
 import AIAnalysis from './AIAnalysis';
+import ParameterCalculator from './ParameterCalculator';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -442,87 +443,10 @@ const PatientDetail = () => {
                     {patient.tedavi}
                   </Typography>
                 </Grid>
-                {/* Hemogram Parametreleri - Accordion */}
-                <Grid item xs={12}>
-                  <Accordion className="patient-detail-accordion" sx={{ mt: 2 }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="hemogram-content"
-                      id="hemogram-header"
-                    >
-                      <Typography variant="h6" sx={{ 
-                        color: '#3B82F6',
-                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                        fontWeight: 600
-                      }}>
-                        🔬 Hemogram Parametreleri
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                
-                {patient.hemogram && Object.entries(hemogramParameters).map(([key]) => {
-                  const value = patient.hemogram[key];
-                  if (!value) return null;
-                  
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={key}>
-                      <ParameterInput
-                        parameter={key}
-                        parameterType="hemogram"
-                        value={value}
-                        onChange={() => {}} // Read-only mode
-                        size="small"
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                  );
-                })}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-
-                {/* Biyokimya Parametreleri - Accordion */}
-                <Grid item xs={12}>
-                  <Accordion className="patient-detail-accordion" sx={{ mt: 2 }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="biyokimya-content"
-                      id="biyokimya-header"
-                    >
-                      <Typography variant="h6" sx={{ 
-                        color: '#3B82F6',
-                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                        fontWeight: 600
-                      }}>
-                        ⚗️ Biyokimya Parametreleri
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                
-                {patient.biyokimya && Object.entries(biyokimyaParameters).map(([key]) => {
-                  const value = patient.biyokimya[key];
-                  if (!value) return null;
-                  
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={key}>
-                      <ParameterInput
-                        parameter={key}
-                        parameterType="biyokimya"
-                        value={value}
-                        onChange={() => {}} // Read-only mode
-                        size="small"
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                  );
-                })}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
+                <ParameterCalculator
+                  patient={patient}
+                  readOnly={true}
+                />
                 
                 <Grid item xs={12} sm={6} md={4}>
                   <Typography variant="subtitle1" color="text.secondary">

@@ -45,7 +45,12 @@ const ParameterInput = styled(TextField)(({ theme }) => ({
   }
 }));
 
-const ParameterCalculator = ({ formData, handleParameterChange }) => {
+const ParameterCalculator = ({ formData, handleParameterChange, patient, readOnly = false }) => {
+  // Eğer readOnly modda ise ve patient verisi varsa, formData olarak patient'ı kullan
+  const data = readOnly ? patient : formData;
+  
+  // ReadOnly modda handleParameterChange fonksiyonunu boş fonksiyon olarak tanımla
+  const handleChange = readOnly ? () => {} : handleParameterChange;
   const [isOpen, setIsOpen] = useState(false);
   const [currentTab, setCurrentTab] = React.useState(0);
 
@@ -73,8 +78,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.hemogram[param] || ''}
-            onChange={handleParameterChange('hemogram', param)}
+            value={data.hemogram[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('hemogram', param)}
             variant="outlined"
           />
         </Grid>
@@ -94,8 +100,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.hemogram[param] || ''}
-            onChange={handleParameterChange('hemogram', param)}
+            value={data.hemogram[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('hemogram', param)}
             variant="outlined"
           />
         </Grid>
@@ -114,8 +121,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.hemogram[param] || ''}
-            onChange={handleParameterChange('hemogram', param)}
+            value={data.hemogram[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('hemogram', param)}
             variant="outlined"
           />
         </Grid>
@@ -138,8 +146,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.biyokimya[param] || ''}
-            onChange={handleParameterChange('biyokimya', param)}
+            value={data.biyokimya[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('biyokimya', param)}
             variant="outlined"
           />
         </Grid>
@@ -158,8 +167,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.biyokimya[param] || ''}
-            onChange={handleParameterChange('biyokimya', param)}
+            value={data.biyokimya[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('biyokimya', param)}
             variant="outlined"
           />
         </Grid>
@@ -179,8 +189,9 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             fullWidth
             size="small"
             label={param}
-            value={formData.biyokimya[param] || ''}
-            onChange={handleParameterChange('biyokimya', param)}
+            value={data.biyokimya[param] || ''}
+            InputProps={{ readOnly: readOnly }}
+            onChange={handleChange('biyokimya', param)}
             variant="outlined"
           />
         </Grid>
@@ -192,13 +203,17 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
     <>
       <Box sx={{ 
         position: 'fixed',
-        left: 200,
-        top: 70,
+        right: 20,
+        top: '50%',
+        transform: 'translateY(-50%)',
         zIndex: 1000,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 1
+        gap: 1,
+        '@media (max-width: 1200px)': {
+          right: 10,
+        }
       }}>
         <Paper
           elevation={3}
@@ -237,7 +252,7 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
       </Box>
 
       <Drawer
-        anchor="left"
+        anchor="right"
         open={isOpen}
         onClose={toggleDrawer}
         PaperProps={{
@@ -245,6 +260,8 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
             width: 320,
             mt: '64px', // Üst boşluk
             height: 'calc(100% - 64px)', // Yükseklik ayarı
+            borderTopLeftRadius: '16px',
+            borderBottomLeftRadius: '16px'
           }
         }}
       >
@@ -280,8 +297,10 @@ const ParameterCalculator = ({ formData, handleParameterChange }) => {
               borderRadius: 1,
               border: '1px dashed #90caf9'
             }}>
-              Bu panelde hemogram ve biyokimya değerlerini hızlıca girebilirsiniz. 
-              Değerler otomatik olarak hasta formuna kaydedilecektir.
+              {readOnly 
+                ? "Bu panelde hastanın hemogram ve biyokimya değerlerini görüntüleyebilirsiniz."
+                : "Bu panelde hemogram ve biyokimya değerlerini hızlıca girebilirsiniz. Değerler otomatik olarak hasta formuna kaydedilecektir."
+              }
             </Typography>
           </Box>
           
