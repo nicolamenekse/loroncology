@@ -4,72 +4,56 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables from .env file
-dotenv.config({ path: path.join(__dirname, '../../.env') });
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-if (!OPENAI_API_KEY) {
-  console.error('OPENAI_API_KEY environment variable is not set!');
-  throw new Error('OpenAI API key is missing');
+// Initialize dotenv
+try {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  dotenv.config({ path: path.join(__dirname, '../../.env') });
+} catch (error) {
+  console.log('Environment setup warning:', error.message);
 }
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+// Fallback API key from environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.RENDER_OPENAI_API_KEY;
 
-const handleAIError = (error) => {
-  console.error('OpenAI API Error:', {
-    name: error.name,
-    message: error.message,
-    status: error.status,
-    type: error.type
+if (!OPENAI_API_KEY) {
+  console.error('⚠️ OpenAI API key is missing! AI features will be disabled.');
+  console.error('Please set OPENAI_API_KEY in your environment variables.');
+}
+
+// Initialize OpenAI with error handling
+let openai;
+try {
+  openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
   });
+} catch (error) {
+  console.error('OpenAI initialization error:', error.message);
+}
 
-  if (error.response) {
-    console.error('OpenAI API Response Error:', {
-      status: error.response.status,
-      data: error.response.data,
-      headers: error.response.headers
-    });
-  }
-
-  // API key related errors
-  if (error.message.includes('API key')) {
-    throw new Error('OpenAI API anahtarı geçersiz veya eksik');
-  }
-
-  // Rate limiting errors
-  if (error.message.includes('Rate limit')) {
-    throw new Error('API istek limiti aşıldı, lütfen biraz bekleyin');
-  }
-
-  // Token limit errors
-  if (error.message.includes('maximum context length')) {
-    throw new Error('Veri boyutu çok büyük, lütfen daha az veri gönderin');
-  }
-
-  // Generic error
-  throw new Error(`AI servisi hatası: ${error.message}`);
+// Helper function to check if AI service is available
+const isAIServiceAvailable = () => {
+  return !!OPENAI_API_KEY && !!openai;
 };
 
 export const generatePatientAnalysis = async (patientData) => {
+  if (!isAIServiceAvailable()) {
+    throw new Error('AI servisi şu anda kullanılamıyor. Lütfen sistem yöneticinize başvurun.');
+  }
+
   try {
     console.log('Generating analysis for patient:', patientData._id);
-
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "Sen bir veteriner onkoloji uzmanısın. Hasta verilerine göre genel bir analiz yapıp olabilecek tanıları sırala,  Hekime destek amaçlı önemli notlar ver.Bunu yaparken labaratuvar sonuclarının değerlerini tekrar yazmana gerek yok az öz ve nitelikli bir analiz lütfen"
+          content: "Sen bir veteriner onkoloji uzmanısın. Hasta verilerini analiz edip, detaylı bir rapor oluşturacaksın."
         },
         {
           role: "user",
-          content: `Sen bir veteriner onkoloji uzmanısın. Hasta verilerine göre genel bir analiz yapıp olabilecek tanıları sırala,  Hekime destek amaçlı önemli notlar ver.Bunu yaparken labaratuvar sonuclarının değerlerini tekrar yazmana gerek yok az öz ve nitelikli bir analiz lütfen${JSON.stringify(patientData, null, 2)}`
+          content: `Lütfen bu hasta verilerini analiz et ve bir rapor oluştur: ${JSON.stringify(patientData, null, 2)}`
         }
       ],
       temperature: 0.7,
@@ -83,14 +67,23 @@ export const generatePatientAnalysis = async (patientData) => {
     console.log('Analysis generated successfully');
     return completion.choices[0].message.content;
   } catch (error) {
-    handleAIError(error);
+    console.error('OpenAI API Error:', {
+      name: error.name,
+      message: error.message,
+      status: error.status
+    });
+    throw new Error(`AI analizi oluşturulurken bir hata oluştu: ${error.message}`);
   }
 };
 
 export const generateTreatmentSuggestions = async (patientData) => {
+  if (!isAIServiceAvailable()) {
+    throw new Error('AI servisi şu anda kullanılamıyor. Lütfen sistem yöneticinize başvurun.');
+  }
+
   try {
     console.log('Generating treatment suggestions for patient:', patientData._id);
-
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -114,20 +107,29 @@ export const generateTreatmentSuggestions = async (patientData) => {
     console.log('Treatment suggestions generated successfully');
     return completion.choices[0].message.content;
   } catch (error) {
-    handleAIError(error);
+    console.error('OpenAI API Error:', {
+      name: error.name,
+      message: error.message,
+      status: error.status
+    });
+    throw new Error(`AI tedavi önerisi oluşturulurken bir hata oluştu: ${error.message}`);
   }
 };
 
 export const analyzeLaboratoryResults = async (labData) => {
+  if (!isAIServiceAvailable()) {
+    throw new Error('AI servisi şu anda kullanılamıyor. Lütfen sistem yöneticinize başvurun.');
+  }
+
   try {
     console.log('Analyzing laboratory results');
-
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "Sen bir veteriner laboratuvar uzmanısın. Daha önce ki ."
+          content: "Sen bir veteriner laboratuvar uzmanısın. Laboratuvar sonuçlarını analiz edip, anormallikler ve öneriler sunacaksın."
         },
         {
           role: "user",
@@ -145,6 +147,11 @@ export const analyzeLaboratoryResults = async (labData) => {
     console.log('Lab analysis generated successfully');
     return completion.choices[0].message.content;
   } catch (error) {
-    handleAIError(error);
+    console.error('OpenAI API Error:', {
+      name: error.name,
+      message: error.message,
+      status: error.status
+    });
+    throw new Error(`AI laboratuvar analizi oluşturulurken bir hata oluştu: ${error.message}`);
   }
-}; 
+};

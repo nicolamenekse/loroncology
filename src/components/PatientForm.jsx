@@ -23,12 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ParameterInput from './ParameterInput';
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import ParameterCalculator from './ParameterCalculator';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -162,13 +157,25 @@ const PatientForm = () => {
   };
 
   return (
-    <div className="fade-in">
-      <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+    <div className="patient-form-wrapper fade-in">
+      <Container maxWidth="lg" sx={{ mt: 8 }}>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: { xs: 2, sm: 3, md: 4 }, 
+            mt: 2,
+            borderRadius: 2,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }}
+        >
           <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ 
-            color: '#2c3e50',
-            fontWeight: 600,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+            color: '#3B82F6',
+            fontWeight: 700,
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+            mb: 4,
+            textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
           }}>
             Yeni Hasta Kaydı
           </Typography>
@@ -177,9 +184,21 @@ const PatientForm = () => {
               {/* Hasta Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Hasta Bilgileri
                 </Typography>
@@ -194,6 +213,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -206,6 +236,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -218,6 +259,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -230,6 +282,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -241,6 +304,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -252,6 +326,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -265,6 +350,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -277,6 +373,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -290,6 +397,17 @@ const PatientForm = () => {
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      }
+                    }
+                  }}
                   inputProps={{ min: 1, max: 9 }}
                 />
               </Grid>
@@ -297,10 +415,22 @@ const PatientForm = () => {
               {/* Klinik Bilgileri */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mt: 2,
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mt: 4,
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Klinik Bilgileri
                 </Typography>
@@ -412,10 +542,22 @@ const PatientForm = () => {
 
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ 
-                  color: '#2c3e50',
-                  mt: 2,
-                  mb: 2,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  color: '#1a2980',
+                  mt: 4,
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  fontWeight: 600,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '60px',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                    borderRadius: '2px'
+                  }
                 }}>
                   Patoloji ve Biyopsi Bilgileri
                 </Typography>
@@ -486,441 +628,10 @@ const PatientForm = () => {
 
              
 
-              {/* Hemogram Parametreleri - Accordion */}
-              <Grid item xs={12}>
-                <Accordion sx={{ mt: 2 }}>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="hemogram-content"
-                    id="hemogram-header"
-                    sx={{
-                      backgroundColor: '#f8f9fa',
-                      '&:hover': {
-                        backgroundColor: '#e9ecef',
-                      },
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ 
-                      color: '#2c3e50',
-                      fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                      fontWeight: 600
-                    }}>
-                      🔬 Hemogram Parametreleri
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Grid container spacing={2}>
-              
-              {/* Lökosit Parametreleri */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="WBC"
-                  parameterType="hemogram"
-                  value={formData.hemogram.WBC}
-                  onChange={handleParameterChange('hemogram', 'WBC')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Neu#"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Neu#']}
-                  onChange={handleParameterChange('hemogram', 'Neu#')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Lym#"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Lym#']}
-                  onChange={handleParameterChange('hemogram', 'Lym#')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Mon#"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Mon#']}
-                  onChange={handleParameterChange('hemogram', 'Mon#')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Eos#"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Eos#']}
-                  onChange={handleParameterChange('hemogram', 'Eos#')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Neu%"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Neu%']}
-                  onChange={handleParameterChange('hemogram', 'Neu%')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Lym%"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Lym%']}
-                  onChange={handleParameterChange('hemogram', 'Lym%')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Mon%"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Mon%']}
-                  onChange={handleParameterChange('hemogram', 'Mon%')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Eos%"
-                  parameterType="hemogram"
-                  value={formData.hemogram['Eos%']}
-                  onChange={handleParameterChange('hemogram', 'Eos%')}
-                />
-              </Grid>
-
-              {/* Eritrosit Parametreleri */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="RBC"
-                  parameterType="hemogram"
-                  value={formData.hemogram.RBC}
-                  onChange={handleParameterChange('hemogram', 'RBC')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="HGB"
-                  parameterType="hemogram"
-                  value={formData.hemogram.HGB}
-                  onChange={handleParameterChange('hemogram', 'HGB')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="HCT"
-                  parameterType="hemogram"
-                  value={formData.hemogram.HCT}
-                  onChange={handleParameterChange('hemogram', 'HCT')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="MCV"
-                  parameterType="hemogram"
-                  value={formData.hemogram.MCV}
-                  onChange={handleParameterChange('hemogram', 'MCV')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="MCH"
-                  parameterType="hemogram"
-                  value={formData.hemogram.MCH}
-                  onChange={handleParameterChange('hemogram', 'MCH')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="MCHC"
-                  parameterType="hemogram"
-                  value={formData.hemogram.MCHC}
-                  onChange={handleParameterChange('hemogram', 'MCHC')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="RDW-CV"
-                  parameterType="hemogram"
-                  value={formData.hemogram['RDW-CV']}
-                  onChange={handleParameterChange('hemogram', 'RDW-CV')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="RDW-SD"
-                  parameterType="hemogram"
-                  value={formData.hemogram['RDW-SD']}
-                  onChange={handleParameterChange('hemogram', 'RDW-SD')}
-                />
-              </Grid>
-
-              {/* Trombosit Parametreleri */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="PLT"
-                  parameterType="hemogram"
-                  value={formData.hemogram.PLT}
-                  onChange={handleParameterChange('hemogram', 'PLT')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="MPV"
-                  parameterType="hemogram"
-                  value={formData.hemogram.MPV}
-                  onChange={handleParameterChange('hemogram', 'MPV')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="PDW"
-                  parameterType="hemogram"
-                  value={formData.hemogram.PDW}
-                  onChange={handleParameterChange('hemogram', 'PDW')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="PCT"
-                  parameterType="hemogram"
-                  value={formData.hemogram.PCT}
-                  onChange={handleParameterChange('hemogram', 'PCT')}
-                />
-              </Grid>
-                    </Grid>
-                  </AccordionDetails>
-                </Accordion>
-              </Grid>
-
-              {/* Biyokimya Parametreleri - Accordion */}
-              <Grid item xs={12}>
-                <Accordion sx={{ mt: 2 }}>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="biyokimya-content"
-                    id="biyokimya-header"
-                    sx={{
-                      backgroundColor: '#f8f9fa',
-                      '&:hover': {
-                        backgroundColor: '#e9ecef',
-                      },
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ 
-                      color: '#2c3e50',
-                      fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                      fontWeight: 600
-                    }}>
-                      ⚗️ Biyokimya Parametreleri
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Grid container spacing={2}>
-
-              {/* Protein Parametreleri */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="TP"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.TP}
-                  onChange={handleParameterChange('biyokimya', 'TP')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="ALB"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.ALB}
-                  onChange={handleParameterChange('biyokimya', 'ALB')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="GLD"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.GLD}
-                  onChange={handleParameterChange('biyokimya', 'GLD')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="A/G"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya['A/G']}
-                  onChange={handleParameterChange('biyokimya', 'A/G')}
-                />
-              </Grid>
-
-              {/* Karaciğer Enzimleri */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="TBIL"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.TBIL}
-                  onChange={handleParameterChange('biyokimya', 'TBIL')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="ALT"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.ALT}
-                  onChange={handleParameterChange('biyokimya', 'ALT')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="AST"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.AST}
-                  onChange={handleParameterChange('biyokimya', 'AST')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="AST/ALT"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya['AST/ALT']}
-                  onChange={handleParameterChange('biyokimya', 'AST/ALT')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="GGT"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.GGT}
-                  onChange={handleParameterChange('biyokimya', 'GGT')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="ALP"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.ALP}
-                  onChange={handleParameterChange('biyokimya', 'ALP')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="TBA"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.TBA}
-                  onChange={handleParameterChange('biyokimya', 'TBA')}
-                />
-              </Grid>
-
-              {/* Diğer Enzimler */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="CK"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.CK}
-                  onChange={handleParameterChange('biyokimya', 'CK')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="AMY"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.AMY}
-                  onChange={handleParameterChange('biyokimya', 'AMY')}
-                />
-              </Grid>
-
-              {/* Lipidler */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="TG"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.TG}
-                  onChange={handleParameterChange('biyokimya', 'TG')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="CHOL"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.CHOL}
-                  onChange={handleParameterChange('biyokimya', 'CHOL')}
-                />
-              </Grid>
-
-              {/* Glukoz ve Böbrek Fonksiyonları */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="GLU"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.GLU}
-                  onChange={handleParameterChange('biyokimya', 'GLU')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="CRE"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.CRE}
-                  onChange={handleParameterChange('biyokimya', 'CRE')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="BUN"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.BUN}
-                  onChange={handleParameterChange('biyokimya', 'BUN')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="BUN/CRE"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya['BUN/CRE']}
-                  onChange={handleParameterChange('biyokimya', 'BUN/CRE')}
-                />
-              </Grid>
-
-              {/* Elektrolitler */}
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="tCO2"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.tCO2}
-                  onChange={handleParameterChange('biyokimya', 'tCO2')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Ca"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.Ca}
-                  onChange={handleParameterChange('biyokimya', 'Ca')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="P"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.P}
-                  onChange={handleParameterChange('biyokimya', 'P')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Ca*P"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya['Ca*P']}
-                  onChange={handleParameterChange('biyokimya', 'Ca*P')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <ParameterInput
-                  parameter="Mg"
-                  parameterType="biyokimya"
-                  value={formData.biyokimya.Mg}
-                  onChange={handleParameterChange('biyokimya', 'Mg')}
-                />
-              </Grid>
-                    </Grid>
-                  </AccordionDetails>
-                </Accordion>
-              </Grid>
+              <ParameterCalculator
+                formData={formData}
+                handleParameterChange={handleParameterChange}
+              />
 
               <Grid item xs={12}>
                 <TextField
@@ -969,7 +680,14 @@ const PatientForm = () => {
                     fullWidth
                     sx={{ 
                       py: 1.5,
-                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                      fontSize: { xs: '1rem', sm: '1.1rem' },
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
+                        transform: 'translateY(-1px)'
+                      }
                     }}
                   >
                     Kaydet
@@ -982,7 +700,14 @@ const PatientForm = () => {
                     onClick={() => navigate('/patients')}
                     sx={{ 
                       py: 1.5,
-                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                      fontSize: { xs: '1rem', sm: '1.1rem' },
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
+                        transform: 'translateY(-1px)'
+                      }
                     }}
                   >
                     İptal

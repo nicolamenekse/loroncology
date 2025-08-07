@@ -19,7 +19,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScienceIcon from '@mui/icons-material/Science';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import CloseIcon from '@mui/icons-material/Close';
+
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const API_URL = import.meta.env.VITE_API_URL || 
@@ -31,7 +31,7 @@ const AIAnalysis = ({ patientId }) => {
   const [analysis, setAnalysis] = useState(null);
   const [treatmentSuggestions, setTreatmentSuggestions] = useState(null);
   const [labAnalysis, setLabAnalysis] = useState(null);
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(true);
 
   const handleError = async (error, response) => {
     console.error('AI işlemi hatası:', error);
@@ -145,54 +145,81 @@ const AIAnalysis = ({ patientId }) => {
     <Box
       sx={{
         position: 'fixed',
-        top: 20,
-        right: 20,
-        maxWidth: minimized ? '300px' : '600px',
+        top: '20%',
+        left: 20,
+        maxWidth: minimized ? '200px' : '350px',
         width: '100%',
         zIndex: 1000,
         transition: 'all 0.3s ease',
+        '@media (max-width: 1200px)': {
+          maxWidth: minimized ? '180px' : '300px',
+        },
+        '@media (max-width: 900px)': {
+          top: 'auto',
+          bottom: 20,
+          left: 20,
+          maxWidth: minimized ? '160px' : '280px'
+        },
+        '@media (max-width: 600px)': {
+          left: 10,
+          maxWidth: minimized ? '140px' : '260px'
+        }
       }}
     >
       <Fade in={true}>
         <Paper
           elevation={6}
+          className="ai-analysis-wrapper"
+          onClick={() => setMinimized(false)}
           sx={{
             borderRadius: 2,
             overflow: 'hidden',
-            backgroundColor: 'white',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15) !important'
+            }
           }}
         >
           <Box
+            className="ai-analysis-header"
+            onClick={() => setMinimized(false)}
             sx={{
-              p: 2,
-              backgroundColor: '#2c3e50',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%) !important'
+              }
             }}
           >
-            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PsychologyIcon /> AI Analiz
+            <Typography 
+              variant={minimized ? "body1" : "h6"} 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                fontSize: minimized ? '0.9rem' : 'inherit'
+              }}
+            >
+              <PsychologyIcon sx={{ fontSize: minimized ? '1.2rem' : '1.5rem' }} /> 
+              AI Analiz
             </Typography>
             <Box>
               <Tooltip title={minimized ? "Genişlet" : "Küçült"}>
                 <IconButton
                   size="small"
-                  onClick={() => setMinimized(!minimized)}
-                  sx={{ color: 'white', mr: 1 }}
-                >
-                  {minimized ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Kapat">
-                <IconButton
-                  size="small"
-                  onClick={clearAnalysis}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMinimized(!minimized);
+                  }}
                   sx={{ color: 'white' }}
                 >
-                  <CloseIcon />
+                  {minimized ? <ExpandMoreIcon /> : <ExpandLessIcon />}
                 </IconButton>
               </Tooltip>
             </Box>
@@ -208,7 +235,7 @@ const AIAnalysis = ({ patientId }) => {
 
               <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
                 <Button
-                  variant="contained"
+                  className="ai-analysis-button"
                   onClick={generateAnalysis}
                   disabled={loading}
                   startIcon={<PsychologyIcon />}
@@ -217,7 +244,7 @@ const AIAnalysis = ({ patientId }) => {
                   Genel Analiz
                 </Button>
                 <Button
-                  variant="contained"
+                  className="ai-analysis-button"
                   onClick={generateTreatmentSuggestions}
                   disabled={loading}
                   startIcon={<MedicalServicesIcon />}
@@ -226,7 +253,7 @@ const AIAnalysis = ({ patientId }) => {
                   Tedavi Önerileri
                 </Button>
                 <Button
-                  variant="contained"
+                  className="ai-analysis-button"
                   onClick={generateLabAnalysis}
                   disabled={loading}
                   startIcon={<ScienceIcon />}
@@ -245,40 +272,103 @@ const AIAnalysis = ({ patientId }) => {
               {(analysis || treatmentSuggestions || labAnalysis) && (
                 <Box sx={{ mt: 2 }}>
                   {analysis && (
-                    <Accordion defaultExpanded>
+                    <Accordion defaultExpanded className="ai-analysis-accordion">
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PsychologyIcon fontSize="small" /> Genel Analiz
                         </Typography>
                       </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography variant="body2" whiteSpace="pre-line">{analysis}</Typography>
+                      <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            whiteSpace: 'pre-line',
+                            '&::-webkit-scrollbar': {
+                              width: '8px'
+                            },
+                            '&::-webkit-scrollbar-track': {
+                              background: 'rgba(0,0,0,0.1)',
+                              borderRadius: '4px'
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                              background: 'rgba(59, 130, 246, 0.5)',
+                              borderRadius: '4px',
+                              '&:hover': {
+                                background: 'rgba(59, 130, 246, 0.7)'
+                              }
+                            }
+                          }}
+                        >
+                          {analysis}
+                        </Typography>
                       </AccordionDetails>
                     </Accordion>
                   )}
 
                   {treatmentSuggestions && (
-                    <Accordion defaultExpanded>
+                    <Accordion defaultExpanded className="ai-analysis-accordion">
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <MedicalServicesIcon fontSize="small" /> Tedavi Önerileri
                         </Typography>
                       </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography variant="body2" whiteSpace="pre-line">{treatmentSuggestions}</Typography>
+                      <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            whiteSpace: 'pre-line',
+                            '&::-webkit-scrollbar': {
+                              width: '8px'
+                            },
+                            '&::-webkit-scrollbar-track': {
+                              background: 'rgba(0,0,0,0.1)',
+                              borderRadius: '4px'
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                              background: 'rgba(59, 130, 246, 0.5)',
+                              borderRadius: '4px',
+                              '&:hover': {
+                                background: 'rgba(59, 130, 246, 0.7)'
+                              }
+                            }
+                          }}
+                        >
+                          {treatmentSuggestions}
+                        </Typography>
                       </AccordionDetails>
                     </Accordion>
                   )}
 
                   {labAnalysis && (
-                    <Accordion defaultExpanded>
+                    <Accordion defaultExpanded className="ai-analysis-accordion">
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <ScienceIcon fontSize="small" /> Laboratuvar Analizi
                         </Typography>
                       </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography variant="body2" whiteSpace="pre-line">{labAnalysis}</Typography>
+                      <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            whiteSpace: 'pre-line',
+                            '&::-webkit-scrollbar': {
+                              width: '8px'
+                            },
+                            '&::-webkit-scrollbar-track': {
+                              background: 'rgba(0,0,0,0.1)',
+                              borderRadius: '4px'
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                              background: 'rgba(59, 130, 246, 0.5)',
+                              borderRadius: '4px',
+                              '&:hover': {
+                                background: 'rgba(59, 130, 246, 0.7)'
+                              }
+                            }
+                          }}
+                        >
+                          {labAnalysis}
+                        </Typography>
                       </AccordionDetails>
                     </Accordion>
                   )}

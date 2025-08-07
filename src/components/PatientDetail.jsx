@@ -34,6 +34,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ParameterInput from './ParameterInput';
 import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
 import AIAnalysis from './AIAnalysis';
+import ParameterCalculator from './ParameterCalculator';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -100,9 +101,9 @@ const PatientDetail = () => {
   };
 
   return (
-    <div className="fade-in">
+    <div className="patient-detail-wrapper fade-in">
       <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+        <Paper elevation={3} className="patient-detail-paper" sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -112,7 +113,7 @@ const PatientDetail = () => {
             gap: { xs: 2, sm: 0 }
           }}>
             <Typography variant="h4" component="h1" sx={{ 
-              color: '#2c3e50',
+              color: '#3B82F6',
               fontWeight: 600,
               fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
             }}>
@@ -179,18 +180,98 @@ const PatientDetail = () => {
                 display: 'none',
                 '@media print': {
                   display: 'block',
-                  textAlign: 'center',
-                  mb: 3,
-                  borderBottom: '2px solid #000',
-                  pb: 2
+                  mb: 4
                 }
               }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  LORONKOLOJI HASTA KAYIT FORMU
-                </Typography>
-                <Typography variant="subtitle1">
-                  Hasta Detay Raporu - {new Date().toLocaleDateString('tr-TR')}
-                </Typography>
+                <Box sx={{ textAlign: 'center', borderBottom: '2px solid #000', pb: 2, mb: 3 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    LORONKOLOJI HASTA KAYIT FORMU
+                  </Typography>
+                  <Typography variant="subtitle1">
+                    Hasta Detay Raporu - {new Date().toLocaleDateString('tr-TR')}
+                  </Typography>
+                </Box>
+                
+                <Box className="print-grid">
+                  <Box>
+                    <Typography className="print-label">Protokol No</Typography>
+                    <Typography className="print-value">{patient.protokolNo}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Hasta Adı</Typography>
+                    <Typography className="print-value">{patient.hastaAdi}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Hasta Sahibi</Typography>
+                    <Typography className="print-value">{patient.hastaSahibi}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Tür</Typography>
+                    <Typography className="print-value">{patient.tur}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Irk</Typography>
+                    <Typography className="print-value">{patient.irk}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Yaş</Typography>
+                    <Typography className="print-value">{patient.yas} yaş</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Cinsiyet</Typography>
+                    <Typography className="print-value">{patient.cinsiyet}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">Kilo</Typography>
+                    <Typography className="print-value">{patient.kilo} kg</Typography>
+                  </Box>
+                  <Box>
+                    <Typography className="print-label">VKS</Typography>
+                    <Typography className="print-value">{patient.vks}</Typography>
+                  </Box>
+                </Box>
+
+                <Typography className="print-section-title">Klinik Bilgileri</Typography>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Anamnez</Typography>
+                  <Typography className="print-value">{patient.anamnez}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Radyolojik Bulgular</Typography>
+                  <Typography className="print-value">{patient.radyolojikBulgular}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Ultrasonografik Bulgular</Typography>
+                  <Typography className="print-value">{patient.ultrasonografikBulgular}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Tomografi Bulgular</Typography>
+                  <Typography className="print-value">{patient.tomografiBulgular}</Typography>
+                </Box>
+
+                <Typography className="print-section-title">Patoloji Bilgileri</Typography>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Patoloji</Typography>
+                  <Typography className="print-value">{patient.patoloji}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Mikroskopisi</Typography>
+                  <Typography className="print-value">{patient.mikroskopisi}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Patolojik Teşhis</Typography>
+                  <Typography className="print-value">{patient.patolojikTeshis}</Typography>
+                </Box>
+
+                <Typography className="print-section-title">Tedavi ve Reçete</Typography>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Tedavi</Typography>
+                  <Typography className="print-value">{patient.tedavi}</Typography>
+                </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography className="print-label">Reçete</Typography>
+                  <Typography className="print-value">{patient.recete}</Typography>
+                </Box>
               </Box>
 
               {/* Tabs Navigation */}
@@ -207,7 +288,7 @@ const PatientDetail = () => {
                 {/* Hasta Bilgileri */}
                 <Grid item xs={12}>
                   <Typography variant="h6" sx={{ 
-                    color: '#2c3e50',
+                    color: '#3B82F6',
                     mb: 2,
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }}>
@@ -290,7 +371,7 @@ const PatientDetail = () => {
                 {/* Klinik Bilgileri */}
                 <Grid item xs={12}>
                   <Typography variant="h6" sx={{ 
-                    color: '#2c3e50',
+                    color: '#3B82F6',
                     mt: 2,
                     mb: 2,
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
@@ -362,99 +443,10 @@ const PatientDetail = () => {
                     {patient.tedavi}
                   </Typography>
                 </Grid>
-                {/* Hemogram Parametreleri - Accordion */}
-                <Grid item xs={12}>
-                  <Accordion sx={{ mt: 2 }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="hemogram-content"
-                      id="hemogram-header"
-                      sx={{
-                        backgroundColor: '#f8f9fa',
-                        '&:hover': {
-                          backgroundColor: '#e9ecef',
-                        },
-                      }}
-                    >
-                      <Typography variant="h6" sx={{ 
-                        color: '#2c3e50',
-                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                        fontWeight: 600
-                      }}>
-                        🔬 Hemogram Parametreleri
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                
-                {patient.hemogram && Object.entries(hemogramParameters).map(([key]) => {
-                  const value = patient.hemogram[key];
-                  if (!value) return null;
-                  
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={key}>
-                      <ParameterInput
-                        parameter={key}
-                        parameterType="hemogram"
-                        value={value}
-                        onChange={() => {}} // Read-only mode
-                        size="small"
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                  );
-                })}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-
-                {/* Biyokimya Parametreleri - Accordion */}
-                <Grid item xs={12}>
-                  <Accordion sx={{ mt: 2 }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="biyokimya-content"
-                      id="biyokimya-header"
-                      sx={{
-                        backgroundColor: '#f8f9fa',
-                        '&:hover': {
-                          backgroundColor: '#e9ecef',
-                        },
-                      }}
-                    >
-                      <Typography variant="h6" sx={{ 
-                        color: '#2c3e50',
-                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                        fontWeight: 600
-                      }}>
-                        ⚗️ Biyokimya Parametreleri
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                
-                {patient.biyokimya && Object.entries(biyokimyaParameters).map(([key]) => {
-                  const value = patient.biyokimya[key];
-                  if (!value) return null;
-                  
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={key}>
-                      <ParameterInput
-                        parameter={key}
-                        parameterType="biyokimya"
-                        value={value}
-                        onChange={() => {}} // Read-only mode
-                        size="small"
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                  );
-                })}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
+                <ParameterCalculator
+                  patient={patient}
+                  readOnly={true}
+                />
                 
                 <Grid item xs={12} sm={6} md={4}>
                   <Typography variant="subtitle1" color="text.secondary">
@@ -476,7 +468,7 @@ const PatientDetail = () => {
                 {/* Patoloji ve Biyopsi Bilgileri */}
                 <Grid item xs={12}>
                   <Typography variant="h6" sx={{ 
-                    color: '#2c3e50',
+                    color: '#3B82F6',
                     mt: 2,
                     mb: 2,
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
@@ -555,7 +547,7 @@ const PatientDetail = () => {
                       </Typography>
                       
                       {history.map((record, index) => (
-                        <Accordion key={index} sx={{ mb: 2 }}>
+                        <Accordion key={index} className="patient-detail-accordion">
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                               <Chip 
@@ -750,7 +742,7 @@ const PatientDetail = () => {
                               {/* Hemogram Parametreleri - History */}
                               <Grid item xs={12}>
                                 <Typography variant="h6" sx={{ 
-                                  color: '#2c3e50',
+                                  color: '#3B82F6',
                                   mt: 2,
                                   mb: 2,
                                   fontSize: { xs: '1rem', sm: '1.1rem' }
@@ -786,7 +778,7 @@ const PatientDetail = () => {
                               {/* Biyokimya Parametreleri - History */}
                               <Grid item xs={12}>
                                 <Typography variant="h6" sx={{ 
-                                  color: '#2c3e50',
+                                  color: '#3B82F6',
                                   mt: 3,
                                   mb: 2,
                                   fontSize: { xs: '1rem', sm: '1.1rem' }

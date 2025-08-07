@@ -150,9 +150,9 @@ const PatientList = () => {
   };
 
   return (
-    <div className="fade-in">
+    <div className="patient-list-wrapper fade-in">
       <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 2 }}>
+        <Paper elevation={3} className="patient-list-paper" sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -162,7 +162,7 @@ const PatientList = () => {
             gap: { xs: 2, sm: 0 }
           }}>
             <Typography variant="h4" component="h1" sx={{ 
-              color: '#2c3e50',
+              color: '#3B82F6',
               fontWeight: 600,
               fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
             }}>
@@ -254,16 +254,14 @@ const PatientList = () => {
               {sortedPatients.map((patient) => (
                 <Grid item xs={12} sm={6} md={4} key={patient._id}>
                   <Card 
+                    className="patient-card"
                     sx={{ 
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 3
-                      }
+                      cursor: 'pointer'
                     }}
+                    onClick={() => handleViewDetails(patient._id)}
                   >
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Box sx={{ 
@@ -309,30 +307,25 @@ const PatientList = () => {
                     }}>
                       <Button
                         size="small"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        onClick={() => handleViewDetails(patient._id)}
-                        startIcon={<VisibilityIcon />}
-                      >
-                        Detaylar
-                      </Button>
-                      <Button
-                        size="small"
                         variant="outlined"
                         color="primary"
                         fullWidth
-                        onClick={() => handleEditPatient(patient._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPatient(patient._id);
+                        }}
                         startIcon={<EditIcon />}
                       >
                         Düzenle
                       </Button>
+
                       <Button
                         size="small"
                         variant="outlined"
                         color="error"
                         fullWidth
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedPatient(patient);
                           setDeleteDialogOpen(true);
                         }}

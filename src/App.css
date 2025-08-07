@@ -28,13 +28,14 @@ body {
 
 /* Header Styles */
 .header {
-  background-color: var(--white);
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   padding: 1rem;
-  box-shadow: var(--shadow);
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .nav-container {
@@ -46,39 +47,52 @@ body {
   padding: 0 1rem;
 }
 
+.MuiAvatar-root.MuiAvatar-circular {
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
 .logo-link {
   text-decoration: none;
-  color: var(--primary-color);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logo-link h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Navigation Styles */
 .nav-links {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-links a {
-  color: var(--primary-color);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
   font-weight: 500;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
 }
 
 .nav-links a:hover {
-  background-color: var(--secondary-color);
-  color: var(--white);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
 /* Main Content Styles */
@@ -88,6 +102,7 @@ body {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  
 }
 
 /* Card Styles */
@@ -335,4 +350,271 @@ body {
 
 .fade-in {
   animation: fadeIn 0.5s ease-out;
+}
+
+.patient-form-wrapper,
+.patient-list-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+  padding: 2rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.patient-list-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
+}
+
+.patient-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease-in-out !important;
+}
+
+.patient-card:hover {
+  transform: translateY(-4px) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.patient-detail-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+  padding: 2rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.patient-detail-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
+}
+
+.patient-detail-accordion {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 16px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.patient-detail-accordion .MuiAccordionSummary-root {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.patient-detail-accordion .MuiAccordionSummary-root:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.patient-detail-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.ai-analysis-wrapper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ai-analysis-header {
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px !important;
+}
+
+.ai-analysis-accordion {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  margin-bottom: 8px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.ai-analysis-accordion .MuiAccordionSummary-root {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ai-analysis-accordion .MuiAccordionSummary-root:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ai-analysis-button {
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  padding: 6px 16px !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.ai-analysis-button:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  transform: translateY(-1px) !important;
+  background: linear-gradient(135deg, #2563EB 0%, #059669 100%) !important;
+}
+
+@media print {
+  /* Yazdırmada gizlenecek elementler */
+  .header,
+  .nav-container,
+  .ai-analysis-wrapper,
+  .MuiButton-root,
+  .MuiTabs-root,
+  .patient-detail-wrapper {
+    background: none !important;
+  }
+
+  /* Yazdırma düzeni */
+  .patient-detail-paper {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  /* Hasta bilgileri tablosu */
+  .print-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .print-grid > div {
+    break-inside: avoid !important;
+  }
+
+  /* Başlıklar */
+  .print-section-title {
+    font-size: 16px !important;
+    font-weight: bold !important;
+    border-bottom: 1px solid #000 !important;
+    margin: 24px 0 16px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* Metin stilleri */
+  .print-label {
+    font-weight: bold !important;
+    color: #000 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .print-value {
+    color: #000 !important;
+  }
+
+  /* Sayfa yapısı */
+  @page {
+    margin: 2cm;
+  }
+
+  /* Yazdırmada gizlenecek elementler */
+  .ai-analysis-wrapper,
+  .MuiButton-root,
+  .header,
+  .nav-container {
+    display: none !important;
+  }
+}
+
+.patient-edit-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+  padding: 2rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.patient-edit-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
+}
+
+.patient-edit-accordion {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 16px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.patient-edit-accordion .MuiAccordionSummary-root {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.patient-edit-accordion .MuiAccordionSummary-root:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.patient-edit-textfield .MuiOutlinedInput-root.Mui-focused {
+  background: rgba(255, 255, 255, 1);
+}
+
+.patient-form-container {
+  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.patient-form-paper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 80px !important;
 }
