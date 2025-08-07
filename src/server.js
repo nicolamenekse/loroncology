@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import PatientHistory from './models/PatientHistory.js';
+import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -405,6 +406,148 @@ app.delete('/api/patients/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting patient:', error);
     res.status(500).json({ message: 'Hasta silinirken bir hata oluştu' });
+  }
+});
+
+// AI Analiz Endpoints
+app.post('/api/patients/:id/analyze', async (req, res) => {
+  try {
+    console.log('Analiz isteği alındı:', req.params.id);
+    const patient = await Patient.findById(req.params.id);
+    
+    if (!patient) {
+      console.log('Hasta bulunamadı:', req.params.id);
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+
+    console.log('Hasta bulundu, AI analizi başlatılıyor');
+    const analysis = await generatePatientAnalysis(patient);
+    
+    if (!analysis) {
+      console.error('AI analizi boş yanıt döndü');
+      return res.status(500).json({ message: 'AI analizi oluşturulamadı' });
+    }
+
+    console.log('AI analizi başarıyla oluşturuldu');
+    res.json({ analysis });
+  } catch (error) {
+    console.error('AI analiz endpoint hatası:', {
+      error: error.message,
+      stack: error.stack,
+      patientId: req.params.id
+    });
+    
+    if (error.message.includes('quota') || error.message.includes('429')) {
+      return res.status(429).json({ 
+        message: 'AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin veya sistem yöneticinize başvurun.',
+        details: 'API kullanım kotası aşıldı.'
+      });
+    }
+    
+    if (error.message.includes('API key')) {
+      return res.status(500).json({ message: 'OpenAI API yapılandırma hatası' });
+    }
+    
+    if (error.message.includes('Rate limit')) {
+      return res.status(429).json({ message: 'API istek limiti aşıldı, lütfen biraz bekleyin' });
+    }
+    
+    res.status(500).json({ 
+      message: 'AI analizi oluşturulurken bir hata oluştu',
+      error: error.message 
+    });
+  }
+});
+
+app.post('/api/patients/:id/treatment-suggestions', async (req, res) => {
+  try {
+    console.log('Tedavi önerisi isteği alındı:', req.params.id);
+    const patient = await Patient.findById(req.params.id);
+    
+    if (!patient) {
+      console.log('Hasta bulunamadı:', req.params.id);
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+
+    console.log('Hasta bulundu, tedavi önerisi oluşturuluyor');
+    const suggestions = await generateTreatmentSuggestions(patient);
+    
+    if (!suggestions) {
+      console.error('AI tedavi önerisi boş yanıt döndü');
+      return res.status(500).json({ message: 'Tedavi önerisi oluşturulamadı' });
+    }
+
+    console.log('Tedavi önerisi başarıyla oluşturuldu');
+    res.json({ suggestions });
+  } catch (error) {
+    console.error('Tedavi önerisi endpoint hatası:', {
+      error: error.message,
+      stack: error.stack,
+      patientId: req.params.id
+    });
+    
+    if (error.message.includes('API key')) {
+      return res.status(500).json({ message: 'OpenAI API yapılandırma hatası' });
+    }
+    
+    if (error.message.includes('Rate limit')) {
+      return res.status(429).json({ message: 'API istek limiti aşıldı, lütfen biraz bekleyin' });
+    }
+    
+    res.status(500).json({ 
+      message: 'Tedavi önerisi oluşturulurken bir hata oluştu',
+      error: error.message 
+    });
+  }
+});
+
+app.post('/api/patients/:id/analyze-lab', async (req, res) => {
+  try {
+    console.log('Lab analizi isteği alındı:', req.params.id);
+    const patient = await Patient.findById(req.params.id);
+    
+    if (!patient) {
+      console.log('Hasta bulunamadı:', req.params.id);
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+
+    if (!patient.hemogram && !patient.biyokimya) {
+      console.log('Laboratuvar sonuçları bulunamadı');
+      return res.status(400).json({ message: 'Laboratuvar sonuçları bulunamadı' });
+    }
+
+    console.log('Hasta bulundu, lab analizi başlatılıyor');
+    const labAnalysis = await analyzeLaboratoryResults({
+      hemogram: patient.hemogram,
+      biyokimya: patient.biyokimya
+    });
+    
+    if (!labAnalysis) {
+      console.error('AI lab analizi boş yanıt döndü');
+      return res.status(500).json({ message: 'Laboratuvar analizi oluşturulamadı' });
+    }
+
+    console.log('Lab analizi başarıyla oluşturuldu');
+    res.json({ labAnalysis });
+  } catch (error) {
+    console.error('Lab analizi endpoint hatası:', {
+      error: error.message,
+      stack: error.stack,
+      patientId: req.params.id
+    });
+    
+    if (error.message.includes('API key')) {
+      return res.status(500).json({ message: 'OpenAI API yapılandırma hatası' });
+    }
+    
+    if (error.message.includes('Rate limit')) {
+      return res.status(429).json({ message: 'API istek limiti aşıldı, lütfen biraz bekleyin' });
+    }
+    
+    res.status(500).json({ 
+      message: 'Laboratuvar analizi oluşturulurken bir hata oluştu',
+      error: error.message 
+    });
   }
 });
 

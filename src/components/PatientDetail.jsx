@@ -33,6 +33,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ParameterInput from './ParameterInput';
 import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
+import AIAnalysis from './AIAnalysis';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
@@ -955,6 +956,9 @@ const PatientDetail = () => {
           )}
         </Paper>
       </Container>
+      
+      {/* AI Analiz Bölümü */}
+      <AIAnalysis patientId={id} />
     </div>
   );
 };
