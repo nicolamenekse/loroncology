@@ -58,6 +58,37 @@ body {
   width: 100%;
 }
 
+/* Desktop Navigation */
+.desktop-nav {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.desktop-nav li {
+  margin: 0;
+}
+
+.desktop-nav a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+.desktop-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .nav-container {
     justify-content: center;
@@ -77,6 +108,11 @@ body {
   .hamburger-menu {
     position: absolute;
     right: 1rem;
+  }
+
+  /* Hide desktop navigation on mobile */
+  .desktop-nav {
+    display: none;
   }
 }
 
@@ -109,6 +145,18 @@ body {
   .nav-container .nav-links {
     display: none;
   }
+}
+
+/* Desktop/Laptop görünümü için nav-links'i göster */
+@media (min-width: 769px) {
+  .hamburger-menu {
+    display: none;
+  }
+
+  .nav-container .nav-links {
+    display: flex !important;
+  }
+}
 
   .menu-overlay {
     position: fixed;
@@ -215,6 +263,20 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+/* Desktop'ta nav-links'i göster, mobile'ta gizle */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+}
+
+/* Desktop'ta nav-links'i göster */
+@media (min-width: 769px) {
+  .nav-links {
+    display: flex !important;
+  }
 }
 
 .nav-links a {
