@@ -79,6 +79,13 @@ function App() {
                 <PetsIcon sx={{ fontSize: 24, color: 'white' }} />
                 <h1>Loroncology</h1>
               </Link>
+              {/* Desktop Navigation */}
+              <ul className="desktop-nav">
+                <li><Link to="/">Ana Sayfa</Link></li>
+                <li><Link to="/hastalar">Kayıtlı Hastalar</Link></li>
+                <li><Link to="/yeni-hasta">Yeni Hasta</Link></li>
+              </ul>
+              {/* Mobile Navigation */}
               <button className="hamburger-menu" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 {isMenuOpen ? '✕' : '☰'}
               </button>
@@ -88,8 +95,8 @@ function App() {
               <div className={`mobile-nav ${isMenuOpen ? 'active' : ''}`}>
                 <ul className="nav-links">
                   <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Ana Sayfa</Link></li>
+                  <li><Link to="/hastalar" onClick={() => setIsMenuOpen(false)}>Kayıtlı Hastalar</Link></li>
                   <li><Link to="/yeni-hasta" onClick={() => setIsMenuOpen(false)}>Yeni Hasta</Link></li>
-                  <li><Link to="/hastalar" onClick={() => setIsMenuOpen(false)}>Hastalar</Link></li>
                 </ul>
               </div>
             </nav>
