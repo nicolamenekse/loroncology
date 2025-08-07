@@ -20,10 +20,11 @@ const Home = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1a2980 0%, #26D0CE 100%)',
       display: 'flex',
       alignItems: 'center',
       position: 'relative',
+      overflow: 'hidden',
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -41,14 +42,29 @@ const Home = () => {
         <Box sx={{ textAlign: 'center', mb: 8 }}>
           <Avatar
             sx={{
-              width: 100,
-              height: 100,
-              margin: '0 auto 2rem auto',
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              boxShadow: '0 8px 32px rgba(33, 150, 243, 0.3)',
+              width: 120,
+              height: 120,
+              margin: '0 auto 2.5rem auto',
+              background: 'linear-gradient(45deg, #2196F3 30%, #00E5FF 90%)',
+              boxShadow: '0 12px 40px rgba(33, 150, 243, 0.4)',
+              animation: 'pulse 2s infinite',
+              '@keyframes pulse': {
+                '0%': {
+                  transform: 'scale(1)',
+                  boxShadow: '0 12px 40px rgba(33, 150, 243, 0.4)',
+                },
+                '50%': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 15px 45px rgba(33, 150, 243, 0.5)',
+                },
+                '100%': {
+                  transform: 'scale(1)',
+                  boxShadow: '0 12px 40px rgba(33, 150, 243, 0.4)',
+                },
+              },
             }}
           >
-            <LocalHospitalIcon sx={{ fontSize: 50, color: 'white' }} />
+            <LocalHospitalIcon sx={{ fontSize: 60, color: 'white' }} />
           </Avatar>
           
           <Typography 
@@ -56,12 +72,24 @@ const Home = () => {
             component="h1" 
             gutterBottom 
             sx={{
-              fontWeight: 800,
+              fontWeight: 900,
               color: 'white',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
+              textShadow: '2px 4px 8px rgba(0,0,0,0.2)',
+              fontSize: { xs: '2.75rem', md: '4rem' },
               letterSpacing: '0.02em',
-              mb: 2
+              mb: 2,
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: '-10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '80px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #00E5FF, #2196F3)',
+                borderRadius: '2px'
+              }
             }}
           >
             🐾 Loronkoloji
@@ -72,10 +100,13 @@ const Home = () => {
             component="h2" 
             sx={{
               fontWeight: 500,
-              color: 'rgba(255,255,255,0.9)',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
-              fontSize: { xs: '1.2rem', md: '1.5rem' },
-              mb: 4
+              color: 'rgba(255,255,255,0.95)',
+              textShadow: '1px 2px 4px rgba(0,0,0,0.15)',
+              fontSize: { xs: '1.3rem', md: '1.7rem' },
+              mb: 6,
+              maxWidth: '800px',
+              margin: '0 auto',
+              opacity: 0.9
             }}
           >
             Veteriner Onkoloji Hasta Takip Sistemi
@@ -94,12 +125,12 @@ const Home = () => {
             <Card
               sx={{
                 height: { xs: '280px', sm: '320px' },
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: 3,
+                background: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: 4,
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
@@ -107,10 +138,11 @@ const Home = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+                  transform: 'translateY(-8px) scale(1.02)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+                  background: 'rgba(255,255,255,0.95)',
                   '& .action-icon': {
-                    transform: 'scale(1.1)',
+                    transform: 'scale(1.15) rotate(5deg)',
                   }
                 },
                 '&::before': {
@@ -196,12 +228,12 @@ const Home = () => {
             <Card
               sx={{
                 height: { xs: '280px', sm: '320px' },
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: 3,
+                background: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: 4,
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
@@ -209,10 +241,11 @@ const Home = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+                  transform: 'translateY(-8px) scale(1.02)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+                  background: 'rgba(255,255,255,0.95)',
                   '& .action-icon': {
-                    transform: 'scale(1.1)',
+                    transform: 'scale(1.15) rotate(5deg)',
                   }
                 },
                 '&::before': {
@@ -296,12 +329,30 @@ const Home = () => {
         </Grid>
 
         {/* Simple Footer */}
-        <Box sx={{ py: 6, textAlign: 'center' }}>
+        <Box 
+          sx={{ 
+            py: 6, 
+            textAlign: 'center',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '200px',
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+            }
+          }}
+        >
           <Typography 
             variant="body2" 
             sx={{ 
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: '0.9rem'
+              color: 'rgba(255,255,255,0.8)',
+              fontSize: '0.95rem',
+              fontWeight: 500,
+              letterSpacing: '0.5px'
             }}
           >
             © 2025 Loronkoloji - Veteriner Onkoloji Hasta Takip Sistemi
