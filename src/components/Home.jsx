@@ -10,9 +10,9 @@ import {
   CardContent,
   Avatar,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import PetsIcon from '@mui/icons-material/Pets';
+import { SvgIcon } from '@mui/material';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -129,213 +129,169 @@ const Home = () => {
           sx={{ maxWidth: '800px', margin: '0 auto' }}
         >
           <Grid item xs={12} sm={6}>
-            <Card
+            <Box
+              onClick={() => navigate('/yeni-hasta')}
               sx={{
-                height: { xs: '280px', sm: '320px' },
-                background: '#F9FAFB',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: 4,
                 cursor: 'pointer',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
-                overflow: 'hidden',
+                width: '100%',
+                height: { xs: '280px', sm: '320px' },
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
                 alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.4s ease',
                 '&:hover': {
-                  transform: 'translateY(-8px) scale(1.02)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                  background: '#FFFFFF',
-                  '& .action-icon': {
-                    transform: 'scale(1.15) rotate(5deg)',
-                    color: '#3B82F6'
+                  transform: 'translateY(-8px)',
+                  '& .snake-icon': {
+                    transform: 'scale(1.1)',
                   }
-                },
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #4CAF50, #2196F3)',
                 }
               }}
-              onClick={() => navigate('/yeni-hasta')}
             >
-              <CardContent 
+              <SvgIcon 
+                className="snake-icon"
                 sx={{ 
-                  p: 3, 
-                  textAlign: 'center', 
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%'
+                  fontSize: { xs: 120, sm: 160 },
+                  mb: 2,
+                  transition: 'transform 0.3s ease',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+                }}
+                viewBox="0 0 100 100"
+              >
+                <path
+                  d="M50 20c-16.5 0-30 13.5-30 30s13.5 30 30 30 30-13.5 30-30S66.5 20 50 20zm0 55c-13.8 0-25-11.2-25-25s11.2-25 25-25 25 11.2 25 25-11.2 25-25 25z"
+                  fill="#10B981"
+                />
+                <path
+                  d="M65 45c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5 5 2.2 5 5z"
+                  fill="#1a1a1a"
+                />
+                <path
+                  d="M45 45c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5 5 2.2 5 5z"
+                  fill="#1a1a1a"
+                />
+                <path
+                  d="M50 60c-8.4 0-15.3-6.9-15.3-15.3h5c0 5.7 4.6 10.3 10.3 10.3s10.3-4.6 10.3-10.3h5C65.3 53.1 58.4 60 50 60z"
+                  fill="#1a1a1a"
+                />
+              </SvgIcon>
+              <Typography 
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                  mb: 1
                 }}
               >
-                <AddCircleOutlineIcon 
-                  className="action-icon"
-                  sx={{ 
-                    fontSize: { xs: 60, sm: 70 }, 
-                    color: 'success.main', 
-                    mb: 2,
-                    transition: 'all 0.3s ease',
-                    filter: 'drop-shadow(0 4px 8px rgba(76,175,80,0.3))'
-                  }} 
-                />
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    fontWeight: 700, 
-                    color: 'success.main', 
-                    mb: 2,
-                    fontSize: { xs: '1.3rem', sm: '1.5rem' }
-                  }}
-                >
-                  Yeni Hasta Ekle
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  color="text.secondary" 
-                  sx={{ 
-                    fontSize: { xs: '0.9rem', sm: '1rem' }, 
-                    lineHeight: 1.5, 
-                    mb: 3,
-                    textAlign: 'center'
-                  }}
-                >
-                  Yeni hasta kaydı oluşturun
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  sx={{ 
-                    px: 3, 
-                    py: 1.2,
-                    borderRadius: 20,
-                    fontWeight: 600,
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                    textTransform: 'none',
-                    bgcolor: '#10B981',
-                    boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
-                    '&:hover': {
-                      bgcolor: '#059669',
-                      boxShadow: '0 6px 16px rgba(16,185,129,0.4)',
-                    }
-                  }}
-                >
-                  Hasta Ekle
-                </Button>
-              </CardContent>
-            </Card>
+                Yeni Hasta Ekle
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+                }}
+              >
+                Yeni hasta kaydı oluşturun
+              </Typography>
+            </Box>
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Card
+            <Box
+              onClick={() => navigate('/hastalar')}
               sx={{
-                height: { xs: '280px', sm: '320px' },
-                background: '#F9FAFB',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: 4,
                 cursor: 'pointer',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
-                overflow: 'hidden',
+                width: '100%',
+                height: { xs: '280px', sm: '320px' },
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
                 alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.4s ease',
                 '&:hover': {
-                  transform: 'translateY(-8px) scale(1.02)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                  background: '#FFFFFF',
-                  '& .action-icon': {
-                    transform: 'scale(1.15) rotate(5deg)',
-                    color: '#3B82F6'
+                  transform: 'translateY(-8px)',
+                  '& .cat-icon': {
+                    transform: 'scale(1.1)',
                   }
-                },
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #2196F3, #9C27B0)',
                 }
               }}
-              onClick={() => navigate('/hastalar')}
             >
-              <CardContent 
+              <SvgIcon 
+                className="cat-icon"
                 sx={{ 
-                  p: 3, 
-                  textAlign: 'center', 
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%'
+                  fontSize: { xs: 120, sm: 160 },
+                  mb: 2,
+                  transition: 'transform 0.3s ease',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+                }}
+                viewBox="0 0 100 100"
+              >
+                {/* Cat reading a book */}
+                <path
+                  d="M30 40 L70 40 L75 80 L25 80 Z"
+                  fill="#3B82F6"
+                  stroke="#2563EB"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M45 30 C45 20 55 20 55 30"
+                  fill="none"
+                  stroke="#2563EB"
+                  strokeWidth="3"
+                />
+                <circle cx="40" cy="35" r="3" fill="#1a1a1a" />
+                <circle cx="60" cy="35" r="3" fill="#1a1a1a" />
+                <path
+                  d="M47 40 C50 42 53 42 55 40"
+                  fill="none"
+                  stroke="#1a1a1a"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M35 30 L25 25 M65 30 L75 25"
+                  fill="none"
+                  stroke="#2563EB"
+                  strokeWidth="3"
+                />
+                <rect
+                  x="40"
+                  y="45"
+                  width="20"
+                  height="25"
+                  fill="#FFFFFF"
+                  stroke="#1a1a1a"
+                />
+                <path
+                  d="M45 50 L55 50 M45 55 L55 55 M45 60 L55 60"
+                  stroke="#1a1a1a"
+                  strokeWidth="1"
+                />
+              </SvgIcon>
+              <Typography 
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                  mb: 1
                 }}
               >
-                <ListAltIcon 
-                  className="action-icon"
-                  sx={{ 
-                    fontSize: { xs: 60, sm: 70 }, 
-                    color: 'primary.main', 
-                    mb: 2,
-                    transition: 'all 0.3s ease',
-                    filter: 'drop-shadow(0 4px 8px rgba(33,150,243,0.3))'
-                  }} 
-                />
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    fontWeight: 700, 
-                    color: 'primary.main', 
-                    mb: 2,
-                    fontSize: { xs: '1.3rem', sm: '1.5rem' }
-                  }}
-                >
-                  Kayıtlı Hastalar
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  color="text.secondary" 
-                  sx={{ 
-                    fontSize: { xs: '0.9rem', sm: '1rem' }, 
-                    lineHeight: 1.5, 
-                    mb: 3,
-                    textAlign: 'center'
-                  }}
-                >
-                  Mevcut hasta kayıtlarını görüntüleyin
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  sx={{ 
-                    px: 3, 
-                    py: 1.2,
-                    borderRadius: 20,
-                    fontWeight: 600,
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                    textTransform: 'none',
-                    bgcolor: '#3B82F6',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
-                    '&:hover': {
-                      bgcolor: '#2563EB',
-                      boxShadow: '0 6px 16px rgba(59,130,246,0.4)',
-                    }
-                  }}
-                >
-                  Hastaları Görüntüle
-                </Button>
-              </CardContent>
-            </Card>
+                Kayıtlı Hastalar
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+                }}
+              >
+                Mevcut hasta kayıtlarını görüntüleyin
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
 
