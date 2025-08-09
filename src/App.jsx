@@ -46,38 +46,51 @@ const AppContent = () => {
       <header className="header">
         <nav className="nav-container">
           <Link to="/" className="logo-link">
-            <PetsIcon sx={{ fontSize: 24, color: 'white' }} />
+            <PetsIcon sx={{ fontSize: 24, color: '#3B82F6' }} />
             <h1>Loroncology</h1>
           </Link>
           
-          <ul className="desktop-nav">
-            {user ? (
-              <>
-                <li><Link to="/">Ana Sayfa</Link></li>
-                <li><Link to="/hastalar">Kayıtlı Hastalar</Link></li>
-                <li><Link to="/yeni-hasta">Yeni Hasta</Link></li>
-                <li><Link to="/blog">Blog</Link></li>
-                <li><Link to="/blog/yeni">Yeni Blog Yazısı</Link></li>
-                <li><Link to="/change-password">Şifre Değiştir</Link></li>
-                {user?.role === 'admin' && (
-                  <li><Link to="/admin">Admin Paneli</Link></li>
-                )}
-                <li>
-                  <Button
-                    onClick={logout}
-                    sx={{ color: 'white' }}
-                  >
-                    Çıkış Yap
-                  </Button>
-                </li>
-              </>
-            ) : (
-              <>
-                <li><Link to="/login">Giriş Yap</Link></li>
-                <li><Link to="/register">Kayıt Ol</Link></li>
-              </>
-            )}
-          </ul>
+                      <ul className="desktop-nav">
+              <li><Link to="/blog">Blog</Link></li>
+              {user ? (
+                <>
+                  <li><Link to="/">Ana Sayfa</Link></li>
+                  <li><Link to="/hastalar">Kayıtlı Hastalar</Link></li>
+                  <li><Link to="/yeni-hasta">Yeni Hasta</Link></li>
+                  <li><Link to="/blog/yeni">Yeni Blog Yazısı</Link></li>
+                  <li><Link to="/change-password">Şifre Değiştir</Link></li>
+                  {user?.role === 'admin' && (
+                    <li><Link to="/admin">Admin Paneli</Link></li>
+                  )}
+                  <li>
+                    <Button
+                      onClick={logout}
+                      sx={{ 
+                        color: '#3B82F6',
+                        '&:hover': {
+                          background: 'rgba(59, 130, 246, 0.1)'
+                        }
+                      }}
+                    >
+                      Çıkış Yap
+                    </Button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/login" className="auth-button login">
+                      Giriş Yap
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/register" className="auth-button register">
+                      Kayıt Ol
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
 
           <button className="hamburger-menu" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? '✕' : '☰'}
@@ -87,39 +100,62 @@ const AppContent = () => {
             <div className="menu-overlay" onClick={() => setIsMenuOpen(false)} />
           )}
           
-          <div className={`mobile-nav ${isMenuOpen ? 'active' : ''}`}>
-            <ul className="nav-links">
-              {user ? (
-                <>
-                  <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Ana Sayfa</Link></li>
-                  <li><Link to="/hastalar" onClick={() => setIsMenuOpen(false)}>Kayıtlı Hastalar</Link></li>
-                  <li><Link to="/yeni-hasta" onClick={() => setIsMenuOpen(false)}>Yeni Hasta</Link></li>
-                  <li><Link to="/blog" onClick={() => setIsMenuOpen(false)}>Blog</Link></li>
-                  <li><Link to="/blog/yeni" onClick={() => setIsMenuOpen(false)}>Yeni Blog Yazısı</Link></li>
-                  <li><Link to="/change-password" onClick={() => setIsMenuOpen(false)}>Şifre Değiştir</Link></li>
-                  {user?.role === 'admin' && (
-                    <li><Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Paneli</Link></li>
-                  )}
-                  <li>
-                    <Button
-                      onClick={() => {
-                        logout();
-                        setIsMenuOpen(false);
-                      }}
-                      sx={{ color: 'white' }}
-                    >
-                      Çıkış Yap
-                    </Button>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li><Link to="/login" onClick={() => setIsMenuOpen(false)}>Giriş Yap</Link></li>
-                  <li><Link to="/register" onClick={() => setIsMenuOpen(false)}>Kayıt Ol</Link></li>
-                </>
-              )}
-            </ul>
-          </div>
+                      <div className={`mobile-nav ${isMenuOpen ? 'active' : ''}`}>
+              <ul className="nav-links">
+                <li><Link to="/blog" onClick={() => setIsMenuOpen(false)}>Blog</Link></li>
+                {user ? (
+                  <>
+                    <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Ana Sayfa</Link></li>
+                    <li><Link to="/hastalar" onClick={() => setIsMenuOpen(false)}>Kayıtlı Hastalar</Link></li>
+                    <li><Link to="/yeni-hasta" onClick={() => setIsMenuOpen(false)}>Yeni Hasta</Link></li>
+                    <li><Link to="/blog/yeni" onClick={() => setIsMenuOpen(false)}>Yeni Blog Yazısı</Link></li>
+                    <li><Link to="/change-password" onClick={() => setIsMenuOpen(false)}>Şifre Değiştir</Link></li>
+                    {user?.role === 'admin' && (
+                      <li><Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Paneli</Link></li>
+                    )}
+                    <li>
+                      <Button
+                        onClick={() => {
+                          logout();
+                          setIsMenuOpen(false);
+                        }}
+                        sx={{ 
+                          color: '#3B82F6',
+                          width: '100%',
+                          justifyContent: 'center',
+                          '&:hover': {
+                            background: 'rgba(59, 130, 246, 0.1)'
+                          }
+                        }}
+                      >
+                        Çıkış Yap
+                      </Button>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link 
+                        to="/login" 
+                        className="auth-button login"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Giriş Yap
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        to="/register" 
+                        className="auth-button register"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Kayıt Ol
+                      </Link>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
         </nav>
       </header>
 
