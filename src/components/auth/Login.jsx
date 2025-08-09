@@ -21,6 +21,7 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResendButton, setShowResendButton] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -50,6 +51,9 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.needsVerification) {
+          setShowResendButton(true);
+        }
         throw new Error(data.message || 'Giriş yapılırken bir hata oluştu');
       }
 
@@ -147,7 +151,21 @@ const Login = () => {
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+            <Alert 
+              severity="error" 
+              sx={{ width: '100%', mb: 2 }}
+              action={
+                showResendButton && (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() => navigate('/register')}
+                  >
+                    Yeniden Gönder
+                  </Button>
+                )
+              }
+            >
               {error}
             </Alert>
           )}

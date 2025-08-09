@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } f
 import { AuthProvider, ProtectedRoute, useAuth } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import VerifyEmail from './components/auth/VerifyEmail';
 import { ThemeProvider, createTheme, Button, useMediaQuery } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -598,6 +599,7 @@ const AppContent = () => {
             <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           
           <Route path="/" element={user ? <ProtectedRoute><Home /></ProtectedRoute> : <PublicHome />} />
           <Route path="/yeni-hasta" element={

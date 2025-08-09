@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
+import sgMail from '@sendgrid/mail';
 import PatientHistory from './models/PatientHistory.js';
 import Blog from './models/Blog.js';
 import User from './models/User.js';
@@ -15,6 +17,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// SendGrid API key kontrolü
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+if (!SENDGRID_API_KEY) {
+  console.error('❌ SENDGRID_API_KEY environment variable is not set!');
+  console.error('Please add SENDGRID_API_KEY to your .env file.');
+  process.exit(1);
+}
+
+// SendGrid'i yapılandır
+sgMail.setApiKey(SENDGRID_API_KEY);
+
+// SendGrid test
+console.log('=== SendGrid Configuration ===');
+console.log('SendGrid API Key:', SENDGRID_API_KEY ? 'Configured ✓' : 'Missing ✗');
+console.log('EMAIL_FROM:', process.env.EMAIL_FROM || 'Missing ✗');
+console.log('APP_URL:', process.env.APP_URL || 'Missing ✗');
+
+if (!process.env.APP_URL) {
+  console.error('❌ APP_URL environment variable is not set!');
+  console.error('Please add APP_URL to your .env file.');
+  process.exit(1);
+}
+
+if (!process.env.EMAIL_FROM) {
+  console.error('❌ EMAIL_FROM environment variable is not set!');
+  console.error('Please add EMAIL_FROM to your .env file.');
+  process.exit(1);
+}
 
 // JWT Secret kontrolü
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -207,7 +238,11 @@ app.use((err, req, res, next) => {
 // Auth Routes
 app.post('/api/auth/register', async (req, res) => {
   try {
+    console.log('\n=== New Registration Request ===');
     console.log('Register isteği alındı:', req.body);
+    console.log('SendGrid Configured:', !!SENDGRID_API_KEY);
+    console.log('EMAIL_FROM:', process.env.EMAIL_FROM);
+    console.log('APP_URL:', process.env.APP_URL);
     const { email, password, name } = req.body;
 
     // Email ve şifre kontrolü
@@ -227,30 +262,109 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ message: 'Şifre en az 6 karakter olmalıdır' });
     }
 
-    // Email benzersizlik kontrolü
+    // Email kontrolü
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    
+    // Eğer kullanıcı varsa ve emailVerified true ise, hata ver
+    if (existingUser && existingUser.emailVerified) {
       return res.status(400).json({ message: 'Bu email adresi zaten kullanılıyor' });
     }
 
-    // Yeni kullanıcı oluştur
-    console.log('Yeni kullanıcı oluşturuluyor:', { email, name });
-    const user = new User({ email, password, name });
-    const savedUser = await user.save();
-    console.log('Kullanıcı başarıyla kaydedildi:', savedUser._id);
+    // Eğer kullanıcı varsa ama doğrulanmamışsa, yeni token oluştur
+    if (existingUser && !existingUser.emailVerified) {
+      console.log('Doğrulanmamış kullanıcı bulundu, yeni token oluşturuluyor...');
+    }
 
-    // Token oluştur
-    const token = generateToken(savedUser);
+    // Yeni kullanıcı oluştur veya mevcut doğrulanmamış kullanıcıyı güncelle
+    console.log('\n=== Creating New User ===');
+    console.log('User details:', { email, name });
+    
+    // Doğrulama token'ı oluştur
+    console.log('Generating verification token...');
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    const tokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 dakika
+
+    console.log('Token details:', {
+      rawToken: verificationToken,
+      hashedToken: tokenHash,
+      expiresAt: tokenExpires
+    });
+
+    let user;
+    if (existingUser) {
+      // Var olan kullanıcıyı güncelle
+      existingUser.emailVerifyTokenHash = tokenHash;
+      existingUser.emailVerifyExpires = tokenExpires;
+      if (password) {
+        existingUser.password = password;
+      }
+      if (name) {
+        existingUser.name = name;
+      }
+      user = await existingUser.save();
+      console.log('Existing user updated with new verification token');
+    } else {
+      // Yeni kullanıcı oluştur
+      user = new User({
+        email,
+        password,
+        name,
+        emailVerifyTokenHash: tokenHash,
+        emailVerifyExpires: tokenExpires
+      });
+      user = await user.save();
+      console.log('New user created');
+    }
+    console.log('User saved successfully:', {
+      id: user._id,
+      email: user.email,
+      tokenHash: user.emailVerifyTokenHash,
+      tokenExpires: user.emailVerifyExpires
+    });
+
+    // Doğrulama emaili gönder
+    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+    
+    const msg = {
+      to: email,
+      from: process.env.EMAIL_FROM,
+      subject: 'Email Adresinizi Doğrulayın',
+      text: `Loroncology'ye hoş geldiniz! Email adresinizi doğrulamak için bu linke tıklayın: ${verificationUrl}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Loroncology'ye Hoş Geldiniz!</h2>
+          <p>Email adresinizi doğrulamak için aşağıdaki butona tıklayın:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}"
+               style="background-color: #4CAF50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Email Adresimi Doğrula
+            </a>
+          </div>
+          <p>Eğer buton çalışmazsa, bu linki tarayıcınıza kopyalayabilirsiniz:</p>
+          <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+          <p>Bu link 30 dakika sonra geçerliliğini yitirecektir.</p>
+          <p>Eğer bu hesabı siz oluşturmadıysanız, bu emaili görmezden gelebilirsiniz.</p>
+        </div>
+      `
+    };
+
+    console.log('Sending verification email to:', email);
+    console.log('Email content:', msg);
+    
+    try {
+      await sgMail.send(msg);
+      console.log('Verification email sent successfully');
+    } catch (sendError) {
+      console.error('SendGrid error:', sendError);
+      if (sendError.response) {
+        console.error('SendGrid error details:', sendError.response.body);
+      }
+      throw sendError;
+    }
 
     res.status(201).json({
-      message: 'Kayıt başarılı',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      }
+      message: 'Kayıt başarılı. Lütfen email adresinizi doğrulayın.'
     });
   } catch (error) {
     console.error('Kayıt hatası:', error);
@@ -261,13 +375,165 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// Email doğrulama endpoint'i
+app.get('/api/auth/verify-email', async (req, res) => {
+  try {
+    console.log('\n=== Email Verification Request ===');
+    console.log('Query params:', req.query);
+    const { token, email } = req.query;
+
+    if (!token || !email) {
+      return res.status(400).json({ message: 'Token ve email zorunludur' });
+    }
+
+    // Kullanıcıyı bul
+    console.log('Searching for user:', email);
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      console.log('User not found with email:', email);
+      return res.status(400).json({ message: 'Kullanıcı bulunamadı' });
+    }
+
+    const now = new Date();
+    console.log('User verification status:', {
+      emailVerified: user.emailVerified,
+      hasToken: !!user.emailVerifyTokenHash,
+      tokenExpires: user.emailVerifyExpires,
+      currentTime: now,
+      tokenExpired: user.emailVerifyExpires < now,
+      timeDiff: (user.emailVerifyExpires - now) / 1000 + ' seconds remaining'
+    });
+
+    // Doğrulama durumunu kontrol et
+    if (user.emailVerified) {
+      return res.status(400).json({ message: 'Email zaten doğrulanmış' });
+    }
+
+    if (!user.emailVerifyTokenHash || !user.emailVerifyExpires) {
+      return res.status(400).json({ message: 'Doğrulama token\'ı bulunamadı' });
+    }
+
+    if (user.emailVerifyExpires < new Date()) {
+      return res.status(400).json({ message: 'Doğrulama linkinin süresi dolmuş' });
+    }
+
+    if (!user) {
+      return res.status(400).json({ message: 'Geçersiz veya süresi dolmuş doğrulama linki' });
+    }
+
+    // Token'ı doğrula
+    console.log('Verifying token...');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    console.log('Token comparison:', {
+      receivedTokenHash: tokenHash,
+      storedTokenHash: user.emailVerifyTokenHash,
+      matches: tokenHash === user.emailVerifyTokenHash
+    });
+
+    if (tokenHash !== user.emailVerifyTokenHash) {
+      return res.status(400).json({ message: 'Geçersiz doğrulama token\'ı' });
+    }
+
+    // Email'i doğrulanmış olarak işaretle
+    user.emailVerified = true;
+    user.emailVerifyTokenHash = null;
+    user.emailVerifyExpires = null;
+    await user.save();
+
+    res.json({ message: 'Email başarıyla doğrulandı' });
+  } catch (error) {
+    console.error('Email doğrulama hatası:', error);
+    res.status(500).json({ message: 'Email doğrulanırken bir hata oluştu' });
+  }
+});
+
+// Email doğrulama yeniden gönderme endpoint'i
+app.post('/api/auth/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email zorunludur' });
+    }
+
+    // Kullanıcıyı bul
+    const user = await User.findOne({ email, emailVerified: false });
+    if (!user) {
+      return res.status(400).json({ message: 'Kullanıcı bulunamadı veya email zaten doğrulanmış' });
+    }
+
+    // Son gönderimden bu yana 60 saniye geçmiş mi kontrol et
+    if (user.emailVerifyExpires && user.emailVerifyExpires > new Date(Date.now() - 60 * 1000)) {
+      const remainingTime = Math.ceil((user.emailVerifyExpires - Date.now() + 60 * 1000) / 1000);
+      return res.status(429).json({
+        message: `Lütfen yeni bir doğrulama emaili göndermeden önce ${remainingTime} saniye bekleyin`
+      });
+    }
+
+    // Yeni doğrulama token'ı oluştur
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    const tokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 dakika
+
+    // Token bilgilerini güncelle
+    user.emailVerifyTokenHash = tokenHash;
+    user.emailVerifyExpires = tokenExpires;
+    await user.save();
+
+    // Doğrulama emaili gönder
+    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+    
+    const msg = {
+      to: email,
+      from: process.env.EMAIL_FROM,
+      subject: 'Email Doğrulama - Yeniden Gönderim',
+      text: `Email adresinizi doğrulamak için bu linke tıklayın: ${verificationUrl}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Email Doğrulama</h2>
+          <p>Email adresinizi doğrulamak için aşağıdaki butona tıklayın:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}"
+               style="background-color: #4CAF50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Email Adresimi Doğrula
+            </a>
+          </div>
+          <p>Eğer buton çalışmazsa, bu linki tarayıcınıza kopyalayabilirsiniz:</p>
+          <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+          <p>Bu link 30 dakika sonra geçerliliğini yitirecektir.</p>
+        </div>
+      `
+    };
+
+    console.log('Sending verification email to:', email);
+    console.log('Email content:', msg);
+    
+    try {
+      await sgMail.send(msg);
+      console.log('Verification email sent successfully');
+    } catch (sendError) {
+      console.error('SendGrid error:', sendError);
+      if (sendError.response) {
+        console.error('SendGrid error details:', sendError.response.body);
+      }
+      throw sendError;
+    }
+
+    res.json({ message: 'Doğrulama emaili yeniden gönderildi' });
+  } catch (error) {
+    console.error('Doğrulama emaili gönderme hatası:', error);
+    res.status(500).json({ message: 'Doğrulama emaili gönderilirken bir hata oluştu' });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Email ve şifre kontrolü
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email ve şifre zorunludur' });
+    // Email kontrolü
+    if (!email) {
+      return res.status(400).json({ message: 'Email zorunludur' });
     }
 
     // Kullanıcıyı bul
@@ -276,10 +542,28 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Geçersiz email veya şifre' });
     }
 
-    // Şifreyi kontrol et
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+    // Email doğrulamasını kontrol et
+    if (!user.emailVerified) {
+      return res.status(403).json({ 
+        message: 'Lütfen email adresinizi doğrulayın. Doğrulama emaili gönderildi mi?',
+        needsVerification: true 
+      });
+    }
+
+    // Eğer password null ise, bu email doğrulamasından sonraki otomatik giriş denemesidir
+    if (password === null && user.emailVerified) {
+      // Email doğrulamasından hemen sonra otomatik giriş - şifre kontrolü yapmadan devam et
+      console.log('Email doğrulaması sonrası otomatik giriş yapılıyor:', email);
+    } else {
+      // Normal giriş - şifre kontrolü yap
+      if (!password) {
+        return res.status(400).json({ message: 'Şifre zorunludur' });
+      }
+      
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+      }
     }
 
     // Son giriş tarihini güncelle

@@ -13,6 +13,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Link } from 'react-router-dom';
+import VerificationStatus from './VerificationStatus';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -51,12 +53,11 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Kayıt olurken bir hata oluştu');
+        throw new Error(data.message || 'An error occurred during registration');
       }
 
-      login(data.user, data.token);
-      const from = location.state?.from?.pathname || '/';
-      navigate(from, { replace: true });
+      // Artık otomatik giriş yapmıyoruz, sadece doğrulama beklendiğini gösteriyoruz
+      setRegistrationComplete(true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -144,136 +145,142 @@ const Register = () => {
               textAlign: 'center'
             }}
           >
-            Kayıt Ol
+            Register
           </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-              {error}
-            </Alert>
+          {registrationComplete ? (
+            <VerificationStatus email={formData.email} />
+          ) : (
+            <>
+              {error && (
+                <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
+              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="name"
+                  label="Full Name"
+                  name="name"
+                  autoComplete="name"
+                  autoFocus
+                  value={formData.name}
+                  onChange={handleChange}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      backdropFilter: 'blur(5px)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.9)'
+                      },
+                      '&.Mui-focused': {
+                        background: 'rgba(255, 255, 255, 1)'
+                      }
+                    }
+                  }}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      backdropFilter: 'blur(5px)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.9)'
+                      },
+                      '&.Mui-focused': {
+                        background: 'rgba(255, 255, 255, 1)'
+                      }
+                    }
+                  }}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  sx={{
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      backdropFilter: 'blur(5px)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.9)'
+                      },
+                      '&.Mui-focused': {
+                        background: 'rgba(255, 255, 255, 1)'
+                      }
+                    }
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  disabled={loading}
+                  sx={{
+                    mt: 2,
+                    mb: 2,
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
+                    color: 'white',
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                    }
+                  }}
+                >
+                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+                </Button>
+
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Already have an account?{' '}
+                    <MuiLink component={Link} to="/login" sx={{ 
+                      color: '#3B82F6',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                      '&:hover': {
+                        textDecoration: 'underline'
+                      }
+                    }}>
+                      Login
+                    </MuiLink>
+                  </Typography>
+                </Box>
+              </Box>
+            </>
           )}
-
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Ad Soyad"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              value={formData.name}
-              onChange={handleChange}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(5px)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.9)'
-                  },
-                  '&.Mui-focused': {
-                    background: 'rgba(255, 255, 255, 1)'
-                  }
-                }
-              }}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Adresi"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(5px)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.9)'
-                  },
-                  '&.Mui-focused': {
-                    background: 'rgba(255, 255, 255, 1)'
-                  }
-                }
-              }}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Şifre"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(5px)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.9)'
-                  },
-                  '&.Mui-focused': {
-                    background: 'rgba(255, 255, 255, 1)'
-                  }
-                }
-              }}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={loading}
-              sx={{
-                mt: 2,
-                mb: 2,
-                py: 1.5,
-                background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
-                color: 'white',
-                fontWeight: 500,
-                textTransform: 'none',
-                fontSize: '1rem',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)',
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                }
-              }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Kayıt Ol'}
-            </Button>
-
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Zaten hesabınız var mı?{' '}
-                <MuiLink component={Link} to="/login" sx={{ 
-                  color: '#3B82F6',
-                  textDecoration: 'none',
-                  fontWeight: 500,
-                  '&:hover': {
-                    textDecoration: 'underline'
-                  }
-                }}>
-                  Giriş Yap
-                </MuiLink>
-              </Typography>
-            </Box>
-          </Box>
         </Paper>
       </Container>
     </Box>

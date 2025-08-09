@@ -20,6 +20,15 @@
 - 📱 **Responsive UI with Material-UI**  
   Designed for smooth use across desktops, tablets, and mobile devices.
 
+## 🔐 Email Verification
+
+The system uses email verification to ensure user authenticity:
+
+1. After registration, users receive a verification email via SendGrid
+2. The verification link is valid for 30 minutes
+3. Users can request a new verification email (rate limited)
+4. Certain features require email verification
+
 ## 🧠 Why AI?
 
 Loroncology doesn’t aim to replace the veterinarian – it aims to **augment their decision-making** with structured summaries and assistant-level insight. By using AI responsibly, this platform aspires to improve case clarity, reduce oversight, and serve as a digital memory for complex oncological cases.
@@ -38,11 +47,17 @@ Loroncology doesn’t aim to replace the veterinarian – it aims to **augment t
 git clone https://github.com/nicolamenekse/loroncology.git
 cd loroncology
 
-# Install backend dependencies
+# Install dependencies
 npm install
-npm run dev:server
 
-# In another terminal, install frontend
-cd client
-npm install
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your values:
+# - MONGODB_URI: Your MongoDB connection string
+# - JWT_SECRET: A secure random string for JWT signing
+# - SENDGRID_API_KEY: Your SendGrid API key
+# - EMAIL_FROM: Your verified sender email in SendGrid
+# - APP_URL: Your application URL (e.g., http://localhost:3000)
+
+# Start the development server
 npm run dev
