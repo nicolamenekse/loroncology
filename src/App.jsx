@@ -14,6 +14,8 @@ import PatientEdit from './components/PatientEdit';
 import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
 import BlogCreate from './components/BlogCreate';
+import ChangePassword from './components/auth/ChangePassword';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 const theme = createTheme({
   palette: {
@@ -56,6 +58,10 @@ const AppContent = () => {
                 <li><Link to="/yeni-hasta">Yeni Hasta</Link></li>
                 <li><Link to="/blog">Blog</Link></li>
                 <li><Link to="/blog/yeni">Yeni Blog Yazısı</Link></li>
+                <li><Link to="/change-password">Şifre Değiştir</Link></li>
+                {user?.role === 'admin' && (
+                  <li><Link to="/admin">Admin Paneli</Link></li>
+                )}
                 <li>
                   <Button
                     onClick={logout}
@@ -90,6 +96,10 @@ const AppContent = () => {
                   <li><Link to="/yeni-hasta" onClick={() => setIsMenuOpen(false)}>Yeni Hasta</Link></li>
                   <li><Link to="/blog" onClick={() => setIsMenuOpen(false)}>Blog</Link></li>
                   <li><Link to="/blog/yeni" onClick={() => setIsMenuOpen(false)}>Yeni Blog Yazısı</Link></li>
+                  <li><Link to="/change-password" onClick={() => setIsMenuOpen(false)}>Şifre Değiştir</Link></li>
+                  {user?.role === 'admin' && (
+                    <li><Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Paneli</Link></li>
+                  )}
                   <li>
                     <Button
                       onClick={() => {
@@ -150,6 +160,16 @@ const AppContent = () => {
             </ProtectedRoute>
           } />
           <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route path="/change-password" element={
+            <ProtectedRoute>
+              <ChangePassword />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              {user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />}
+            </ProtectedRoute>
+          } />
         </Routes>
       </main>
     </div>

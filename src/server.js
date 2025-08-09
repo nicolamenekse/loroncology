@@ -9,6 +9,7 @@ import Blog from './models/Blog.js';
 import User from './models/User.js';
 import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
 import { generateToken, authMiddleware, requireRole } from './services/authService.js';
+import { adminMiddleware } from './middleware/adminMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -318,6 +319,105 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Kullanıcı bilgileri getirme hatası:', error);
     res.status(500).json({ message: 'Kullanıcı bilgileri alınırken bir hata oluştu' });
+  }
+});
+
+// Şifre değiştirme endpoint'i
+// Admin Routes
+app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    console.error('Kullanıcıları getirme hatası:', error);
+    res.status(500).json({ message: 'Kullanıcılar getirilirken bir hata oluştu' });
+  }
+});
+
+app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { name, email, role } = req.body;
+
+    // Kullanıcıyı bul
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+
+    // Email değişmişse benzersizlik kontrolü
+    if (email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Bu email adresi zaten kullanılıyor' });
+      }
+    }
+
+    // Kullanıcıyı güncelle
+    user.name = name;
+    user.email = email;
+    user.role = role;
+    await user.save();
+
+    res.json({ message: 'Kullanıcı başarıyla güncellendi', user });
+  } catch (error) {
+    console.error('Kullanıcı güncelleme hatası:', error);
+    res.status(500).json({ message: 'Kullanıcı güncellenirken bir hata oluştu' });
+  }
+});
+
+app.delete('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    // Kendini silmeye çalışıyor mu kontrolü
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ message: 'Kendi hesabınızı silemezsiniz' });
+    }
+
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+
+    res.json({ message: 'Kullanıcı başarıyla silindi' });
+  } catch (error) {
+    console.error('Kullanıcı silme hatası:', error);
+    res.status(500).json({ message: 'Kullanıcı silinirken bir hata oluştu' });
+  }
+});
+
+app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Şifre kontrolü
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Mevcut şifre ve yeni şifre zorunludur' });
+    }
+
+    // Yeni şifre uzunluk kontrolü
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Yeni şifre en az 6 karakter olmalıdır' });
+    }
+
+    // Kullanıcıyı bul
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+
+    // Mevcut şifreyi kontrol et
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Mevcut şifre yanlış' });
+    }
+
+    // Yeni şifreyi kaydet
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Şifre başarıyla değiştirildi' });
+  } catch (error) {
+    console.error('Şifre değiştirme hatası:', error);
+    res.status(500).json({ message: 'Şifre değiştirilirken bir hata oluştu' });
   }
 });
 
