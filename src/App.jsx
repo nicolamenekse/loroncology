@@ -314,11 +314,11 @@ const AppContent = () => {
                     }}
                   >
                     Kayıt Ol
-                  </Link>
+              </Link>
                 </li>
               </>
             )}
-          </ul>
+              </ul>
 
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -332,10 +332,10 @@ const AppContent = () => {
               cursor: 'pointer'
             }}
           >
-            {isMenuOpen ? '✕' : '☰'}
-          </button>
+                {isMenuOpen ? '✕' : '☰'}
+              </button>
           
-          {isMenuOpen && (
+              {isMenuOpen && (
             <div 
               onClick={() => setIsMenuOpen(false)}
               style={{
@@ -578,10 +578,10 @@ const AppContent = () => {
                   </li>
                 </>
               )}
-            </ul>
-          </div>
-        </nav>
-      </header>
+                </ul>
+              </div>
+            </nav>
+          </header>
 
       <main 
         className="main-content fade-in"
@@ -595,7 +595,7 @@ const AppContent = () => {
           justifyContent: isAuthPage ? 'center' : 'initial'
         }}
       >
-        <Routes>
+            <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
@@ -634,9 +634,9 @@ const AppContent = () => {
             </ProtectedRoute>
           } />
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-    </div>
+            </Routes>
+          </main>
+        </div>
   );
 };
 
@@ -652,7 +652,7 @@ function App() {
           <AppContent />
         </AuthProvider>
       </ThemeProvider>
-    </Router>
+      </Router>
   );
 }
 
