@@ -109,11 +109,11 @@ const BlogList = () => {
                 }
               }}
             >
-                              <CardMedia
-                  component="img"
-                  height="200"
-                  image={blog.coverImage || 'https://images.unsplash.com/photo-1584486483122-af7d49cf2992?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1792&h=1024&fit=crop'}
-                  alt={blog.title}
+              <CardMedia
+                component="img"
+                height="200"
+                image={blog.coverImage || `/images/fallback/${blog.category.toLowerCase().replace(/\s+/g, '-')}.jpg`}
+                alt={blog.title}
                 sx={{
                   objectFit: 'cover',
                   transition: 'transform 0.3s ease-in-out',

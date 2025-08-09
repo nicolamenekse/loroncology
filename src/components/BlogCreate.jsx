@@ -89,7 +89,7 @@ const BlogCreate = () => {
         } catch (err) {
           console.warn('Görsel oluşturulamadı:', err);
           // Hata durumunda varsayılan görseli kullan
-          formData.coverImage = `https://images.unsplash.com/photo-1584486483122-af7d49cf2992?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1792&h=1024&fit=crop`;
+          formData.coverImage = `/images/fallback/${formData.category.toLowerCase().replace(/\s+/g, '-')}.jpg`;
         }
       }
 
@@ -123,7 +123,7 @@ const BlogCreate = () => {
                 }}
               >
                 <img
-                  src={formData.coverImage || previewImage}
+                  src={formData.coverImage || previewImage || `/images/fallback/${formData.category.toLowerCase().replace(/\s+/g, '-')}.jpg`}
                   alt="Kapak görseli önizleme"
                   style={{
                     width: '100%',
@@ -143,7 +143,7 @@ const BlogCreate = () => {
                   }}
                 >
                   <Typography variant="caption">
-                    Görsel: Unsplash
+                    Kapak Görseli
                   </Typography>
                 </Box>
               </Box>

@@ -95,9 +95,9 @@ const BlogDetail = () => {
           overflow: 'hidden'
         }}
       >
-                      <img
-                src={blog.coverImage || 'https://images.unsplash.com/photo-1584486483122-af7d49cf2992?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1792&h=1024&fit=crop'}
-                alt={blog.title}
+        <img
+          src={blog.coverImage || `/images/fallback/${blog.category.toLowerCase().replace(/\s+/g, '-')}.jpg`}
+          alt={blog.title}
           style={{
             width: '100%',
             height: '100%',

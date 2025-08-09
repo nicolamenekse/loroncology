@@ -99,7 +99,7 @@ function PublicHome() {
             <Grid item xs={12} md={6}>
               <Box
                 component="img"
-                src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&q=80"
+                src="/images/hero/veterinary-clinic.jpg"
                 alt="Veteriner Kliniği"
                 sx={{
                   width: '100%',

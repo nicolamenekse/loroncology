@@ -25,20 +25,20 @@ export const generateImagePrompt = async (title, content, category) => {
   try {
     // Başlık ve içerikten anahtar kelimeleri çıkar
     const completion = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
-  messages: [
-    {
-      role: "system",
-      content: "Sen bir veteriner uzmanısın. Verilen başlık ve içerikten, görsel oluşturmak için en önemli 2-3 GENEL veterinerlik terimini İngilizce olarak belirle (örn: veterinary care, animal health, pet wellness). Hastalık isimleri, tıbbi terimler veya tedavi yöntemleri KULLANMA. Sadece genel ve pozitif terimleri virgülle ayırarak dön."
-    },
-    {
-      role: "user",
-      content: `Başlık: ${title}\nİçerik: ${content.slice(0, 300)}...`
-    }
-  ],
-  temperature: 0.7,
-  max_tokens: 50
-});
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "Sen bir veteriner uzmanısın. Verilen başlık ve içerikten, görsel oluşturmak için en önemli 2-3 GENEL veterinerlik terimini İngilizce olarak belirle (örn: veterinary care, animal health, pet wellness). Hastalık isimleri, tıbbi terimler veya tedavi yöntemleri KULLANMA. Sadece genel ve pozitif terimleri virgülle ayırarak dön."
+        },
+        {
+          role: "user",
+          content: `Başlık: ${title}\nİçerik: ${content.slice(0, 300)}...`
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 50
+    });
 
     const keywords = completion.choices[0].message.content.trim();
     console.log('Generated keywords:', keywords);
@@ -85,11 +85,11 @@ export const generateBlogImage = async (title, content, category) => {
     
     // Kategori bazlı fallback görseller - Genel veterinerlik görselleri
     const fallbackImages = {
-      'Onkoloji': 'https://images.unsplash.com/photo-1584486483122-af7d49cf2992',
-      'Tedavi Yöntemleri': 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97',
-      'Hasta Bakımı': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09',
-      'Araştırmalar': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69',
-      'Genel': 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd'
+      'Onkoloji': '/images/fallback/oncology.jpg',
+      'Tedavi Yöntemleri': '/images/fallback/treatment.jpg',
+      'Hasta Bakımı': '/images/fallback/patient-care.jpg',
+      'Araştırmalar': '/images/fallback/research.jpg',
+      'Genel': '/images/fallback/general.jpg'
     };
 
     return fallbackImages[category] || fallbackImages['Genel'];
