@@ -5,12 +5,23 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import PatientHistory from './models/PatientHistory.js';
+import Blog from './models/Blog.js';
+import User from './models/User.js';
 import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
+import { generateToken, authMiddleware, requireRole } from './services/authService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// JWT Secret kontrolü
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is not set!');
+  console.error('Please add JWT_SECRET to your .env file.');
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -69,6 +80,8 @@ const connectDB = async () => {
   try {
     await mongoose.connect(MONGODB_URI, mongooseOptions);
     console.log('MongoDB bağlantısı başarılı');
+    console.log('Veritabanı:', mongoose.connection.name);
+    console.log('Collections:', await mongoose.connection.db.listCollections().toArray());
   } catch (err) {
     console.error('MongoDB bağlantı hatası:', err);
     process.exit(1);
@@ -190,8 +203,126 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Auth Routes
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    console.log('Register isteği alındı:', req.body);
+    const { email, password, name } = req.body;
+
+    // Email ve şifre kontrolü
+    if (!email || !password || !name) {
+      console.log('Eksik alanlar:', { email: !!email, password: !!password, name: !!name });
+      return res.status(400).json({ message: 'Email, şifre ve isim zorunludur' });
+    }
+
+    // Email formatı kontrolü
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Geçersiz email formatı' });
+    }
+
+    // Şifre uzunluğu kontrolü
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Şifre en az 6 karakter olmalıdır' });
+    }
+
+    // Email benzersizlik kontrolü
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Bu email adresi zaten kullanılıyor' });
+    }
+
+    // Yeni kullanıcı oluştur
+    console.log('Yeni kullanıcı oluşturuluyor:', { email, name });
+    const user = new User({ email, password, name });
+    const savedUser = await user.save();
+    console.log('Kullanıcı başarıyla kaydedildi:', savedUser._id);
+
+    // Token oluştur
+    const token = generateToken(savedUser);
+
+    res.status(201).json({
+      message: 'Kayıt başarılı',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Kayıt hatası:', error);
+    res.status(500).json({ 
+      message: 'Kayıt işlemi sırasında bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Email ve şifre kontrolü
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email ve şifre zorunludur' });
+    }
+
+    // Kullanıcıyı bul
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+    }
+
+    // Şifreyi kontrol et
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+    }
+
+    // Son giriş tarihini güncelle
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Token oluştur
+    const token = generateToken(user);
+
+    res.json({
+      message: 'Giriş başarılı',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Giriş hatası:', error);
+    res.status(500).json({ 
+      message: 'Giriş işlemi sırasında bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Kullanıcı bilgilerini getir
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Kullanıcı bilgileri getirme hatası:', error);
+    res.status(500).json({ message: 'Kullanıcı bilgileri alınırken bir hata oluştu' });
+  }
+});
+
 // Routes
-app.post('/api/patients', async (req, res) => {
+app.post('/api/patients', authMiddleware, async (req, res) => {
   try {
     console.log('POST /api/patients - Gelen istek:', req.body);
 
@@ -552,6 +683,174 @@ app.post('/api/patients/:id/analyze-lab', async (req, res) => {
 });
 
 // Health check endpoint
+// Blog API Endpoints
+app.post('/api/blogs', async (req, res) => {
+  try {
+    const blog = new Blog(req.body);
+    await blog.save();
+    res.status(201).json(blog);
+  } catch (error) {
+    console.error('Blog oluşturma hatası:', error);
+    res.status(400).json({ 
+      message: 'Blog oluşturulurken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.get('/api/blogs', async (req, res) => {
+  try {
+    const query = { ...req.query };
+    if (!query.status) {
+      query.status = 'published';
+    }
+    const blogs = await Blog.find(query).sort({ createdAt: -1 });
+    res.json(blogs);
+  } catch (error) {
+    console.error('Blog listeleme hatası:', error);
+    res.status(500).json({ 
+      message: 'Bloglar getirilirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.get('/api/blogs/:slug', async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug });
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json(blog);
+  } catch (error) {
+    console.error('Blog detay hatası:', error);
+    res.status(500).json({ 
+      message: 'Blog yazısı getirilirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.put('/api/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json(blog);
+  } catch (error) {
+    console.error('Blog güncelleme hatası:', error);
+    res.status(400).json({ 
+      message: 'Blog yazısı güncellenirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndDelete(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json({ message: 'Blog yazısı başarıyla silindi' });
+  } catch (error) {
+    console.error('Blog silme hatası:', error);
+    res.status(500).json({ 
+      message: 'Blog yazısı silinirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Blog API Endpoints
+app.post('/api/blogs', async (req, res) => {
+  try {
+    const blog = new Blog(req.body);
+    await blog.save();
+    res.status(201).json(blog);
+  } catch (error) {
+    console.error('Blog oluşturma hatası:', error);
+    res.status(400).json({ 
+      message: 'Blog oluşturulurken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.get('/api/blogs', async (req, res) => {
+  try {
+    const query = { ...req.query };
+    if (!query.status) {
+      query.status = 'published';
+    }
+    const blogs = await Blog.find(query).sort({ createdAt: -1 });
+    res.json(blogs);
+  } catch (error) {
+    console.error('Blog listeleme hatası:', error);
+    res.status(500).json({ 
+      message: 'Bloglar getirilirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.get('/api/blogs/:slug', async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug });
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json(blog);
+  } catch (error) {
+    console.error('Blog detay hatası:', error);
+    res.status(500).json({ 
+      message: 'Blog yazısı getirilirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.put('/api/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json(blog);
+  } catch (error) {
+    console.error('Blog güncelleme hatası:', error);
+    res.status(400).json({ 
+      message: 'Blog yazısı güncellenirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+app.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndDelete(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog yazısı bulunamadı' });
+    }
+    res.json({ message: 'Blog yazısı başarıyla silindi' });
+  } catch (error) {
+    console.error('Blog silme hatası:', error);
+    res.status(500).json({ 
+      message: 'Blog yazısı silinirken bir hata oluştu',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 app.get('/healthz', (req, res) => {
   res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
