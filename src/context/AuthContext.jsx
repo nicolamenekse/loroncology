@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import LoadingScreen from '../components/LoadingScreen';
 
 const AuthContext = createContext(null);
 
@@ -53,19 +54,32 @@ export const useAuth = () => {
 };
 
 // Protected Route bileşeni
-export const ProtectedRoute = ({ children }) => {
+export const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login');
+      // Kullanıcı giriş yapmamışsa, mevcut URL'yi state olarak login sayfasına gönder
+      navigate('/login', { state: { from: location } });
+    } else if (!loading && user && adminOnly && user.role !== 'admin') {
+      // Admin-only route için yetkisiz erişim
+      navigate('/', { replace: true });
     }
-  }, [loading, user, navigate]);
+  }, [loading, user, navigate, location, adminOnly]);
 
   if (loading) {
-    return <div>Yükleniyor...</div>;
+    return <LoadingScreen />;
   }
 
-  return user ? children : null;
+  if (!user) {
+    return null;
+  }
+
+  if (adminOnly && user.role !== 'admin') {
+    return null;
+  }
+
+  return children;
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   Container,
@@ -22,6 +22,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const handleChange = (e) => {
@@ -53,7 +54,8 @@ const Login = () => {
       }
 
       login(data.user, data.token);
-      navigate('/');
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -62,137 +64,192 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Paper 
-        elevation={3} 
-        sx={{
-          p: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          background: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 2,
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-        }}
-      >
-        <Typography 
-          component="h1" 
-          variant="h4" 
-          sx={{ 
-            mb: 3,
-            color: '#2c3e50',
-            fontWeight: 600,
-            textAlign: 'center'
+    <Box
+      sx={{
+        minHeight: '100vh',
+        width: '100%',
+        background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: { xs: 2, sm: 4, md: 8 },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23FFFFFF\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          backgroundSize: '30px 30px',
+          opacity: 0.1,
+          animation: 'gradient-move 20s linear infinite',
+        },
+        '@keyframes gradient-move': {
+          '0%': {
+            backgroundPosition: '0 0',
+          },
+          '100%': {
+            backgroundPosition: '60px 60px',
+          },
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.2) 100%)',
+          pointerEvents: 'none',
+        }
+      }}
+    >
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Paper 
+          elevation={3} 
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            borderRadius: 3,
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #3B82F6 0%, #10B981 100%)'
+            }
           }}
         >
-          Giriş Yap
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Adresi"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={formData.email}
-            onChange={handleChange}
-            sx={{
-              mb: 2,
-              '& .MuiOutlinedInput-root': {
-                background: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(5px)',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.9)'
-                },
-                '&.Mui-focused': {
-                  background: 'rgba(255, 255, 255, 1)'
-                }
-              }
-            }}
-          />
-
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Şifre"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={formData.password}
-            onChange={handleChange}
-            sx={{
+          <Typography 
+            component="h1" 
+            variant="h4" 
+            sx={{ 
               mb: 3,
-              '& .MuiOutlinedInput-root': {
-                background: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(5px)',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.9)'
-                },
-                '&.Mui-focused': {
-                  background: 'rgba(255, 255, 255, 1)'
-                }
-              }
-            }}
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            disabled={loading}
-            sx={{
-              mt: 2,
-              mb: 2,
-              py: 1.5,
-              background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
-              color: 'white',
-              fontWeight: 500,
-              textTransform: 'none',
-              fontSize: '1rem',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)',
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-              }
+              color: '#2c3e50',
+              fontWeight: 600,
+              textAlign: 'center'
             }}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
-          </Button>
+            Giriş Yap
+          </Typography>
 
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Hesabınız yok mu?{' '}
-              <MuiLink component={Link} to="/register" sx={{ 
-                color: '#3B82F6',
-                textDecoration: 'none',
-                fontWeight: 500,
-                '&:hover': {
-                  textDecoration: 'underline'
+          {error && (
+            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Adresi"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={formData.email}
+              onChange={handleChange}
+              sx={{
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(5px)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 0.9)'
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(255, 255, 255, 1)'
+                  }
                 }
-              }}>
-                Kayıt Ol
-              </MuiLink>
-            </Typography>
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Şifre"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              sx={{
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(5px)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 0.9)'
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(255, 255, 255, 1)'
+                  }
+                }
+              }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={loading}
+              sx={{
+                mt: 2,
+                mb: 2,
+                py: 1.5,
+                background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
+                color: 'white',
+                fontWeight: 500,
+                textTransform: 'none',
+                fontSize: '1rem',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                }
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
+            </Button>
+
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Hesabınız yok mu?{' '}
+                <MuiLink component={Link} to="/register" sx={{ 
+                  color: '#3B82F6',
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}>
+                  Kayıt Ol
+                </MuiLink>
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

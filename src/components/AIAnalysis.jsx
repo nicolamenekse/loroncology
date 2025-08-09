@@ -19,7 +19,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScienceIcon from '@mui/icons-material/Science';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const API_URL = import.meta.env.VITE_API_URL || 
@@ -151,6 +150,7 @@ const AIAnalysis = ({ patientId }) => {
         width: '100%',
         zIndex: 1000,
         transition: 'all 0.3s ease',
+        opacity: 1,
         '@media (max-width: 1200px)': {
           maxWidth: minimized ? '180px' : '300px',
         },
@@ -176,9 +176,13 @@ const AIAnalysis = ({ patientId }) => {
             overflow: 'hidden',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
+            background: 'white',
+            border: '1px solid rgba(59, 130, 246, 0.1)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
             '&:hover': {
               transform: 'translateY(-2px)',
-              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15) !important'
+              boxShadow: '0 12px 24px rgba(59, 130, 246, 0.15)',
+              border: '1px solid rgba(59, 130, 246, 0.2)'
             }
           }}
         >
@@ -186,14 +190,16 @@ const AIAnalysis = ({ patientId }) => {
             className="ai-analysis-header"
             onClick={() => setMinimized(false)}
             sx={{
+              background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)',
               color: 'white',
+              padding: minimized ? '12px 16px' : '16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               '&:hover': {
-                background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%) !important'
+                background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)'
               }
             }}
           >
@@ -203,7 +209,9 @@ const AIAnalysis = ({ patientId }) => {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: 1,
-                fontSize: minimized ? '0.9rem' : 'inherit'
+                fontSize: minimized ? '0.9rem' : 'inherit',
+                fontWeight: 600,
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)'
               }}
             >
               <PsychologyIcon sx={{ fontSize: minimized ? '1.2rem' : '1.5rem' }} /> 
@@ -217,7 +225,12 @@ const AIAnalysis = ({ patientId }) => {
                     e.stopPropagation();
                     setMinimized(!minimized);
                   }}
-                  sx={{ color: 'white' }}
+                  sx={{ 
+                    color: 'white',
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }}
                 >
                   {minimized ? <ExpandMoreIcon /> : <ExpandLessIcon />}
                 </IconButton>
@@ -235,29 +248,50 @@ const AIAnalysis = ({ patientId }) => {
 
               <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
                 <Button
-                  className="ai-analysis-button"
+                  variant="contained"
                   onClick={generateAnalysis}
                   disabled={loading}
                   startIcon={<PsychologyIcon />}
                   size="small"
+                  sx={{
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                    color: 'white',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                    }
+                  }}
                 >
                   Genel Analiz
                 </Button>
                 <Button
-                  className="ai-analysis-button"
+                  variant="contained"
                   onClick={generateTreatmentSuggestions}
                   disabled={loading}
                   startIcon={<MedicalServicesIcon />}
                   size="small"
+                  sx={{
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    color: 'white',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    }
+                  }}
                 >
                   Tedavi Önerileri
                 </Button>
                 <Button
-                  className="ai-analysis-button"
+                  variant="contained"
                   onClick={generateLabAnalysis}
                   disabled={loading}
                   startIcon={<ScienceIcon />}
                   size="small"
+                  sx={{
+                    background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+                    color: 'white',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)',
+                    }
+                  }}
                 >
                   Lab Analizi
                 </Button>
@@ -265,15 +299,39 @@ const AIAnalysis = ({ patientId }) => {
 
               {loading && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                  <CircularProgress size={24} />
+                  <CircularProgress size={24} sx={{ color: '#3B82F6' }} />
                 </Box>
               )}
 
               {(analysis || treatmentSuggestions || labAnalysis) && (
                 <Box sx={{ mt: 2 }}>
                   {analysis && (
-                    <Accordion defaultExpanded className="ai-analysis-accordion">
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Accordion 
+                      defaultExpanded 
+                      sx={{
+                        mb: 2,
+                        border: '1px solid rgba(59, 130, 246, 0.1)',
+                        borderRadius: '8px !important',
+                        '&:before': {
+                          display: 'none',
+                        },
+                        '& .MuiAccordionSummary-root': {
+                          borderRadius: '8px',
+                          '&:hover': {
+                            background: 'rgba(59, 130, 246, 0.05)',
+                          }
+                        }
+                      }}
+                    >
+                      <AccordionSummary 
+                        expandIcon={<ExpandMoreIcon sx={{ color: '#3B82F6' }} />}
+                        sx={{
+                          '& .MuiAccordionSummary-content': {
+                            color: '#3B82F6',
+                            fontWeight: 500
+                          }
+                        }}
+                      >
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PsychologyIcon fontSize="small" /> Genel Analiz
                         </Typography>
@@ -283,6 +341,8 @@ const AIAnalysis = ({ patientId }) => {
                           variant="body2" 
                           sx={{ 
                             whiteSpace: 'pre-line',
+                            color: '#1F2937',
+                            lineHeight: 1.6,
                             '&::-webkit-scrollbar': {
                               width: '8px'
                             },
@@ -306,8 +366,32 @@ const AIAnalysis = ({ patientId }) => {
                   )}
 
                   {treatmentSuggestions && (
-                    <Accordion defaultExpanded className="ai-analysis-accordion">
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Accordion 
+                      defaultExpanded 
+                      sx={{
+                        mb: 2,
+                        border: '1px solid rgba(16, 185, 129, 0.1)',
+                        borderRadius: '8px !important',
+                        '&:before': {
+                          display: 'none',
+                        },
+                        '& .MuiAccordionSummary-root': {
+                          borderRadius: '8px',
+                          '&:hover': {
+                            background: 'rgba(16, 185, 129, 0.05)',
+                          }
+                        }
+                      }}
+                    >
+                      <AccordionSummary 
+                        expandIcon={<ExpandMoreIcon sx={{ color: '#10B981' }} />}
+                        sx={{
+                          '& .MuiAccordionSummary-content': {
+                            color: '#10B981',
+                            fontWeight: 500
+                          }
+                        }}
+                      >
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <MedicalServicesIcon fontSize="small" /> Tedavi Önerileri
                         </Typography>
@@ -317,6 +401,8 @@ const AIAnalysis = ({ patientId }) => {
                           variant="body2" 
                           sx={{ 
                             whiteSpace: 'pre-line',
+                            color: '#1F2937',
+                            lineHeight: 1.6,
                             '&::-webkit-scrollbar': {
                               width: '8px'
                             },
@@ -325,10 +411,10 @@ const AIAnalysis = ({ patientId }) => {
                               borderRadius: '4px'
                             },
                             '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(59, 130, 246, 0.5)',
+                              background: 'rgba(16, 185, 129, 0.5)',
                               borderRadius: '4px',
                               '&:hover': {
-                                background: 'rgba(59, 130, 246, 0.7)'
+                                background: 'rgba(16, 185, 129, 0.7)'
                               }
                             }
                           }}
@@ -340,8 +426,32 @@ const AIAnalysis = ({ patientId }) => {
                   )}
 
                   {labAnalysis && (
-                    <Accordion defaultExpanded className="ai-analysis-accordion">
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Accordion 
+                      defaultExpanded 
+                      sx={{
+                        mb: 2,
+                        border: '1px solid rgba(99, 102, 241, 0.1)',
+                        borderRadius: '8px !important',
+                        '&:before': {
+                          display: 'none',
+                        },
+                        '& .MuiAccordionSummary-root': {
+                          borderRadius: '8px',
+                          '&:hover': {
+                            background: 'rgba(99, 102, 241, 0.05)',
+                          }
+                        }
+                      }}
+                    >
+                      <AccordionSummary 
+                        expandIcon={<ExpandMoreIcon sx={{ color: '#6366F1' }} />}
+                        sx={{
+                          '& .MuiAccordionSummary-content': {
+                            color: '#6366F1',
+                            fontWeight: 500
+                          }
+                        }}
+                      >
                         <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <ScienceIcon fontSize="small" /> Laboratuvar Analizi
                         </Typography>
@@ -351,6 +461,8 @@ const AIAnalysis = ({ patientId }) => {
                           variant="body2" 
                           sx={{ 
                             whiteSpace: 'pre-line',
+                            color: '#1F2937',
+                            lineHeight: 1.6,
                             '&::-webkit-scrollbar': {
                               width: '8px'
                             },
@@ -359,10 +471,10 @@ const AIAnalysis = ({ patientId }) => {
                               borderRadius: '4px'
                             },
                             '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(59, 130, 246, 0.5)',
+                              background: 'rgba(99, 102, 241, 0.5)',
                               borderRadius: '4px',
                               '&:hover': {
-                                background: 'rgba(59, 130, 246, 0.7)'
+                                background: 'rgba(99, 102, 241, 0.7)'
                               }
                             }
                           }}
