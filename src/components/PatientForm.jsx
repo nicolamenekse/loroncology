@@ -41,6 +41,7 @@ const PatientForm = () => {
     kilo: '',
     vks: 5,
     anamnez: '',
+    klinikBulgular: '',
     radyolojikBulgular: '',
     ultrasonografikBulgular: '',
     tomografiBulgular: '',
