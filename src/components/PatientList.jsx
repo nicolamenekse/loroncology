@@ -70,7 +70,11 @@ const PatientList = () => {
       console.log('API URL:', API_URL);
       console.log('Fetching patients from:', `${API_URL}/api/patients`);
       
-      const response = await fetch(`${API_URL}/api/patients`);
+      const response = await fetch(`${API_URL}/api/patients`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       console.log('Response status:', response.status);
       console.log('Response ok:', response.ok);
       
@@ -79,6 +83,29 @@ const PatientList = () => {
       }
       const data = await response.json();
       console.log('Fetched patients:', data.length, 'patients');
+      console.log('Patient data details:', data.map(p => ({
+        id: p._id,
+        hastaAdi: p.hastaAdi,
+        doctorName: p.doctorName,
+        doctorEmail: p.doctorEmail,
+        hasDoctorName: !!p.doctorName,
+        hasDoctorEmail: !!p.doctorEmail
+      })));
+      
+      // Additional debugging - log each patient individually
+      data.forEach((patient, index) => {
+        console.log(`Patient ${index + 1}:`, {
+          id: patient._id,
+          hastaAdi: patient.hastaAdi,
+          doctorName: patient.doctorName,
+          doctorEmail: patient.doctorEmail,
+          doctorNameType: typeof patient.doctorName,
+          doctorEmailType: typeof patient.doctorEmail,
+          hasDoctorName: !!patient.doctorName,
+          hasDoctorEmail: !!patient.doctorEmail
+        });
+      });
+      
       setPatients(data);
       setError(null);
     } catch (error) {
@@ -93,6 +120,9 @@ const PatientList = () => {
     try {
       const response = await fetch(`${API_URL}/api/patients/${selectedPatient._id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (!response.ok) {
@@ -256,14 +286,16 @@ const PatientList = () => {
                   <Card 
                     className="patient-card"
                     sx={{ 
-                      height: '100%',
+                      // height: '100%', // Remove fixed height constraint
                       display: 'flex',
                       flexDirection: 'column',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      minHeight: '300px', // Set minimum height instead
+                      overflow: 'visible' // Ensure content is not cut off
                     }}
                     onClick={() => handleViewDetails(patient._id)}
                   >
-                    <CardContent sx={{ flexGrow: 1 }}>
+                    <CardContent sx={{ flexGrow: 1, pb: 1 }}>
                       <Box sx={{ 
                         display: 'flex', 
                         justifyContent: 'space-between',
@@ -294,9 +326,34 @@ const PatientList = () => {
                       <Typography variant="body2" color="text.secondary" gutterBottom>
                         <strong>Yaş:</strong> {patient.yas} yaş
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
                         <strong>VKS:</strong> {patient.vks}
                       </Typography>
+                      
+                      {/* Doctor Information - Make it more prominent */}
+                      <Box sx={{ 
+                        mt: 2, 
+                        p: 1.5, 
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                        borderRadius: 1,
+                        border: '1px solid rgba(59, 130, 246, 0.2)'
+                      }}>
+                        <Typography variant="body2" color="primary" gutterBottom sx={{ fontWeight: 600 }}>
+                          <strong>Doktor:</strong> {patient.doctorName ? `Doktor ${patient.doctorName}` : 'Belirtilmemiş'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontSize: '0.85rem',
+                          fontStyle: 'italic'
+                        }}>
+                          {patient.doctorEmail || 'Email belirtilmemiş'}
+                        </Typography>
+                        {/* Debug info */}
+                        {console.log('Patient doctor info:', { 
+                          hastaAdi: patient.hastaAdi, 
+                          doctorName: patient.doctorName, 
+                          doctorEmail: patient.doctorEmail 
+                        })}
+                      </Box>
                     </CardContent>
                     <CardActions sx={{ 
                       p: 2, 

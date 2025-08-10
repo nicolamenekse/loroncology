@@ -1,10 +1,23 @@
 import mongoose from 'mongoose';
 
 const patientSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  doctorName: {
+    type: String,
+    required: true,
+  },
+  doctorEmail: {
+    type: String,
+    required: true,
+  },
   protokolNo: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true, // Removed global uniqueness
   },
   hastaAdi: {
     type: String,
@@ -137,6 +150,9 @@ const patientSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Add compound index for user-specific uniqueness of protokolNo
+patientSchema.index({ userId: 1, protokolNo: 1 }, { unique: true });
 
 const Patient = mongoose.model('Patient', patientSchema);
 

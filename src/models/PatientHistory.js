@@ -83,10 +83,11 @@ const patientHistorySchema = new mongoose.Schema({
     },
     biyopsiNot: String,
   },
-  // Değişiklik yapan kullanıcı bilgisi (gelecekte auth eklenirse)
+  // Değişiklik yapan kullanıcı bilgisi
   modifiedBy: {
-    type: String,
-    default: 'System User'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   // Değişiklik nedeni/açıklaması
   changeReason: {

@@ -56,7 +56,11 @@ const PatientDetail = () => {
 
   const fetchPatientDetails = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/patients/${id}`);
+      const response = await fetch(`${API_URL}/api/patients/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Hasta bilgileri yüklenirken bir hata oluştu');
       }
@@ -75,7 +79,11 @@ const PatientDetail = () => {
     try {
       setHistoryLoading(true);
       setHistoryError(null);
-      const response = await fetch(`${API_URL}/api/patients/${id}/history`);
+      const response = await fetch(`${API_URL}/api/patients/${id}/history`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Hasta geçmişi yüklenirken bir hata oluştu');
       }
@@ -196,6 +204,14 @@ const PatientDetail = () => {
                   <Box>
                     <Typography className="print-label">Protokol No</Typography>
                     <Typography className="print-value">{patient.protokolNo}</Typography>
+                  </Box>
+                            <Box>
+            <Typography className="print-label">Doktor Adı</Typography>
+            <Typography className="print-value">{patient.doctorName ? `Doktor ${patient.doctorName}` : 'Belirtilmemiş'}</Typography>
+          </Box>
+                  <Box>
+                    <Typography className="print-label">Doktor Email</Typography>
+                    <Typography className="print-value">{patient.doctorEmail || 'Belirtilmemiş'}</Typography>
                   </Box>
                   <Box>
                     <Typography className="print-label">Hasta Adı</Typography>

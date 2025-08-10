@@ -34,9 +34,9 @@ const PatientForm = () => {
     protokolNo: '',
     hastaAdi: '',
     hastaSahibi: '',
-    tur: '',
+    tur: 'Kedi',
     irk: '',
-    cinsiyet: '',
+    cinsiyet: 'Erkek',
     yas: '',
     kilo: '',
     vks: 5,
@@ -106,13 +106,24 @@ const PatientForm = () => {
     try {
       // Form verilerini kontrol et
       if (!formData.protokolNo || !formData.hastaAdi || !formData.hastaSahibi || 
-          !formData.tur || !formData.yas || !formData.vks) {
+          !formData.tur || !formData.irk || !formData.cinsiyet || 
+          !formData.yas || !formData.kilo || !formData.vks || !formData.anamnez) {
         throw new Error('Lütfen tüm zorunlu alanları doldurun.');
       }
 
       // VKS değerini kontrol et
       if (formData.vks < 1 || formData.vks > 9) {
         throw new Error('VKS değeri 1-9 arasında olmalıdır.');
+      }
+
+      // Tür değerini kontrol et
+      if (!['Kedi', 'Köpek'].includes(formData.tur)) {
+        throw new Error('Tür değeri "Kedi" veya "Köpek" olmalıdır.');
+      }
+
+      // Cinsiyet değerini kontrol et
+      if (!['Erkek', 'Dişi'].includes(formData.cinsiyet)) {
+        throw new Error('Cinsiyet değeri "Erkek" veya "Dişi" olmalıdır.');
       }
 
       console.log('API URL:', API_URL);
@@ -123,6 +134,7 @@ const PatientForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(formData),
       });
@@ -274,17 +286,14 @@ const PatientForm = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Tür"
-                  name="tur"
-                  value={formData.tur}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
+                <FormControl fullWidth required size="small">
+                  <InputLabel>Tür</InputLabel>
+                  <Select
+                    name="tur"
+                    value={formData.tur}
+                    onChange={handleChange}
+                    label="Tür"
+                    sx={{
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
                       '&:hover': {
                         backgroundColor: 'rgba(255, 255, 255, 1)',
@@ -292,13 +301,17 @@ const PatientForm = () => {
                       '&.Mui-focused': {
                         backgroundColor: 'rgba(255, 255, 255, 1)',
                       }
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <MenuItem value="Kedi">Kedi</MenuItem>
+                    <MenuItem value="Köpek">Köpek</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
+                  required
                   label="Irk"
                   name="irk"
                   value={formData.irk}
@@ -319,16 +332,14 @@ const PatientForm = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="Cinsiyet"
-                  name="cinsiyet"
-                  value={formData.cinsiyet}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
+                <FormControl fullWidth required size="small">
+                  <InputLabel>Cinsiyet</InputLabel>
+                  <Select
+                    name="cinsiyet"
+                    value={formData.cinsiyet}
+                    onChange={handleChange}
+                    label="Cinsiyet"
+                    sx={{
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
                       '&:hover': {
                         backgroundColor: 'rgba(255, 255, 255, 1)',
@@ -336,9 +347,12 @@ const PatientForm = () => {
                       '&.Mui-focused': {
                         backgroundColor: 'rgba(255, 255, 255, 1)',
                       }
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <MenuItem value="Erkek">Erkek</MenuItem>
+                    <MenuItem value="Dişi">Dişi</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
@@ -367,6 +381,7 @@ const PatientForm = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
+                  required
                   label="Kilo"
                   name="kilo"
                   type="number"
@@ -439,6 +454,7 @@ const PatientForm = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
+                  required
                   label="Anamnez"
                   name="anamnez"
                   value={formData.anamnez}
