@@ -9,6 +9,7 @@ import sgMail from '@sendgrid/mail';
 import PatientHistory from './models/PatientHistory.js';
 import Blog from './models/Blog.js';
 import User from './models/User.js';
+import Patient from './models/Patient.js';
 import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
 import { generateToken, authMiddleware, requireRole } from './services/authService.js';
 import { adminMiddleware } from './middleware/adminMiddleware.js';
@@ -136,6 +137,39 @@ mongoose.connection.once('connected', async () => {
       await collection.dropIndex('tcNo_1');
       console.log('tcNo index\'i başarıyla kaldırıldı');
     }
+    
+    // Check and fix Patient collection indexes
+    console.log('Patient collection indexes on startup:', Object.keys(indexes));
+    
+    // Try to drop the old global protokolNo index if it exists
+    const protokolNoIndex = indexes.find(index => index.name === 'protokolNo_1');
+    if (protokolNoIndex) {
+      console.log('Eski global protokolNo index\'i bulundu, kaldırılıyor...');
+      try {
+        await collection.dropIndex('protokolNo_1');
+        console.log('Global protokolNo index\'i başarıyla kaldırıldı');
+      } catch (dropError) {
+        console.log('Global protokolNo index kaldırılamadı:', dropError.message);
+      }
+    }
+    
+    // Ensure the compound index exists
+    const compoundIndex = indexes.find(index => index.name === 'userId_1_protokolNo_1');
+    if (!compoundIndex) {
+      console.log('Compound index bulunamadı, oluşturuluyor...');
+      try {
+        await collection.createIndex(
+          { userId: 1, protokolNo: 1 },
+          { unique: true, name: 'userId_1_protokolNo_1' }
+        );
+        console.log('Compound index başarıyla oluşturuldu');
+      } catch (createError) {
+        console.log('Compound index oluşturulamadı:', createError.message);
+      }
+    } else {
+      console.log('Compound index zaten mevcut');
+    }
+    
   } catch (error) {
     // Index yoksa hata olabilir, bu normal
     if (error.code !== 27 && error.codeName !== 'IndexNotFound') {
@@ -144,87 +178,7 @@ mongoose.connection.once('connected', async () => {
   }
 });
 
-// Patient Schema
-const patientSchema = new mongoose.Schema({
-  protokolNo: { type: String, required: true },
-  hastaAdi: { type: String, required: true },
-  hastaSahibi: { type: String, required: true },
-  tur: { type: String, required: true },
-  irk: String,
-  cinsiyet: String,
-  yas: { type: String, required: true },
-  kilo: String,
-  vks: { type: Number, required: true },
-  anamnez: String,
-  radyolojikBulgular: String,
-  ultrasonografikBulgular: String,
-  tomografiBulgular: String,
-  patoloji: String,
-  mikroskopisi: String,
-  patolojikTeshis: String,
-  tedavi: String,
-  hemogram: {
-    WBC: { type: String, default: '' },
-    'Neu#': { type: String, default: '' },
-    'Lym#': { type: String, default: '' },
-    'Mon#': { type: String, default: '' },
-    'Eos#': { type: String, default: '' },
-    'Neu%': { type: String, default: '' },
-    'Lym%': { type: String, default: '' },
-    'Mon%': { type: String, default: '' },
-    'Eos%': { type: String, default: '' },
-    RBC: { type: String, default: '' },
-    HGB: { type: String, default: '' },
-    HCT: { type: String, default: '' },
-    MCV: { type: String, default: '' },
-    MCH: { type: String, default: '' },
-    MCHC: { type: String, default: '' },
-    'RDW-CV': { type: String, default: '' },
-    'RDW-SD': { type: String, default: '' },
-    PLT: { type: String, default: '' },
-    MPV: { type: String, default: '' },
-    PDW: { type: String, default: '' },
-    PCT: { type: String, default: '' }
-  },
-  biyokimya: {
-    TP: { type: String, default: '' },
-    ALB: { type: String, default: '' },
-    GLD: { type: String, default: '' },
-    'A/G': { type: String, default: '' },
-    TBIL: { type: String, default: '' },
-    ALT: { type: String, default: '' },
-    AST: { type: String, default: '' },
-    'AST/ALT': { type: String, default: '' },
-    GGT: { type: String, default: '' },
-    ALP: { type: String, default: '' },
-    TBA: { type: String, default: '' },
-    CK: { type: String, default: '' },
-    AMY: { type: String, default: '' },
-    TG: { type: String, default: '' },
-    CHOL: { type: String, default: '' },
-    GLU: { type: String, default: '' },
-    CRE: { type: String, default: '' },
-    BUN: { type: String, default: '' },
-    'BUN/CRE': { type: String, default: '' },
-    tCO2: { type: String, default: '' },
-    Ca: { type: String, default: '' },
-    P: { type: String, default: '' },
-    'Ca*P': { type: String, default: '' },
-    Mg: { type: String, default: '' }
-  },
-  recete: String,
-  biyopsi: {
-    iiab: { type: Boolean, default: false },
-    tuse: { type: Boolean, default: false },
-    trucat: { type: Boolean, default: false },
-    operasyon: { type: Boolean, default: false }
-  },
-  biyopsiNot: String,
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
 
-const Patient = mongoose.model('Patient', patientSchema);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -709,9 +663,17 @@ app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
 app.post('/api/patients', authMiddleware, async (req, res) => {
   try {
     console.log('POST /api/patients - Gelen istek:', req.body);
+    
+    // Kullanıcı ID'sini ekle
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({
+        message: 'Oturum bulunamadı'
+      });
+    }
 
     // Gelen veriyi kontrol et
-    const requiredFields = ['protokolNo', 'hastaAdi', 'hastaSahibi', 'tur', 'yas', 'vks'];
+    const requiredFields = ['protokolNo', 'hastaAdi', 'hastaSahibi', 'tur', 'irk', 'cinsiyet', 'yas', 'kilo', 'vks', 'anamnez'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {
@@ -730,14 +692,80 @@ app.post('/api/patients', authMiddleware, async (req, res) => {
       });
     }
 
-    // Protokol numarası benzersiz olmalı
-    const existingPatient = await Patient.findOne({ protokolNo: req.body.protokolNo });
+    // Tür değerini kontrol et
+    if (!['Kedi', 'Köpek'].includes(req.body.tur)) {
+      console.log('Geçersiz tür değeri:', req.body.tur);
+      return res.status(400).json({
+        message: 'Tür değeri "Kedi" veya "Köpek" olmalıdır'
+      });
+    }
+
+    // Cinsiyet değerini kontrol et
+    if (!['Erkek', 'Dişi'].includes(req.body.cinsiyet)) {
+      console.log('Geçersiz cinsiyet değeri:', req.body.cinsiyet);
+      return res.status(400).json({
+        message: 'Cinsiyet değeri "Erkek" veya "Dişi" olmalıdır'
+      });
+    }
+
+    // Protokol numarası kullanıcıya özel benzersiz olmalı
+    console.log('Protokol numarası kontrolü yapılıyor...', {
+      userId: userId,
+      protokolNo: req.body.protokolNo,
+      userIdType: typeof userId
+    });
+    
+    // Debug: Check all patients with this protokolNo across all users
+    const allPatientsWithProtokolNo = await Patient.find({ protokolNo: req.body.protokolNo });
+    console.log('Tüm kullanıcılarda bu protokol numarasına sahip hastalar:', allPatientsWithProtokolNo.map(p => ({
+      id: p._id,
+      userId: p.userId,
+      protokolNo: p.protokolNo,
+      hastaAdi: p.hastaAdi
+    })));
+    
+    // Check if any patient has this protokolNo (for debugging)
+    if (allPatientsWithProtokolNo.length > 0) {
+      console.log('⚠️ UYARI: Bu protokol numarası başka kullanıcılarda kullanılıyor!');
+      console.log('Çakışan hastalar:', allPatientsWithProtokolNo);
+      
+      // Check if current user already has a patient with this protokolNo
+      const userPatientWithProtokolNo = allPatientsWithProtokolNo.find(p => 
+        p.userId && p.userId.toString() === userId.toString()
+      );
+      
+      if (userPatientWithProtokolNo) {
+        console.log('❌ Bu kullanıcı zaten bu protokol numarasına sahip bir hastaya sahip!');
+        return res.status(400).json({
+          message: 'Bu protokol numarası zaten kullanılıyor',
+          details: 'Bu kullanıcı için zaten kullanılıyor'
+        });
+      }
+      
+      console.log('✅ Bu protokol numarası başka kullanıcılarda kullanılıyor ama bu kullanıcı için kullanılabilir');
+    }
+    
+    const existingPatient = await Patient.findOne({ 
+      userId: userId, 
+      protokolNo: req.body.protokolNo 
+    });
+    
+    console.log('Mevcut hasta kontrolü sonucu:', {
+      existingPatient: existingPatient ? {
+        id: existingPatient._id,
+        userId: existingPatient.userId,
+        protokolNo: existingPatient.protokolNo
+      } : null
+    });
+    
     if (existingPatient) {
-      console.log('Protokol numarası zaten kullanılıyor:', req.body.protokolNo);
+      console.log('Bu kullanıcı için protokol numarası zaten kullanılıyor:', req.body.protokolNo);
       return res.status(400).json({
         message: 'Bu protokol numarası zaten kullanılıyor'
       });
     }
+    
+    console.log('Protokol numarası kullanılabilir, devam ediliyor...');
 
     // MongoDB bağlantı durumunu kontrol et
     if (mongoose.connection.readyState !== 1) {
@@ -748,9 +776,32 @@ app.post('/api/patients', authMiddleware, async (req, res) => {
     }
 
     console.log('Hasta kaydı oluşturuluyor...');
-    const patient = new Patient(req.body);
+    console.log('userId değeri:', { userId, userIdType: typeof userId });
+    
+    // Kullanıcı bilgilerini al (doktor adı ve email için)
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error('Kullanıcı bulunamadı:', userId);
+      return res.status(404).json({
+        message: 'Kullanıcı bulunamadı'
+      });
+    }
+    
+    const patientData = {
+      ...req.body,
+      userId: userId,
+      doctorName: user.name,
+      doctorEmail: user.email
+    };
+    console.log('Kaydedilecek hasta verisi:', patientData);
+    
+    const patient = new Patient(patientData);
     const savedPatient = await patient.save();
     console.log('Hasta kaydı başarıyla oluşturuldu:', savedPatient);
+    console.log('Kaydedilen hastanın userId değeri:', { 
+      savedUserId: savedPatient.userId, 
+      savedUserIdType: typeof savedPatient.userId 
+    });
     
     res.status(201).json({ 
       message: 'Hasta kaydı başarıyla oluşturuldu', 
@@ -762,6 +813,35 @@ app.post('/api/patients', authMiddleware, async (req, res) => {
     // MongoDB bağlantı hatası kontrolü
     if (error.name === 'MongoServerError') {
       console.error('MongoDB sunucu hatası:', error.message);
+      console.error('MongoDB error code:', error.code);
+      console.error('MongoDB error details:', error);
+      
+      // Duplicate key error kontrolü
+      if (error.code === 11000) {
+        console.error('Duplicate key hatası - muhtemelen eski global unique index hala aktif');
+        console.error('Error details:', {
+          code: error.code,
+          keyPattern: error.keyPattern,
+          keyValue: error.keyValue,
+          message: error.message
+        });
+        
+        // Check if this is a protokolNo duplicate error
+        if (error.keyPattern && error.keyPattern.protokolNo) {
+          return res.status(400).json({
+            message: 'Bu protokol numarası zaten kullanılıyor (veritabanı indeksi hatası)',
+            error: 'Duplicate key error - database index issue',
+            details: 'Global unique index on protokolNo is still active'
+          });
+        }
+        
+        return res.status(400).json({
+          message: 'Veritabanı çakışma hatası',
+          error: 'Duplicate key error',
+          details: error.keyPattern || 'Unknown duplicate field'
+        });
+      }
+      
       return res.status(500).json({
         message: 'Veritabanı işlemi sırasında bir hata oluştu',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -786,12 +866,267 @@ app.post('/api/patients', authMiddleware, async (req, res) => {
   }
 });
 
-// Get all patients
-app.get('/api/patients', async (req, res) => {
+// Debug endpoint to check database indexes
+app.get('/api/debug/indexes', async (req, res) => {
   try {
-    console.log('Hastalar getiriliyor...');
-    const patients = await Patient.find().sort({ createdAt: -1 });
+    const indexes = await Patient.collection.getIndexes();
+    res.json({
+      message: 'Current database indexes',
+      indexes: Object.keys(indexes),
+      details: indexes
+    });
+  } catch (error) {
+    console.error('Index check error:', error);
+    res.status(500).json({ 
+      message: 'Index check failed',
+      error: error.message
+    });
+  }
+});
+
+// New debug endpoint to check protokolNo conflicts
+app.get('/api/debug/protokol-conflicts', async (req, res) => {
+  try {
+    const { protokolNo } = req.query;
+    
+    if (!protokolNo) {
+      return res.status(400).json({
+        message: 'protokolNo query parameter is required'
+      });
+    }
+    
+    // Find all patients with this protokolNo
+    const patients = await Patient.find({ protokolNo }).populate('userId', 'name email');
+    
+    // Get all users
+    const users = await User.find({}, 'name email');
+    
+    // Check current indexes
+    const indexes = await Patient.collection.getIndexes();
+    
+    res.json({
+      message: 'Protokol number conflict analysis',
+      protokolNo,
+      patientsWithProtokolNo: patients.map(p => ({
+        id: p._id,
+        userId: p.userId,
+        hastaAdi: p.hastaAdi,
+        createdAt: p.createdAt
+      })),
+      allUsers: users.map(u => ({
+        id: u._id,
+        name: u.name,
+        email: u.email
+      })),
+      currentIndexes: Object.keys(indexes),
+      indexDetails: indexes
+    });
+  } catch (error) {
+    console.error('Protokol conflict check error:', error);
+    res.status(500).json({
+      message: 'Protokol conflict check failed',
+      error: error.message
+    });
+  }
+});
+
+// Debug endpoint to check patient doctor information
+app.get('/api/debug/patient-doctor-info', async (req, res) => {
+  try {
+    console.log('Checking patient doctor information...');
+    
+    const patients = await Patient.find({});
+    const patientsWithDoctorInfo = patients.map(patient => ({
+      id: patient._id,
+      hastaAdi: patient.hastaAdi,
+      protokolNo: patient.protokolNo,
+      userId: patient.userId,
+      doctorName: patient.doctorName,
+      doctorEmail: patient.doctorEmail,
+      hasDoctorName: !!patient.doctorName,
+      hasDoctorEmail: !!patient.doctorEmail,
+      createdAt: patient.createdAt
+    }));
+    
+    console.log('Patient doctor information:', patientsWithDoctorInfo);
+    
+    res.json({
+      message: 'Patient doctor information retrieved',
+      totalPatients: patients.length,
+      patientsWithDoctorInfo: patientsWithDoctorInfo,
+      summary: {
+        withDoctorName: patientsWithDoctorInfo.filter(p => p.hasDoctorName).length,
+        withoutDoctorName: patientsWithDoctorInfo.filter(p => !p.hasDoctorName).length,
+        withDoctorEmail: patientsWithDoctorInfo.filter(p => p.hasDoctorEmail).length,
+        withoutDoctorEmail: patientsWithDoctorInfo.filter(p => !p.hasDoctorEmail).length
+      }
+    });
+  } catch (error) {
+    console.error('Patient doctor info check error:', error);
+    res.status(500).json({ 
+      message: 'Patient doctor info check failed',
+      error: error.message 
+    });
+  }
+});
+
+// Endpoint to update existing patients with doctor information
+app.post('/api/debug/update-patient-doctor-info', async (req, res) => {
+  try {
+    console.log('Updating existing patients with doctor information...');
+    
+    // Get all patients that don't have doctorName or doctorEmail
+    const patientsToUpdate = await Patient.find({
+      $or: [
+        { doctorName: { $exists: false } },
+        { doctorEmail: { $exists: false } },
+        { doctorName: null },
+        { doctorEmail: null }
+      ]
+    });
+    
+    console.log(`${patientsToUpdate.length} hasta güncellenecek`);
+    
+    if (patientsToUpdate.length === 0) {
+      return res.json({
+        message: 'Güncellenecek hasta bulunamadı',
+        totalPatients: 0
+      });
+    }
+    
+    let updatedCount = 0;
+    const updateResults = [];
+    
+    for (const patient of patientsToUpdate) {
+      try {
+        // Get user information
+        const user = await User.findById(patient.userId);
+        if (!user) {
+          console.log(`Kullanıcı bulunamadı: ${patient.userId} (Hasta: ${patient.hastaAdi})`);
+          updateResults.push({
+            patientId: patient._id,
+            hastaAdi: patient.hastaAdi,
+            status: 'error',
+            message: 'Kullanıcı bulunamadı'
+          });
+          continue;
+        }
+        
+        // Update patient with doctor information
+        await Patient.findByIdAndUpdate(patient._id, {
+          doctorName: user.name,
+          doctorEmail: user.email
+        });
+        
+        console.log(`Hasta güncellendi: ${patient.hastaAdi} -> Doktor: ${user.name}`);
+        updatedCount++;
+        
+        updateResults.push({
+          patientId: patient._id,
+          hastaAdi: patient.hastaAdi,
+          status: 'success',
+          doctorName: user.name,
+          doctorEmail: user.email
+        });
+        
+      } catch (error) {
+        console.error(`Hasta güncellenirken hata: ${patient._id}`, error);
+        updateResults.push({
+          patientId: patient._id,
+          hastaAdi: patient.hastaAdi,
+          status: 'error',
+          message: error.message
+        });
+      }
+    }
+    
+    console.log(`\nGüncelleme tamamlandı! ${updatedCount} hasta güncellendi.`);
+    
+    res.json({
+      message: 'Patient doctor info update completed',
+      totalPatientsToUpdate: patientsToUpdate.length,
+      updatedCount: updatedCount,
+      updateResults: updateResults
+    });
+    
+  } catch (error) {
+    console.error('Patient doctor info update error:', error);
+    res.status(500).json({ 
+      message: 'Patient doctor info update failed',
+      error: error.message 
+    });
+  }
+});
+
+// Temporary endpoint to fix database indexes
+app.post('/api/debug/fix-indexes', async (req, res) => {
+  try {
+    console.log('Fixing database indexes...');
+    
+    // Get current indexes
+    const currentIndexes = await Patient.collection.getIndexes();
+    console.log('Current indexes:', Object.keys(currentIndexes));
+    
+    // Try to drop the old global protokolNo index if it exists
+    try {
+      await Patient.collection.dropIndex('protokolNo_1');
+      console.log('Old global protokolNo index dropped successfully');
+    } catch (dropError) {
+      console.log('Global protokolNo index not found or already dropped:', dropError.message);
+    }
+    
+    // Create the new compound index
+    await Patient.collection.createIndex(
+      { userId: 1, protokolNo: 1 },
+      { unique: true, name: 'userId_protokolNo_unique' }
+    );
+    console.log('New compound index created successfully');
+    
+    // Get updated indexes
+    const newIndexes = await Patient.collection.getIndexes();
+    console.log('New indexes:', Object.keys(newIndexes));
+    
+    res.json({
+      message: 'Indexes fixed successfully',
+      oldIndexes: Object.keys(currentIndexes),
+      newIndexes: Object.keys(newIndexes)
+    });
+  } catch (error) {
+    console.error('Index fix error:', error);
+    res.status(500).json({ 
+      message: 'Index fix failed',
+      error: error.message 
+    });
+  }
+});
+
+// Get all patients
+app.get('/api/patients', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log('Kullanıcının hastaları getiriliyor...', { 
+      userId, 
+      userIdType: typeof userId,
+      userIdValue: userId 
+    });
+    
+    // Debug: Tüm hastaları kontrol et
+    const allPatients = await Patient.find({});
+    console.log('Veritabanındaki tüm hastalar:', allPatients.map(p => ({ 
+      id: p._id, 
+      userId: p.userId, 
+      hastaAdi: p.hastaAdi,
+      userIdType: typeof p.userId
+    })));
+    
+    const patients = await Patient.find({ userId }).sort({ createdAt: -1 });
     console.log(`${patients.length} hasta bulundu`);
+    console.log('Bulunan hastalar:', patients.map(p => ({ 
+      id: p._id, 
+      hastaAdi: p.hastaAdi,
+      userId: p.userId 
+    })));
+    
     res.json(patients);
   } catch (error) {
     console.error('Hastalar getirme hatası:', error);
@@ -802,12 +1137,20 @@ app.get('/api/patients', async (req, res) => {
   }
 });
 
-app.get('/api/patients/:id', async (req, res) => {
+app.get('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
+    const userId = req.user.id;
     const patient = await Patient.findById(req.params.id);
+    
     if (!patient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
+    
+    // Kullanıcının sadece kendi hastalarına erişebilmesini sağla
+    if (patient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydına erişim yetkiniz yok' });
+    }
+    
     res.json(patient);
   } catch (error) {
     console.error('Error fetching patient:', error);
@@ -815,14 +1158,21 @@ app.get('/api/patients/:id', async (req, res) => {
   }
 });
 
-app.put('/api/patients/:id', async (req, res) => {
+app.put('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
     console.log('PUT /api/patients/:id - Hasta güncelleniyor:', req.params.id);
+    
+    const userId = req.user.id;
     
     // Önce mevcut hasta bilgilerini al (history için)
     const currentPatient = await Patient.findById(req.params.id);
     if (!currentPatient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    // Kullanıcının sadece kendi hastalarını güncelleyebilmesini sağla
+    if (currentPatient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydını güncelleme yetkiniz yok' });
     }
 
     // Mevcut hasta verilerini history tablosuna kaydet
@@ -855,7 +1205,7 @@ app.put('/api/patients/:id', async (req, res) => {
       },
       version: historyCount + 1,
       changeReason: req.body.changeReason || 'Hasta bilgileri düzenlendi',
-      modifiedBy: req.body.modifiedBy || 'System User'
+      modifiedBy: userId
     });
 
     // History kaydını veritabanına kaydet
@@ -906,12 +1256,23 @@ app.get('/api/patients/:id/history', async (req, res) => {
   }
 });
 
-app.delete('/api/patients/:id', async (req, res) => {
+app.delete('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndDelete(req.params.id);
+    const userId = req.user.id;
+    
+    // Önce hastayı bul ve kullanıcı yetkisini kontrol et
+    const patient = await Patient.findById(req.params.id);
     if (!patient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
+    
+    // Kullanıcının sadece kendi hastalarını silebilmesini sağla
+    if (patient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydını silme yetkiniz yok' });
+    }
+    
+    // Hastayı sil
+    await Patient.findByIdAndDelete(req.params.id);
     
     // Hasta silindiğinde history kayıtlarını da sil
     await PatientHistory.deleteMany({ patientId: req.params.id });
@@ -925,14 +1286,21 @@ app.delete('/api/patients/:id', async (req, res) => {
 });
 
 // AI Analiz Endpoints
-app.post('/api/patients/:id/analyze', async (req, res) => {
+app.post('/api/patients/:id/analyze', authMiddleware, async (req, res) => {
   try {
     console.log('Analiz isteği alındı:', req.params.id);
+    const userId = req.user.id;
+    
     const patient = await Patient.findById(req.params.id);
     
     if (!patient) {
       console.log('Hasta bulunamadı:', req.params.id);
       return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    // Kullanıcının sadece kendi hastalarını analiz edebilmesini sağla
+    if (patient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydını analiz etme yetkiniz yok' });
     }
 
     console.log('Hasta bulundu, AI analizi başlatılıyor');
@@ -974,14 +1342,21 @@ app.post('/api/patients/:id/analyze', async (req, res) => {
   }
 });
 
-app.post('/api/patients/:id/treatment-suggestions', async (req, res) => {
+app.post('/api/patients/:id/treatment-suggestions', authMiddleware, async (req, res) => {
   try {
     console.log('Tedavi önerisi isteği alındı:', req.params.id);
+    const userId = req.user.id;
+    
     const patient = await Patient.findById(req.params.id);
     
     if (!patient) {
       console.log('Hasta bulunamadı:', req.params.id);
       return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    // Kullanıcının sadece kendi hastaları için tedavi önerisi alabilmesini sağla
+    if (patient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydı için tedavi önerisi alma yetkiniz yok' });
     }
 
     console.log('Hasta bulundu, tedavi önerisi oluşturuluyor');
@@ -1016,14 +1391,21 @@ app.post('/api/patients/:id/treatment-suggestions', async (req, res) => {
   }
 });
 
-app.post('/api/patients/:id/analyze-lab', async (req, res) => {
+app.post('/api/patients/:id/analyze-lab', authMiddleware, async (req, res) => {
   try {
     console.log('Lab analizi isteği alındı:', req.params.id);
+    const userId = req.user.id;
+    
     const patient = await Patient.findById(req.params.id);
     
     if (!patient) {
       console.log('Hasta bulunamadı:', req.params.id);
       return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    // Kullanıcının sadece kendi hastalarının lab sonuçlarını analiz edebilmesini sağla
+    if (patient.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bu hasta kaydının lab sonuçlarını analiz etme yetkiniz yok' });
     }
 
     if (!patient.hemogram && !patient.biyokimya) {

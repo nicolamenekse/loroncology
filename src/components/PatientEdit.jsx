@@ -82,7 +82,11 @@ const PatientEdit = () => {
 
   const fetchPatientData = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/patients/${id}`);
+      const response = await fetch(`${API_URL}/api/patients/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Hasta bilgileri yüklenirken bir hata oluştu');
       }
@@ -134,6 +138,7 @@ const PatientEdit = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(formData),
       });
@@ -181,6 +186,54 @@ const PatientEdit = () => {
                   Hasta Bilgileri
                 </Typography>
               </Grid>
+              
+              {/* Doktor Bilgileri - Sadece Görüntüleme */}
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label="Doktor Adı"
+                  value={formData.doctorName ? `Doktor ${formData.doctorName}` : 'Belirtilmemiş'}
+                  variant="outlined"
+                  size="small"
+                  disabled
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(240, 240, 240, 0.9)',
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label="Doktor Email"
+                  value={formData.doctorEmail || 'Belirtilmemiş'}
+                  variant="outlined"
+                  size="small"
+                  disabled
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(240, 240, 240, 0.9)',
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label="Kayıt Tarihi"
+                  value={formData.createdAt ? new Date(formData.createdAt).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
+                  variant="outlined"
+                  size="small"
+                  disabled
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(240, 240, 240, 0.9)',
+                    }
+                  }}
+                />
+              </Grid>
+              
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
