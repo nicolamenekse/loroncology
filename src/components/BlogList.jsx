@@ -14,8 +14,10 @@ import {
 } from '@mui/material';
 import { getAllBlogs } from '../services/blogService';
 import { generateBlogImage } from '../services/imageService';
+import { useAuth } from '../context/AuthContext';
 
 const BlogList = () => {
+  const { user } = useAuth();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,14 +67,16 @@ const BlogList = () => {
         <Typography variant="h4" component="h1">
           Blog Yazıları
         </Typography>
-        <Button
-          component={Link}
-          to="/blog/yeni"
-          variant="contained"
-          color="primary"
-        >
-          Yeni Blog Yazısı
-        </Button>
+        {user && (
+          <Button
+            component={Link}
+            to="/blog/yeni"
+            variant="contained"
+            color="primary"
+          >
+            Yeni Blog Yazısı
+          </Button>
+        )}
       </Box>
 
       {/* Kategori Filtreleme */}
@@ -97,12 +101,16 @@ const BlogList = () => {
         {blogs.map((blog) => (
           <Grid item xs={12} sm={6} md={4} key={blog._id}>
             <Card 
+              component={Link}
+              to={`/blog/${blog.slug}`}
               sx={{ 
                 height: '100%', 
                 display: 'flex', 
                 flexDirection: 'column',
                 overflow: 'hidden',
                 transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                textDecoration: 'none',
+                color: 'inherit',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: 4,
@@ -112,7 +120,7 @@ const BlogList = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={blog.coverImage || `/images/fallback/${blog.category.toLowerCase().replace(/\s+/g, '-')}.jpg`}
+                image={blog.coverImage}
                 alt={blog.title}
                 sx={{
                   objectFit: 'cover',
@@ -120,6 +128,9 @@ const BlogList = () => {
                   '&:hover': {
                     transform: 'scale(1.05)'
                   }
+                }}
+                onError={(e) => {
+                  e.target.src = `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...`; // Varsayılan görsel base64 formatında
                 }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
@@ -137,10 +148,7 @@ const BlogList = () => {
 
                 <Typography 
                   variant="h6" 
-                  component={Link}
-                  to={`/blog/${blog.slug}`}
                   sx={{ 
-                    textDecoration: 'none',
                     color: 'inherit',
                     '&:hover': { color: 'primary.main' }
                   }}
@@ -174,14 +182,9 @@ const BlogList = () => {
                   <Typography variant="caption" color="text.secondary">
                     {blog.readingTime} dk okuma
                   </Typography>
-                  <Button
-                    component={Link}
-                    to={`/blog/${blog.slug}`}
-                    size="small"
-                    color="primary"
-                  >
+                  <Typography variant="caption" color="primary" sx={{ display: 'flex', alignItems: 'center' }}>
                     Devamını Oku →
-                  </Button>
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>

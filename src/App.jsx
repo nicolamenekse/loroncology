@@ -193,25 +193,7 @@ const AppContent = () => {
                     Blog
                   </Link>
                 </li>
-                <li>
-                  <Link 
-                    to="/blog/yeni" 
-                    style={{
-                      color: '#FFFFFF',
-                      textDecoration: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontWeight: 500,
-                      fontSize: '15px',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        background: 'rgba(255, 255, 255, 0.1)',
-                      }
-                    }}
-                  >
-                    Yeni Blog Yazısı
-                  </Link>
-                </li>
+
 
                 {user?.role === 'admin' && (
                   <li>
@@ -449,25 +431,7 @@ const AppContent = () => {
                       Blog
                     </Link>
                   </li>
-                  <li>
-                    <Link 
-                      to="/blog/yeni" 
-                      onClick={() => setIsMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '12px 20px',
-                        color: '#2c3e50',
-                        textDecoration: 'none',
-                        fontWeight: 500,
-                        textAlign: 'left',
-                        borderRadius: '8px',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      Yeni Blog Yazısı
-                    </Link>
-                  </li>
+
 
                   {user?.role === 'admin' && (
                     <li>

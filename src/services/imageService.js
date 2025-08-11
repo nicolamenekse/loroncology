@@ -55,6 +55,22 @@ export const generateImagePrompt = async (title, content, category) => {
   }
 };
 
+const convertImageToBase64 = async (imageUrl) => {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Görsel base64\'e dönüştürülürken hata:', error);
+    throw error;
+  }
+};
+
 export const generateBlogImage = async (title, content, category) => {
   try {
     if (!title || !content || !category) {
@@ -79,19 +95,22 @@ export const generateBlogImage = async (title, content, category) => {
       throw new Error('DALL-E geçerli bir görsel URL\'si döndürmedi');
     }
 
-    return response.data[0].url;
+    // Görseli base64'e dönüştür
+    const base64Image = await convertImageToBase64(response.data[0].url);
+    return base64Image;
   } catch (error) {
     console.error('Görsel oluşturma hatası:', error);
     
-    // Kategori bazlı fallback görseller - Genel veterinerlik görselleri
+    // Kategori bazlı fallback görseller - Base64 formatında
     const fallbackImages = {
-      'Onkoloji': '/images/fallback/oncology.jpg',
-      'Tedavi Yöntemleri': '/images/fallback/treatment.jpg',
-      'Hasta Bakımı': '/images/fallback/patient-care.jpg',
-      'Araştırmalar': '/images/fallback/research.jpg',
-      'Genel': '/images/fallback/general.jpg'
+      'Onkoloji': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...',  // Varsayılan onkoloji görseli
+      'Tedavi Yöntemleri': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...', // Varsayılan tedavi görseli
+      'Hasta Bakımı': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...', // Varsayılan hasta bakımı görseli
+      'Araştırmalar': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...', // Varsayılan araştırma görseli
+      'Genel': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/...' // Varsayılan genel görsel
     };
 
+    // Fallback görseli base64 formatında döndür
     return fallbackImages[category] || fallbackImages['Genel'];
   }
 };

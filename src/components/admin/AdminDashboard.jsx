@@ -21,7 +21,10 @@ import {
   Alert,
   Tab,
   Tabs,
-  CircularProgress
+  CircularProgress,
+  Chip,
+  Stack,
+  Divider
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 
@@ -29,14 +32,22 @@ const AdminDashboard = () => {
   const { token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [users, setUsers] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editDialog, setEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedBlog, setSelectedBlog] = useState(null);
   const [editForm, setEditForm] = useState({
     name: '',
     email: '',
     role: ''
+  });
+  const [editBlogForm, setEditBlogForm] = useState({
+    title: '',
+    content: '',
+    summary: '',
+    category: ''
   });
 
   // Kullanıcıları getir
@@ -80,9 +91,103 @@ const AdminDashboard = () => {
     }
   };
 
+  // Blog yazılarını getir
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/blogs', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 401) {
+        logout();
+        throw new Error('Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.');
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Blog yazıları getirilemedi');
+      }
+
+      const data = await response.json();
+      setBlogs(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Blog yazılarını getirme hatası:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Blog düzenleme
+  const handleEditBlog = (blog) => {
+    setSelectedBlog(blog);
+    setEditBlogForm({
+      title: blog.title,
+      content: blog.content,
+      summary: blog.summary,
+      category: blog.category
+    });
+    setEditDialog(true);
+  };
+
+  const handleEditBlogSubmit = async () => {
+    try {
+      const response = await fetch(`/api/blogs/${selectedBlog._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editBlogForm)
+      });
+
+      if (!response.ok) {
+        throw new Error('Blog yazısı güncellenemedi');
+      }
+
+      await fetchBlogs();
+      setEditDialog(false);
+      setSelectedBlog(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Blog silme
+  const handleDeleteBlog = async (blogId) => {
+    if (window.confirm('Bu blog yazısını silmek istediğinize emin misiniz?')) {
+      try {
+        const response = await fetch(`/api/blogs/${blogId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Blog yazısı silinemedi');
+        }
+
+        await fetchBlogs();
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (activeTab === 0) {
+      fetchUsers();
+    } else if (activeTab === 1) {
+      fetchBlogs();
+    }
+  }, [activeTab]);
 
   // Kullanıcı düzenleme
   const handleEdit = (user) => {
@@ -143,7 +248,12 @@ const AdminDashboard = () => {
   const stats = {
     totalUsers: users.length,
     adminUsers: users.filter(u => u.role === 'admin').length,
-    regularUsers: users.filter(u => u.role === 'user').length
+    regularUsers: users.filter(u => u.role === 'user').length,
+    totalBlogs: blogs.length,
+    blogsByCategory: blogs.reduce((acc, blog) => {
+      acc[blog.category] = (acc[blog.category] || 0) + 1;
+      return acc;
+    }, {})
   };
 
   return (
@@ -175,12 +285,36 @@ const AdminDashboard = () => {
             <Typography variant="subtitle1">Normal Kullanıcılar</Typography>
             <Typography variant="h4">{stats.regularUsers}</Typography>
           </Box>
+          <Divider orientation="vertical" flexItem />
+          <Box>
+            <Typography variant="subtitle1">Blog Yazıları</Typography>
+            <Typography variant="h4">{stats.totalBlogs}</Typography>
+          </Box>
+        </Box>
+
+        {/* Blog Kategorileri İstatistikleri */}
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Blog Kategorileri
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {Object.entries(stats.blogsByCategory).map(([category, count]) => (
+              <Chip
+                key={category}
+                label={`${category}: ${count}`}
+                color="primary"
+                variant="outlined"
+                sx={{ m: 0.5 }}
+              />
+            ))}
+          </Stack>
         </Box>
       </Paper>
 
       <Paper>
         <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
           <Tab label="Kullanıcılar" />
+          <Tab label="Blog Yönetimi" />
           <Tab label="Sistem Ayarları" />
         </Tabs>
 
@@ -242,6 +376,56 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 1 && (
+            <>
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Başlık</TableCell>
+                        <TableCell>Kategori</TableCell>
+                        <TableCell>Yazar</TableCell>
+                        <TableCell>Yayın Tarihi</TableCell>
+                        <TableCell>İşlemler</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {blogs.map((blog) => (
+                        <TableRow key={blog._id}>
+                          <TableCell>{blog.title}</TableCell>
+                          <TableCell>{blog.category}</TableCell>
+                          <TableCell>{blog.author?.name || 'Bilinmiyor'}</TableCell>
+                          <TableCell>
+                            {new Date(blog.createdAt).toLocaleDateString('tr-TR')}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              color="primary"
+                              onClick={() => handleEditBlog(blog)}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleDeleteBlog(blog._id)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </>
+          )}
+
+          {activeTab === 2 && (
             <Typography variant="h6">
               Sistem ayarları yakında eklenecek...
             </Typography>
@@ -249,8 +433,14 @@ const AdminDashboard = () => {
         </Box>
       </Paper>
 
-      {/* Düzenleme Dialog'u */}
-      <Dialog open={editDialog} onClose={() => setEditDialog(false)}>
+      {/* Kullanıcı Düzenleme Dialog'u */}
+      <Dialog 
+        open={editDialog && selectedUser} 
+        onClose={() => {
+          setEditDialog(false);
+          setSelectedUser(null);
+        }}
+      >
         <DialogTitle>Kullanıcı Düzenle</DialogTitle>
         <DialogContent>
           <TextField
@@ -283,6 +473,71 @@ const AdminDashboard = () => {
         <DialogActions>
           <Button onClick={() => setEditDialog(false)}>İptal</Button>
           <Button onClick={handleEditSubmit} variant="contained">
+            Kaydet
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Blog Düzenleme Dialog'u */}
+      <Dialog 
+        open={editDialog && selectedBlog} 
+        onClose={() => {
+          setEditDialog(false);
+          setSelectedBlog(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Blog Yazısı Düzenle</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Başlık"
+            fullWidth
+            value={editBlogForm.title}
+            onChange={(e) => setEditBlogForm({ ...editBlogForm, title: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Özet"
+            fullWidth
+            multiline
+            rows={3}
+            value={editBlogForm.summary}
+            onChange={(e) => setEditBlogForm({ ...editBlogForm, summary: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="İçerik"
+            fullWidth
+            multiline
+            rows={10}
+            value={editBlogForm.content}
+            onChange={(e) => setEditBlogForm({ ...editBlogForm, content: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Kategori"
+            fullWidth
+            select
+            SelectProps={{ native: true }}
+            value={editBlogForm.category}
+            onChange={(e) => setEditBlogForm({ ...editBlogForm, category: e.target.value })}
+          >
+            <option value="">Kategori Seçin</option>
+            <option value="Onkoloji">Onkoloji</option>
+            <option value="Tedavi Yöntemleri">Tedavi Yöntemleri</option>
+            <option value="Hasta Bakımı">Hasta Bakımı</option>
+            <option value="Araştırmalar">Araştırmalar</option>
+            <option value="Genel">Genel</option>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setEditDialog(false);
+            setSelectedBlog(null);
+          }}>İptal</Button>
+          <Button onClick={handleEditBlogSubmit} variant="contained">
             Kaydet
           </Button>
         </DialogActions>
