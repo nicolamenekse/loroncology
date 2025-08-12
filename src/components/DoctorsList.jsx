@@ -18,11 +18,12 @@ import {
 } from '@mui/material';
 import { getDoctors } from '../services/consultationService';
 import { getAllDoctors } from '../services/colleagueService';
-import { sendConnectionRequest, respondToConnectionRequest } from '../services/colleagueService';
+import { sendConnectionRequest, respondToConnectionRequest, removeConnection } from '../services/colleagueService';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import PendingIcon from '@mui/icons-material/Pending';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const DoctorsList = () => {
   const [doctors, setDoctors] = useState([]);
@@ -83,18 +84,48 @@ const DoctorsList = () => {
     }
   };
 
+  const handleRemoveConnection = async (connectionId) => {
+    try {
+      await removeConnection(connectionId);
+      setSnackbar({
+        open: true,
+        message: 'Bağlantı başarıyla kaldırıldı',
+        severity: 'success'
+      });
+      fetchDoctors(); // Listeyi güncelle
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message,
+        severity: 'error'
+      });
+    }
+  };
+
   const getConnectionButton = (doctor) => {
     switch (doctor.connectionStatus) {
       case 'self':
         return null;
       case 'connected':
         return (
-          <Chip
-            icon={<CheckIcon />}
-            label="Bağlantılı"
-            color="success"
-            variant="outlined"
-          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center' }}>
+            <Chip
+              icon={<CheckIcon />}
+              label="Bağlantılı"
+              color="success"
+              variant="outlined"
+            />
+            <Button
+              size="small"
+              color="error"
+              variant="outlined"
+              onClick={() => handleRemoveConnection(doctor.connectionId)}
+              startIcon={<DeleteIcon />}
+              sx={{ fontSize: '0.75rem', py: 0.5 }}
+            >
+              Bağlantıyı Kaldır
+            </Button>
+          </Box>
         );
       case 'sent':
         return (

@@ -19,10 +19,11 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile, fetchUserProfile as fetchProfile } from '../../services/authService';
-import { respondToConnectionRequest } from '../../services/colleagueService';
+import { respondToConnectionRequest, removeConnection } from '../../services/colleagueService';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // Alt uzmanlık alanları
 const subspecialtiesByMain = {
@@ -140,6 +141,22 @@ const EditProfile = () => {
         subspecialties: data.subspecialties || []
       });
       setSuccess(`Bağlantı isteği ${status === 'accepted' ? 'kabul edildi' : 'reddedildi'}`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRemoveConnection = async (connectionId) => {
+    try {
+      await removeConnection(connectionId);
+      // Profil bilgilerini yeniden yükle
+      const data = await fetchProfile();
+      setUser(data);
+      setFormData({
+        mainSpecialty: data.mainSpecialty || '',
+        subspecialties: data.subspecialties || []
+      });
+      setSuccess('Bağlantı başarıyla kaldırıldı');
     } catch (err) {
       setError(err.message);
     }
@@ -436,13 +453,25 @@ const EditProfile = () => {
                             {otherDoctor.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
                           </Typography>
                         </Box>
-                        <Chip
-                          label="Bağlantılı"
-                          color="success"
-                          size="small"
-                          variant="outlined"
-                          icon={<CheckIcon />}
-                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Chip
+                            label="Bağlantılı"
+                            color="success"
+                            size="small"
+                            variant="outlined"
+                            icon={<CheckIcon />}
+                          />
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            onClick={() => handleRemoveConnection(connection._id)}
+                            startIcon={<DeleteIcon />}
+                            sx={{ minWidth: 'auto', px: 1 }}
+                          >
+                            Kaldır
+                          </Button>
+                        </Box>
                       </Box>
                     );
                   }).filter(Boolean)} {/* Filter out null values */}

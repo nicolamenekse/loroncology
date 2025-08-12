@@ -88,3 +88,25 @@ export const getAllDoctors = async () => {
     throw error;
   }
 };
+
+// Bağlantıyı kaldır
+export const removeConnection = async (connectionId) => {
+  try {
+    const response = await fetch(`${API_URL}/api/colleagues/remove/${connectionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Bağlantı kaldırılamadı');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Bağlantı kaldırılırken hata:', error);
+    throw error;
+  }
+};

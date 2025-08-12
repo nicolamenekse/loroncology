@@ -2293,6 +2293,33 @@ app.get('/api/colleagues/connections', authMiddleware, async (req, res) => {
   }
 });
 
+// Meslektaş bağlantısını kaldır
+app.delete('/api/colleagues/remove/:connectionId', authMiddleware, async (req, res) => {
+  try {
+    const { connectionId } = req.params;
+    const userId = req.user._id;
+
+    const connection = await ColleagueConnection.findById(connectionId);
+    if (!connection) {
+      return res.status(404).json({ message: 'Bağlantı bulunamadı' });
+    }
+
+    // Sadece bağlantının bir parçası olan kullanıcı kaldırabilir
+    if (connection.sender.toString() !== userId.toString() && 
+        connection.receiver.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    // Bağlantıyı kaldır
+    await ColleagueConnection.findByIdAndDelete(connectionId);
+
+    res.json({ message: 'Bağlantı başarıyla kaldırıldı' });
+  } catch (error) {
+    console.error('Bağlantı kaldırma hatası:', error);
+    res.status(500).json({ message: 'Bağlantı kaldırılırken bir hata oluştu' });
+  }
+});
+
 app.get('/healthz', (req, res) => {
   res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
