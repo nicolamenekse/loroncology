@@ -10,14 +10,17 @@ import PatientHistory from './models/PatientHistory.js';
 import Blog from './models/Blog.js';
 import User from './models/User.js';
 import Patient from './models/Patient.js';
+import Consultation from './models/Consultation.js';
+import Message from './models/Message.js';
+import ColleagueConnection from './models/ColleagueConnection.js';
 import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
-import { generateToken, authMiddleware, requireRole } from './services/authService.js';
+import { generateToken, authMiddleware, requireRole } from './services/backend/authService.js';
 import { adminMiddleware } from './middleware/adminMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 // SendGrid API key kontrolü
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
@@ -89,6 +92,33 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+// Test route to check if server is working
+app.get('/api/test', (req, res) => {
+  console.log('=== Test route hit ===');
+  res.json({ message: 'Server is working!' });
+});
+
+// Debug endpoint - mevcut bağlantıları kontrol et
+app.get('/api/debug/connections', authMiddleware, async (req, res) => {
+  try {
+    const connections = await ColleagueConnection.find({
+      $or: [
+        { sender: req.user._id },
+        { receiver: req.user._id }
+      ]
+    }).populate('sender', 'name email').populate('receiver', 'name email');
+    
+    res.json({
+      userId: req.user._id,
+      userName: req.user.name,
+      connections: connections
+    });
+  } catch (error) {
+    console.error('Bağlantı debug hatası:', error);
+    res.status(500).json({ message: 'Bağlantılar getirilirken hata oluştu' });
+  }
+});
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../dist')));
@@ -197,13 +227,27 @@ app.post('/api/auth/register', async (req, res) => {
     console.log('SendGrid Configured:', !!SENDGRID_API_KEY);
     console.log('EMAIL_FROM:', process.env.EMAIL_FROM);
     console.log('APP_URL:', process.env.APP_URL);
-    const { email, password, name } = req.body;
+    const { email, password, name, mainSpecialty } = req.body;
 
     // Email ve şifre kontrolü
     if (!email || !password || !name) {
       console.log('Eksik alanlar:', { email: !!email, password: !!password, name: !!name });
       return res.status(400).json({ message: 'Email, şifre ve isim zorunludur' });
     }
+
+    // Frontend specialty values to backend mapping
+    const specialtyMapping = {
+      'Küçük Hayvan Hekimliği': 'Hayvan Türüne Göre Uzmanlıklar',
+      'Büyük Hayvan Hekimliği': 'Hayvan Türüne Göre Uzmanlıklar',
+      'Kanatlı Hayvan Hekimliği': 'Hayvan Türüne Göre Uzmanlıklar',
+      'Egzotik Hayvan Hekimliği': 'Hayvan Türüne Göre Uzmanlıklar',
+      'Akademik / Araştırma': 'Araştırma & Akademik Alanlar',
+      'Saha & Üretim': 'Saha ve Üretim Branşları'
+    };
+
+    // Map frontend specialty to backend specialty
+    const mappedSpecialty = mainSpecialty ? specialtyMapping[mainSpecialty] : null;
+    console.log('Specialty mapping:', { frontend: mainSpecialty, backend: mappedSpecialty });
 
     // Email formatı kontrolü
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -259,16 +303,26 @@ app.post('/api/auth/register', async (req, res) => {
       user = await existingUser.save();
       console.log('Existing user updated with new verification token');
     } else {
-      // Yeni kullanıcı oluştur
+                // Yeni kullanıcı oluştur
+      console.log('Creating new user with data:', { email, name, role: 'doctor', mainSpecialty: mappedSpecialty });
       user = new User({
         email,
         password,
         name,
+        role: 'doctor', // Explicitly set role
+        mainSpecialty: mappedSpecialty, // Include mapped specialty
         emailVerifyTokenHash: tokenHash,
         emailVerifyExpires: tokenExpires
       });
+    
+    try {
       user = await user.save();
-      console.log('New user created');
+      console.log('New user created successfully');
+    } catch (saveError) {
+      console.error('User save error:', saveError);
+      console.error('Validation errors:', saveError.errors);
+      throw saveError;
+    }
     }
     console.log('User saved successfully:', {
       id: user._id,
@@ -322,6 +376,26 @@ app.post('/api/auth/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Kayıt hatası:', error);
+    
+    // More detailed error logging
+    if (error.name === 'ValidationError') {
+      console.error('Validation errors:', error.errors);
+      return res.status(400).json({ 
+        message: 'Kayıt bilgileri geçersiz',
+        errors: Object.keys(error.errors).map(key => ({
+          field: key,
+          message: error.errors[key].message
+        }))
+      });
+    }
+    
+    if (error.code === 11000) {
+      console.error('Duplicate key error:', error.keyValue);
+      return res.status(400).json({ 
+        message: 'Bu email adresi zaten kullanılıyor'
+      });
+    }
+    
     res.status(500).json({ 
       message: 'Kayıt işlemi sırasında bir hata oluştu',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -549,14 +623,96 @@ app.post('/api/auth/login', async (req, res) => {
 // Kullanıcı bilgilerini getir
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }
-    res.json(user);
+
+    // Gelen bağlantı isteklerini getir
+    const pendingRequests = await ColleagueConnection.find({
+      receiver: req.user._id,
+      status: 'pending'
+    }).populate('sender', 'name mainSpecialty');
+
+    // Gönderilen bağlantı isteklerini getir
+    const sentRequests = await ColleagueConnection.find({
+      sender: req.user._id,
+      status: 'pending'
+    }).populate('receiver', 'name mainSpecialty');
+
+    // Kabul edilen bağlantıları getir
+    const connections = await ColleagueConnection.find({
+      $or: [
+        { sender: req.user._id },
+        { receiver: req.user._id }
+      ],
+      status: 'accepted'
+    })
+    .populate('sender', 'name mainSpecialty')
+    .populate('receiver', 'name mainSpecialty');
+
+    console.log('API /auth/me - Kullanıcı bilgileri:', {
+              userId: req.user._id,
+      pendingRequests: pendingRequests.length,
+      sentRequests: sentRequests.length,
+      connections: connections.length
+    });
+
+    res.json({
+      ...user.toObject(),
+      pendingRequests,
+      sentRequests,
+      connections
+    });
   } catch (error) {
     console.error('Kullanıcı bilgileri getirme hatası:', error);
     res.status(500).json({ message: 'Kullanıcı bilgileri alınırken bir hata oluştu' });
+  }
+});
+
+// Profil güncelleme endpoint'i
+app.put('/api/auth/profile', authMiddleware, async (req, res) => {
+  try {
+    const { mainSpecialty, subspecialties, profileCompleted } = req.body;
+
+    // Kullanıcıyı bul
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+
+    // Ana uzmanlık alanı kontrolü
+    if (mainSpecialty && !user.mainSpecialty) {
+      user.mainSpecialty = mainSpecialty;
+    }
+
+    // Alt uzmanlık alanlarını güncelle
+    if (Array.isArray(subspecialties)) {
+      user.subspecialties = subspecialties;
+    }
+
+    // Profil tamamlanma durumunu güncelle
+    if (typeof profileCompleted === 'boolean') {
+      user.profileCompleted = profileCompleted;
+    }
+
+    await user.save();
+
+    res.json({
+      message: 'Profil başarıyla güncellendi',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        mainSpecialty: user.mainSpecialty,
+        subspecialties: user.subspecialties,
+        profileCompleted: user.profileCompleted
+      }
+    });
+  } catch (error) {
+    console.error('Profil güncelleme hatası:', error);
+    res.status(500).json({ message: 'Profil güncellenirken bir hata oluştu' });
   }
 });
 
@@ -606,7 +762,7 @@ app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res
 app.delete('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     // Kendini silmeye çalışıyor mu kontrolü
-    if (req.params.id === req.user.id) {
+    if (req.params.id === req.user._id) {
       return res.status(400).json({ message: 'Kendi hesabınızı silemezsiniz' });
     }
 
@@ -665,7 +821,7 @@ app.post('/api/patients', authMiddleware, async (req, res) => {
     console.log('POST /api/patients - Gelen istek:', req.body);
     
     // Kullanıcı ID'sini ekle
-    const userId = req.user.id;
+    const userId = req.user._id;
     if (!userId) {
       return res.status(401).json({
         message: 'Oturum bulunamadı'
@@ -1103,7 +1259,7 @@ app.post('/api/debug/fix-indexes', async (req, res) => {
 // Get all patients
 app.get('/api/patients', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     console.log('Kullanıcının hastaları getiriliyor...', { 
       userId, 
       userIdType: typeof userId,
@@ -1139,15 +1295,24 @@ app.get('/api/patients', authMiddleware, async (req, res) => {
 
 app.get('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const patient = await Patient.findById(req.params.id);
     
     if (!patient) {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
     
+    // Debug: Log patient and user information
+    console.log('Patient ID:', req.params.id);
+    console.log('Patient userId:', patient.userId);
+    console.log('Current user ID:', userId);
+    
     // Kullanıcının sadece kendi hastalarına erişebilmesini sağla
-    if (patient.userId.toString() !== userId) {
+    if (!patient.userId) {
+      console.log('Warning: Patient has no userId field');
+      // For patients without userId, allow access (legacy data)
+      // You might want to update these patients with the current user's ID
+    } else if (patient.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Bu hasta kaydına erişim yetkiniz yok' });
     }
     
@@ -1162,7 +1327,7 @@ app.put('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
     console.log('PUT /api/patients/:id - Hasta güncelleniyor:', req.params.id);
     
-    const userId = req.user.id;
+    const userId = req.user._id;
     
     // Önce mevcut hasta bilgilerini al (history için)
     const currentPatient = await Patient.findById(req.params.id);
@@ -1170,8 +1335,17 @@ app.put('/api/patients/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Hasta bulunamadı' });
     }
     
+    // Debug: Log patient and user information for update
+    console.log('Update - Patient ID:', req.params.id);
+    console.log('Update - Patient userId:', currentPatient.userId);
+    console.log('Update - Current user ID:', userId);
+    
     // Kullanıcının sadece kendi hastalarını güncelleyebilmesini sağla
-    if (currentPatient.userId.toString() !== userId) {
+    if (!currentPatient.userId) {
+      console.log('Warning: Patient has no userId field (update)');
+      // For patients without userId, allow access (legacy data)
+      // You might want to update these patients with the current user's ID
+    } else if (currentPatient.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Bu hasta kaydını güncelleme yetkiniz yok' });
     }
 
@@ -1258,7 +1432,7 @@ app.get('/api/patients/:id/history', async (req, res) => {
 
 app.delete('/api/patients/:id', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     
     // Önce hastayı bul ve kullanıcı yetkisini kontrol et
     const patient = await Patient.findById(req.params.id);
@@ -1289,7 +1463,7 @@ app.delete('/api/patients/:id', authMiddleware, async (req, res) => {
 app.post('/api/patients/:id/analyze', authMiddleware, async (req, res) => {
   try {
     console.log('Analiz isteği alındı:', req.params.id);
-    const userId = req.user.id;
+    const userId = req.user._id;
     
     const patient = await Patient.findById(req.params.id);
     
@@ -1345,7 +1519,7 @@ app.post('/api/patients/:id/analyze', authMiddleware, async (req, res) => {
 app.post('/api/patients/:id/treatment-suggestions', authMiddleware, async (req, res) => {
   try {
     console.log('Tedavi önerisi isteği alındı:', req.params.id);
-    const userId = req.user.id;
+    const userId = req.user._id;
     
     const patient = await Patient.findById(req.params.id);
     
@@ -1394,7 +1568,7 @@ app.post('/api/patients/:id/treatment-suggestions', authMiddleware, async (req, 
 app.post('/api/patients/:id/analyze-lab', authMiddleware, async (req, res) => {
   try {
     console.log('Lab analizi isteği alındı:', req.params.id);
-    const userId = req.user.id;
+    const userId = req.user._id;
     
     const patient = await Patient.findById(req.params.id);
     
@@ -1617,6 +1791,475 @@ app.delete('/api/blogs/:id', async (req, res) => {
   }
 });
 
+// Konsültasyon routes
+app.post('/api/consultations', authMiddleware, async (req, res) => {
+  try {
+    const { patient, receiverDoctor, notes } = req.body;
+    
+    console.log('=== Konsültasyon Gönderme Debug ===');
+    console.log('Gönderen Doktor ID:', req.user._id);
+    console.log('Alıcı Doktor ID:', receiverDoctor);
+    console.log('Hasta ID:', patient);
+    console.log('Notlar:', notes);
+    
+    // Meslektaş bağlantısını kontrol et
+    const connection = await ColleagueConnection.findOne({
+      $or: [
+        { sender: req.user._id, receiver: receiverDoctor, status: 'accepted' },
+        { sender: receiverDoctor, receiver: req.user._id, status: 'accepted' }
+      ]
+    });
+
+    console.log('Bulunan bağlantı:', connection);
+    console.log('Bağlantı durumu:', connection ? connection.status : 'Bağlantı bulunamadı');
+
+    if (!connection) {
+      console.log('403 Hata: Bağlantı bulunamadı');
+      return res.status(403).json({ 
+        message: 'Bu doktora konsültasyon gönderebilmek için önce meslektaş bağlantısı kurmanız gerekiyor' 
+      });
+    }
+
+    // Hasta bilgilerini kontrol et
+    const patientDoc = await Patient.findById(patient);
+    if (!patientDoc) {
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+
+    // Alıcı doktoru kontrol et
+    const receiverDoc = await User.findById(receiverDoctor);
+    if (!receiverDoc) {
+      return res.status(404).json({ message: 'Alıcı doktor bulunamadı' });
+    }
+    
+    // Konsültasyonu oluştur
+    const consultation = new Consultation({
+      patient,
+      senderDoctor: req.user._id,
+      receiverDoctor,
+      notes
+    });
+
+    await consultation.save();
+
+    // Populate işlemi
+    await consultation.populate([
+      { path: 'patient' }, // Tüm hasta bilgilerini getir
+      { path: 'senderDoctor', select: 'name email' },
+      { path: 'receiverDoctor', select: 'name email' }
+    ]);
+
+    res.status(201).json(consultation);
+  } catch (error) {
+    console.error('Konsültasyon oluşturma hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon oluşturulurken bir hata oluştu' });
+  }
+});
+
+// Gelen konsültasyonları getir
+app.get('/api/consultations/incoming', authMiddleware, async (req, res) => {
+  try {
+    const consultations = await Consultation.find({ receiverDoctor: req.user._id })
+      .populate('patient') // Tüm hasta bilgilerini getir
+      .populate('senderDoctor', 'name email')
+      .populate('receiverDoctor', 'name email')
+      .sort('-createdAt');
+
+    res.json(consultations);
+  } catch (error) {
+    console.error('Konsültasyon getirme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyonlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Gönderilen konsültasyonları getir
+app.get('/api/consultations/sent', authMiddleware, async (req, res) => {
+  try {
+    const consultations = await Consultation.find({ senderDoctor: req.user._id })
+      .populate('patient') // Tüm hasta bilgilerini getir
+      .populate('senderDoctor', 'name email')
+      .populate('receiverDoctor', 'name email')
+      .sort('-createdAt');
+
+    res.json(consultations);
+  } catch (error) {
+    console.error('Konsültasyon getirme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyonlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Tüm konsültasyonları getir (gelen kutusu için)
+app.get('/api/consultations/inbox', authMiddleware, async (req, res) => {
+  try {
+    const consultations = await Consultation.find({
+      $or: [
+        { receiverDoctor: req.user._id },
+        { senderDoctor: req.user._id }
+      ]
+    })
+      .populate('patient') // Tüm hasta bilgilerini getir
+      .populate('senderDoctor', 'name email')
+      .populate('receiverDoctor', 'name email')
+      .sort('-createdAt');
+
+    // Her konsültasyon için tip bilgisi ekle
+    const consultationsWithType = consultations.map(consultation => {
+      const isIncoming = consultation.receiverDoctor._id.toString() === req.user._id.toString();
+      return {
+        ...consultation.toObject(),
+        type: isIncoming ? 'incoming' : 'sent'
+      };
+    });
+
+    res.json(consultationsWithType);
+  } catch (error) {
+    console.error('Konsültasyon getirme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyonlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyon durumunu güncelle
+app.put('/api/consultations/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece alıcı doktor durumu güncelleyebilir
+    if (consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    consultation.status = status;
+    await consultation.save();
+
+    await consultation.populate([
+      { path: 'patient', select: 'hastaAdi hastaSahibi tur irk' },
+      { path: 'senderDoctor', select: 'name email' },
+      { path: 'receiverDoctor', select: 'name email' }
+    ]);
+
+    res.json(consultation);
+  } catch (error) {
+    console.error('Konsültasyon güncelleme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon güncellenirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyona mesaj gönder
+app.post('/api/consultations/:id/messages', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece konsültasyonun tarafları mesaj gönderebilir
+    if (consultation.senderDoctor.toString() !== req.user._id.toString() &&
+        consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    const message = new Message({
+      consultation: id,
+      sender: req.user._id,
+      content
+    });
+
+    await message.save();
+    await message.populate('sender', 'name email');
+
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Mesaj gönderme hatası:', error);
+    res.status(500).json({ message: 'Mesaj gönderilirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyon mesajlarını getir
+app.get('/api/consultations/:id/messages', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece konsültasyonun tarafları mesajları görebilir
+    if (consultation.senderDoctor.toString() !== req.user._id.toString() &&
+        consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    const messages = await Message.find({ consultation: id })
+      .populate('sender', 'name email')
+      .sort('createdAt');
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Mesaj getirme hatası:', error);
+    res.status(500).json({ message: 'Mesajlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyon için doktorları getir (sadece bağlantılı meslektaşlar)
+app.get('/api/users/doctors', authMiddleware, async (req, res) => {
+  try {
+    // Önce tüm kullanıcıları doctor rolüne güncelle (geçici çözüm)
+    await User.updateMany(
+      { role: 'user' },
+      { $set: { role: 'doctor' } }
+    );
+
+    // Sadece kabul edilmiş meslektaş bağlantılarını bul
+    const acceptedConnections = await ColleagueConnection.find({
+      $or: [
+        { sender: req.user._id, status: 'accepted' },
+        { receiver: req.user._id, status: 'accepted' }
+      ]
+    });
+
+    // Bağlantılı doktor ID'lerini topla
+    const connectedDoctorIds = acceptedConnections.map(connection => {
+              if (connection.sender.toString() === req.user._id) {
+        return connection.receiver;
+      } else {
+        return connection.sender;
+      }
+    });
+
+    console.log('Connected doctor IDs:', connectedDoctorIds);
+
+    // Sadece bağlantılı doktorları getir
+    const doctors = await User.find({
+      _id: { $in: connectedDoctorIds }
+    })
+    .select('name mainSpecialty subspecialties')
+    .sort('name');
+    
+    console.log('Found connected doctors:', doctors.map(d => ({
+      id: d._id,
+      name: d.name,
+      mainSpecialty: d.mainSpecialty,
+      subspecialties: d.subspecialties
+    })));
+
+    // Her doktor için bağlantı durumunu kontrol et (hepsi 'connected' olacak)
+    const doctorsWithConnectionStatus = doctors.map((doctor) => {
+      return {
+        _id: doctor._id,
+        name: doctor.name,
+        mainSpecialty: doctor.mainSpecialty || 'Belirtilmemiş',
+        subspecialties: doctor.subspecialties || [],
+        connectionStatus: 'connected',
+        connectionId: acceptedConnections.find(conn => 
+          conn.sender.toString() === doctor._id.toString() || 
+          conn.receiver.toString() === doctor._id.toString()
+        )?._id
+      };
+    });
+
+    res.json(doctorsWithConnectionStatus);
+  } catch (error) {
+    console.error('Doktor getirme hatası:', error);
+    res.status(500).json({ message: 'Doktorlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Tüm doktorları getir (meslektaş listesi için)
+app.get('/api/users/all-doctors', authMiddleware, async (req, res) => {
+  console.log('=== /api/users/all-doctors route hit ===');
+  try {
+    // Tüm kullanıcıları getir (kendisi hariç)
+    console.log('Current user ID:', req.user._id);
+    
+    const doctors = await User.find({
+      _id: { $ne: req.user._id } // Kendisi hariç
+    })
+    .select('name mainSpecialty subspecialties')
+    .sort('name');
+    
+    console.log('Found all doctors:', doctors.map(d => ({
+      id: d._id,
+      name: d.name,
+      mainSpecialty: d.mainSpecialty,
+      subspecialties: d.subspecialties
+    })));
+
+    // Her doktor için bağlantı durumunu kontrol et
+    const doctorsWithConnectionStatus = await Promise.all(doctors.map(async (doctor) => {
+      const connection = await ColleagueConnection.findOne({
+        $or: [
+          { sender: req.user._id, receiver: doctor._id },
+          { sender: doctor._id, receiver: req.user._id }
+        ]
+      });
+
+      let connectionStatus = 'none';
+      let connectionId = null;
+      
+      if (connection) {
+        connectionId = connection._id;
+        if (connection.status === 'accepted') {
+          connectionStatus = 'connected';
+        } else if (connection.status === 'pending') {
+          connectionStatus = connection.sender.toString() === req.user._id ? 'sent' : 'received';
+        } else if (connection.status === 'rejected') {
+          connectionStatus = 'rejected';
+        }
+      }
+
+      return {
+        _id: doctor._id,
+        name: doctor.name,
+        mainSpecialty: doctor.mainSpecialty || 'Belirtilmemiş',
+        subspecialties: doctor.subspecialties || [],
+        connectionStatus,
+        connectionId
+      };
+    }));
+
+    res.json(doctorsWithConnectionStatus);
+  } catch (error) {
+    console.error('Doktor getirme hatası:', error);
+    res.status(500).json({ message: 'Doktorlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Meslektaş bağlantı isteği gönder
+app.post('/api/colleagues/connect', authMiddleware, async (req, res) => {
+  try {
+    const { receiverId } = req.body;
+    const senderId = req.user._id;
+
+    // Kendine istek göndermeyi engelle
+    if (senderId === receiverId) {
+      return res.status(400).json({ message: 'Kendinize bağlantı isteği gönderemezsiniz' });
+    }
+
+    // Alıcının var olduğunu kontrol et
+    const receiver = await User.findById(receiverId);
+    if (!receiver) {
+      return res.status(404).json({ message: 'Alıcı bulunamadı' });
+    }
+
+    // Mevcut bağlantıyı kontrol et
+    const existingConnection = await ColleagueConnection.findOne({
+      $or: [
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId }
+      ]
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ 
+        message: 'Bu kullanıcı ile zaten bir bağlantı mevcut',
+        status: existingConnection.status
+      });
+    }
+
+    // Günlük istek limitini kontrol et
+    const canSendRequest = await ColleagueConnection.checkDailyRequestLimit(senderId);
+    if (!canSendRequest) {
+      return res.status(429).json({ 
+        message: 'Günlük bağlantı isteği limitine ulaştınız. Lütfen 24 saat sonra tekrar deneyin.'
+      });
+    }
+
+    // Yeni bağlantı isteği oluştur
+    const connection = new ColleagueConnection({
+      sender: senderId,
+      receiver: receiverId
+    });
+
+    await connection.save();
+
+    res.status(201).json({
+      message: 'Bağlantı isteği başarıyla gönderildi',
+      connection
+    });
+  } catch (error) {
+    console.error('Bağlantı isteği hatası:', error);
+    res.status(500).json({ message: 'Bağlantı isteği gönderilirken bir hata oluştu' });
+  }
+});
+
+// Meslektaş bağlantı isteğini yanıtla
+app.put('/api/colleagues/respond', authMiddleware, async (req, res) => {
+  try {
+    const { connectionId, status } = req.body;
+
+    if (!['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Geçersiz durum' });
+    }
+
+    const connection = await ColleagueConnection.findById(connectionId);
+    if (!connection) {
+      return res.status(404).json({ message: 'Bağlantı isteği bulunamadı' });
+    }
+
+    // Sadece alıcı yanıt verebilir
+    if (connection.receiver.toString() !== req.user._id) {
+      return res.status(403).json({ message: 'Bu isteği yanıtlama yetkiniz yok' });
+    }
+
+    connection.status = status;
+    await connection.save();
+
+    res.json({
+      message: `Bağlantı isteği ${status === 'accepted' ? 'kabul edildi' : 'reddedildi'}`,
+      connection
+    });
+  } catch (error) {
+    console.error('Bağlantı yanıtlama hatası:', error);
+    res.status(500).json({ message: 'Bağlantı isteği yanıtlanırken bir hata oluştu' });
+  }
+});
+
+// Test endpoint'i - meslektaş bağlantılarını kontrol et
+app.get('/api/test/connections', async (req, res) => {
+  try {
+    const connections = await ColleagueConnection.find()
+      .populate('sender', 'name email mainSpecialty')
+      .populate('receiver', 'name email mainSpecialty');
+    
+    res.json({
+      totalConnections: connections.length,
+      connections: connections
+    });
+  } catch (error) {
+    console.error('Test bağlantı listesi hatası:', error);
+    res.status(500).json({ message: 'Test bağlantıları getirilirken bir hata oluştu' });
+  }
+});
+
+// Meslektaş bağlantılarını getir
+app.get('/api/colleagues/connections', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const connections = await ColleagueConnection.find({
+      $or: [{ sender: userId }, { receiver: userId }],
+      status: 'accepted'
+    })
+    .populate('sender', 'name email mainSpecialty subspecialties')
+    .populate('receiver', 'name email mainSpecialty subspecialties');
+
+    res.json(connections);
+  } catch (error) {
+    console.error('Bağlantı listesi hatası:', error);
+    res.status(500).json({ message: 'Bağlantılar getirilirken bir hata oluştu' });
+  }
+});
+
 app.get('/healthz', (req, res) => {
   res.json({ status: 'ok', mongodb: mongoose.connection.readyState === 1 });
 });
@@ -1626,7 +2269,32 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
+  
+  // Test için meslektaş bağlantısı oluştur
+  try {
+    const users = await User.find().limit(2);
+    if (users.length >= 2) {
+      const existingConnection = await ColleagueConnection.findOne({
+        $or: [
+          { sender: users[0]._id, receiver: users[1]._id },
+          { sender: users[1]._id, receiver: users[0]._id }
+        ]
+      });
+      
+      if (!existingConnection) {
+        const testConnection = new ColleagueConnection({
+          sender: users[0]._id,
+          receiver: users[1]._id,
+          status: 'pending'
+        });
+        await testConnection.save();
+        console.log('Test meslektaş bağlantısı oluşturuldu');
+      }
+    }
+  } catch (error) {
+    console.error('Test bağlantısı oluşturma hatası:', error);
+  }
 }); 
 

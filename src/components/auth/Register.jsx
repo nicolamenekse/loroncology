@@ -10,7 +10,12 @@ import {
   Box,
   Alert,
   Link as MuiLink,
-  CircularProgress
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import VerificationStatus from './VerificationStatus';
@@ -19,7 +24,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'doctor',
+    mainSpecialty: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -224,7 +231,7 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                   sx={{
-                    mb: 3,
+                    mb: 2,
                     '& .MuiOutlinedInput-root': {
                       background: 'rgba(255, 255, 255, 0.8)',
                       backdropFilter: 'blur(5px)',
@@ -238,6 +245,45 @@ const Register = () => {
                     }
                   }}
                 />
+
+                <FormControl 
+                  fullWidth 
+                  required
+                  sx={{
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      backdropFilter: 'blur(5px)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.9)'
+                      },
+                      '&.Mui-focused': {
+                        background: 'rgba(255, 255, 255, 1)'
+                      }
+                    }
+                  }}
+                >
+                  <InputLabel id="mainSpecialty-label">Uzmanlık Alanı</InputLabel>
+                  <Select
+                    labelId="mainSpecialty-label"
+                    id="mainSpecialty"
+                    name="mainSpecialty"
+                    value={formData.mainSpecialty}
+                    label="Uzmanlık Alanı"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="Küçük Hayvan Hekimliği">Küçük Hayvan Hekimliği</MenuItem>
+                    <MenuItem value="Büyük Hayvan Hekimliği">Büyük Hayvan Hekimliği</MenuItem>
+                    <MenuItem value="Kanatlı Hayvan Hekimliği">Kanatlı Hayvan Hekimliği</MenuItem>
+                    <MenuItem value="Egzotik Hayvan Hekimliği">Egzotik Hayvan Hekimliği</MenuItem>
+                    <MenuItem value="Akademik / Araştırma">Akademik / Araştırma</MenuItem>
+                    <MenuItem value="Saha & Üretim">Saha & Üretim</MenuItem>
+                  </Select>
+                  <FormHelperText>
+                    Kayıt sonrası profilinizden alt uzmanlık alanlarınızı seçebilirsiniz
+                  </FormHelperText>
+                </FormControl>
 
                 <Button
                   type="submit"

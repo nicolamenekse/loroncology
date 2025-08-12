@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute, useAuth } from './context/AuthContext';
+import DoctorsList from './components/DoctorsList';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import VerifyEmail from './components/auth/VerifyEmail';
 import { ThemeProvider, createTheme, Button, useMediaQuery } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
+import MailIcon from '@mui/icons-material/Mail';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
 import CssBaseline from '@mui/material/CssBaseline';
 import Home from './components/Home';
 import PublicHome from './components/PublicHome';
@@ -19,6 +23,8 @@ import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
 import BlogCreate from './components/BlogCreate';
 import AdminDashboard from './components/admin/AdminDashboard';
+import Inbox from './components/Inbox';
+import EditProfile from './components/profile/EditProfile';
 
 const theme = createTheme({
   palette: {
@@ -193,7 +199,75 @@ const AppContent = () => {
                     Blog
                   </Link>
                 </li>
-
+                <li>
+                  <Link 
+                    to="/doctors" 
+                    style={{
+                      color: '#FFFFFF',
+                      textDecoration: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontWeight: 500,
+                      fontSize: '15px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.1)',
+                      }
+                    }}
+                  >
+                    <GroupIcon sx={{ fontSize: 20 }} />
+                    Meslektaşlar
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/inbox" 
+                    style={{
+                      color: '#FFFFFF',
+                      textDecoration: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontWeight: 500,
+                      fontSize: '15px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.1)',
+                      }
+                    }}
+                  >
+                    <MailIcon sx={{ fontSize: 20 }} />
+                    Gelen Kutusu
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/profile/edit" 
+                    style={{
+                      color: '#FFFFFF',
+                      textDecoration: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontWeight: 500,
+                      fontSize: '15px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.1)',
+                      }
+                    }}
+                  >
+                    <PersonIcon sx={{ fontSize: 20 }} />
+                    Profil
+                  </Link>
+                </li>
 
                 {user?.role === 'admin' && (
                   <li>
@@ -431,7 +505,72 @@ const AppContent = () => {
                       Blog
                     </Link>
                   </li>
-
+                  <li>
+                    <Link 
+                      to="/doctors" 
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '12px 20px',
+                        color: '#2c3e50',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        textAlign: 'left',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <GroupIcon sx={{ fontSize: 20 }} />
+                      Meslektaşlar
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/inbox" 
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '12px 20px',
+                        color: '#2c3e50',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        textAlign: 'left',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <MailIcon sx={{ fontSize: 20 }} />
+                      Gelen Kutusu
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/profile/edit" 
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '12px 20px',
+                        color: '#2c3e50',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        textAlign: 'left',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <PersonIcon sx={{ fontSize: 20 }} />
+                      Profil
+                    </Link>
+                  </li>
 
                   {user?.role === 'admin' && (
                     <li>
@@ -594,6 +733,21 @@ const AppContent = () => {
           } />
           <Route path="/blog/:slug" element={<BlogDetail />} />
 
+          <Route path="/inbox" element={
+            <ProtectedRoute>
+              <Inbox />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctors" element={
+            <ProtectedRoute>
+              <DoctorsList />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/edit" element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          } />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly>
               <AdminDashboard />

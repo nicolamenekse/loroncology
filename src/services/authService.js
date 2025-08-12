@@ -1,127 +1,90 @@
-import jwt from 'jsonwebtoken';
-import { APIError } from '../middleware/errorHandler.js';
-import { generateVerificationToken, hashToken, compareTokens, sendVerificationEmail } from '../utils/emailUtils.js';
-import User from '../models/User.js';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRE = '24h';
+export const getToken = () => localStorage.getItem('token');
 
-export const generateToken = (user) => {
-  return jwt.sign(
-    { 
-      id: user._id,
-      email: user.email,
-      role: user.role
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRE }
-  );
-};
-
-export const verifyToken = (token) => {
+export const updateProfile = async (profileData) => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const response = await fetch(`${API_URL}/api/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify(profileData)
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Profil güncellenirken bir hata oluştu');
+    }
+
+    return await response.json();
   } catch (error) {
-    throw new Error('Geçersiz veya süresi dolmuş token');
+    console.error('Profil güncelleme hatası:', error);
+    throw error;
   }
 };
 
-// Auth middleware
-export const authMiddleware = async (req, res, next) => {
+export const fetchUserProfile = async () => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    
-    if (!token) {
-      return res.status(401).json({ message: 'Yetkilendirme token\'ı bulunamadı' });
+    const response = await fetch(`${API_URL}/api/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Profil bilgileri alınamadı');
     }
 
-    const decoded = verifyToken(token);
-    req.user = decoded;
-    next();
+    return await response.json();
   } catch (error) {
-    res.status(401).json({ message: 'Geçersiz token' });
+    console.error('Profil bilgileri getirme hatası:', error);
+    throw error;
   }
 };
 
-// Role bazlı yetkilendirme middleware'i
-export const requireRole = (roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      throw new APIError('You do not have permission for this operation', 403);
+export const login = async (email, password) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Giriş yapılırken bir hata oluştu');
     }
-    next();
-  };
+
+    return await response.json();
+  } catch (error) {
+    console.error('Giriş hatası:', error);
+    throw error;
+  }
 };
 
-// Register a new user with email verification
 export const register = async (userData) => {
-  const verificationToken = generateVerificationToken();
-  const tokenHash = hashToken(verificationToken);
-  const tokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+  try {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
 
-  const user = new User({
-    ...userData,
-    emailVerifyTokenHash: tokenHash,
-    emailVerifyExpires: tokenExpires
-  });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Kayıt olurken bir hata oluştu');
+    }
 
-  await user.save();
-  await sendVerificationEmail(user.email, verificationToken);
-
-  return { message: 'Registration successful. Please check your email for verification.' };
-};
-
-// Verify email with token
-export const verifyEmail = async (email, token) => {
-  const user = await User.findOne({ 
-    email,
-    emailVerified: false,
-    emailVerifyExpires: { $gt: new Date() }
-  });
-
-  if (!user) {
-    throw new APIError('Invalid or expired verification link', 400);
+    return await response.json();
+  } catch (error) {
+    console.error('Kayıt hatası:', error);
+    throw error;
   }
-
-  if (!compareTokens(token, user.emailVerifyTokenHash)) {
-    throw new APIError('Invalid verification token', 400);
-  }
-
-  user.emailVerified = true;
-  user.emailVerifyTokenHash = null;
-  user.emailVerifyExpires = null;
-  await user.save();
-
-  return { message: 'Email verified successfully' };
-};
-
-// Resend verification email
-export const resendVerification = async (email) => {
-  const user = await User.findOne({ email, emailVerified: false });
-  
-  if (!user) {
-    throw new APIError('User not found or already verified', 400);
-  }
-
-  const verificationToken = generateVerificationToken();
-  const tokenHash = hashToken(verificationToken);
-  const tokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-
-  user.emailVerifyTokenHash = tokenHash;
-  user.emailVerifyExpires = tokenExpires;
-  await user.save();
-
-  await sendVerificationEmail(user.email, verificationToken);
-  return { message: 'Verification email sent successfully' };
-};
-
-// Check if email is verified middleware
-export const requireEmailVerified = async (req, res, next) => {
-  const user = await User.findById(req.user.id);
-  
-  if (!user?.emailVerified) {
-    throw new APIError('Please verify your email address to access this resource', 403);
-  }
-  
-  next();
 };

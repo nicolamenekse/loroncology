@@ -31,6 +31,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 import HistoryIcon from '@mui/icons-material/History';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ShareIcon from '@mui/icons-material/Share';
+import ConsultationDialog from './ConsultationDialog';
 import ParameterInput from './ParameterInput';
 import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
 import AIAnalysis from './AIAnalysis';
@@ -47,6 +49,7 @@ const PatientDetail = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const [consultationDialog, setConsultationDialog] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -169,6 +172,19 @@ const PatientDetail = () => {
                 }}
               >
                 Düzenle
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setConsultationDialog(true)}
+                fullWidth
+                startIcon={<ShareIcon />}
+                sx={{ 
+                  py: 1.5,
+                  fontSize: { xs: '1rem', sm: '1.1rem' }
+                }}
+              >
+                Konsültasyon İste
               </Button>
             </Box>
           </Box>
@@ -967,6 +983,13 @@ const PatientDetail = () => {
       
       {/* AI Analiz Bölümü */}
       <AIAnalysis patientId={id} />
+
+      {/* Konsültasyon Dialog'u */}
+      <ConsultationDialog
+        open={consultationDialog}
+        onClose={() => setConsultationDialog(false)}
+        patient={patient}
+      />
     </div>
   );
 };
