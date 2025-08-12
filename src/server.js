@@ -605,7 +605,8 @@ app.post('/api/auth/login', async (req, res) => {
       message: 'Giriş başarılı',
       token,
       user: {
-        id: user._id,
+        _id: user._id,
+        id: user._id, // Keep both for compatibility
         email: user.email,
         name: user.name,
         role: user.role
@@ -719,8 +720,12 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
 // Şifre değiştirme endpoint'i
 // Admin Routes
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+  console.log('=== /api/admin/users route hit ===');
+  console.log('Current user ID:', req.user._id);
+  console.log('Current user role:', req.user.role);
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
+    console.log('Users found:', users.length);
     res.json(users);
   } catch (error) {
     console.error('Kullanıcıları getirme hatası:', error);
@@ -793,7 +798,7 @@ app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
     }
 
     // Kullanıcıyı bul
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }

@@ -29,12 +29,16 @@ import {
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 
 const AdminDashboard = () => {
-  const { token, logout } = useAuth();
+  const { token, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [users, setUsers] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Debug: Log user information
+  console.log('AdminDashboard - Current user:', user);
+  console.log('AdminDashboard - Token:', token);
   const [editDialog, setEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedBlog, setSelectedBlog] = useState(null);
@@ -56,6 +60,8 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
 
+      console.log('AdminDashboard - Fetching users with token:', token);
+
       if (!token) {
         throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
       }
@@ -66,6 +72,9 @@ const AdminDashboard = () => {
           'Content-Type': 'application/json'
         }
       });
+
+      console.log('AdminDashboard - Response status:', response.status);
+      console.log('AdminDashboard - Response ok:', response.ok);
 
       if (response.status === 401) {
         logout();

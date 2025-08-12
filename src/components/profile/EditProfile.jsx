@@ -288,49 +288,57 @@ const EditProfile = () => {
                   Gelen İstekler
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  {user.pendingRequests.map((request) => (
-                    <Box
-                      key={request._id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        p: 1,
-                        '&:not(:last-child)': {
-                          borderBottom: '1px solid #eee'
-                        }
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle2">
-                          Dr. {request.sender.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {request.sender.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
-                        </Typography>
+                  {user.pendingRequests.map((request) => {
+                    // Add null check for sender
+                    if (!request.sender) {
+                      console.warn('Request with null sender:', request);
+                      return null; // Skip this request
+                    }
+                    
+                    return (
+                      <Box
+                        key={request._id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          p: 1,
+                          '&:not(:last-child)': {
+                            borderBottom: '1px solid #eee'
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="subtitle2">
+                            Dr. {request.sender.name || 'İsimsiz Doktor'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {request.sender.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="success"
+                            startIcon={<CheckIcon />}
+                            onClick={() => handleRespondRequest(request._id, 'accepted')}
+                          >
+                            Kabul Et
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            startIcon={<CloseIcon />}
+                            onClick={() => handleRespondRequest(request._id, 'rejected')}
+                          >
+                            Reddet
+                          </Button>
+                        </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="success"
-                          startIcon={<CheckIcon />}
-                          onClick={() => handleRespondRequest(request._id, 'accepted')}
-                        >
-                          Kabul Et
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="error"
-                          startIcon={<CloseIcon />}
-                          onClick={() => handleRespondRequest(request._id, 'rejected')}
-                        >
-                          Reddet
-                        </Button>
-                      </Box>
-                    </Box>
-                  ))}
+                    );
+                  }).filter(Boolean)} {/* Filter out null values */}
                 </Paper>
               </Box>
             )}
@@ -343,35 +351,43 @@ const EditProfile = () => {
                   Gönderilen İstekler
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  {user.sentRequests.map((request) => (
-                    <Box
-                      key={request._id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        p: 1,
-                        '&:not(:last-child)': {
-                          borderBottom: '1px solid #eee'
-                        }
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle2">
-                          Dr. {request.receiver.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {request.receiver.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
-                        </Typography>
+                  {user.sentRequests.map((request) => {
+                    // Add null check for receiver
+                    if (!request.receiver) {
+                      console.warn('Request with null receiver:', request);
+                      return null; // Skip this request
+                    }
+                    
+                    return (
+                      <Box
+                        key={request._id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          p: 1,
+                          '&:not(:last-child)': {
+                            borderBottom: '1px solid #eee'
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="subtitle2">
+                            Dr. {request.receiver.name || 'İsimsiz Doktor'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {request.receiver.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label="Beklemede"
+                          color="warning"
+                          size="small"
+                          variant="outlined"
+                        />
                       </Box>
-                      <Chip
-                        label="Beklemede"
-                        color="warning"
-                        size="small"
-                        variant="outlined"
-                      />
-                    </Box>
-                  ))}
+                    );
+                  }).filter(Boolean)} {/* Filter out null values */}
                 </Paper>
               </Box>
             )}
@@ -385,7 +401,20 @@ const EditProfile = () => {
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   {user.connections.map((connection) => {
+                    // Add null checks for sender and receiver
+                    if (!connection.sender || !connection.receiver) {
+                      console.warn('Connection with null sender or receiver:', connection);
+                      return null; // Skip this connection
+                    }
+                    
                     const otherDoctor = connection.sender._id === user._id ? connection.receiver : connection.sender;
+                    
+                    // Additional check for otherDoctor
+                    if (!otherDoctor) {
+                      console.warn('OtherDoctor is null for connection:', connection);
+                      return null; // Skip this connection
+                    }
+                    
                     return (
                       <Box
                         key={connection._id}
@@ -401,7 +430,7 @@ const EditProfile = () => {
                       >
                         <Box>
                           <Typography variant="subtitle2">
-                            Dr. {otherDoctor.name}
+                            Dr. {otherDoctor.name || 'İsimsiz Doktor'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {otherDoctor.mainSpecialty || 'Uzmanlık alanı belirtilmemiş'}
@@ -416,7 +445,7 @@ const EditProfile = () => {
                         />
                       </Box>
                     );
-                  })}
+                  }).filter(Boolean)} {/* Filter out null values */}
                 </Paper>
               </Box>
             )}
