@@ -1924,15 +1924,80 @@ app.get('/api/consultations/sent', authMiddleware, async (req, res) => {
 // Tüm konsültasyonları getir (gelen kutusu için)
 app.get('/api/consultations/inbox', authMiddleware, async (req, res) => {
   try {
-    const consultations = await Consultation.find({
+    const { showArchived = false, showDeleted = false } = req.query;
+    
+    // Kullanıcının konsültasyonlarını getir
+    let query = {
       $or: [
         { receiverDoctor: req.user._id },
         { senderDoctor: req.user._id }
       ]
-    })
+    };
+
+    // 30 günden eski silinen konsültasyonları filtrele
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    if (showDeleted) {
+      // Sadece silinen konsültasyonları getir (30 gün içinde)
+      query.$and = [
+        {
+          $or: [
+            { 
+              senderDoctor: req.user._id, 
+              senderDeleted: true,
+              senderDeletedAt: { $gte: thirtyDaysAgo }
+            },
+            { 
+              receiverDoctor: req.user._id, 
+              receiverDeleted: true,
+              receiverDeletedAt: { $gte: thirtyDaysAgo }
+            }
+          ]
+        }
+      ];
+    } else if (showArchived) {
+      // Sadece arşivlenmiş konsültasyonları getir (silinmemiş)
+      query.$and = [
+        {
+          $or: [
+            { 
+              senderDoctor: req.user._id, 
+              senderArchived: true,
+              senderDeleted: false
+            },
+            { 
+              receiverDoctor: req.user._id, 
+              receiverArchived: true,
+              receiverDeleted: false
+            }
+          ]
+        }
+      ];
+    } else {
+      // Aktif konsültasyonları getir (silinmemiş ve arşivlenmemiş)
+      query.$and = [
+        {
+          $or: [
+            { 
+              senderDoctor: req.user._id, 
+              senderDeleted: false, 
+              senderArchived: false 
+            },
+            { 
+              receiverDoctor: req.user._id, 
+              receiverDeleted: false, 
+              receiverArchived: false 
+            }
+          ]
+        }
+      ];
+    }
+
+    const consultations = await Consultation.find(query)
       .populate('patient') // Tüm hasta bilgilerini getir
-      .populate('senderDoctor', 'name email')
-      .populate('receiverDoctor', 'name email')
+      .populate('senderDoctor', 'name email mainSpecialty subspecialties')
+      .populate('receiverDoctor', 'name email mainSpecialty subspecialties')
       .sort('-createdAt');
 
     // Her konsültasyon için tip bilgisi ekle
@@ -2040,6 +2105,108 @@ app.get('/api/consultations/:id/messages', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Mesaj getirme hatası:', error);
     res.status(500).json({ message: 'Mesajlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyonu sil (tek taraflı)
+app.delete('/api/consultations/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece konsültasyonun tarafları silebilir
+    if (consultation.senderDoctor.toString() !== req.user._id.toString() &&
+        consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    // Kullanıcının rolüne göre silme işlemi yap
+    if (consultation.senderDoctor.toString() === req.user._id.toString()) {
+      consultation.senderDeleted = true;
+      consultation.senderDeletedAt = new Date();
+    } else {
+      consultation.receiverDeleted = true;
+      consultation.receiverDeletedAt = new Date();
+    }
+
+    await consultation.save();
+
+    res.json({ message: 'Konsültasyon başarıyla silindi' });
+  } catch (error) {
+    console.error('Konsültasyon silme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon silinirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyonu arşivle/arşivden çıkar (tek taraflı)
+app.put('/api/consultations/:id/archive', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { archived } = req.body;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece konsültasyonun tarafları arşivleyebilir
+    if (consultation.senderDoctor.toString() !== req.user._id.toString() &&
+        consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    // Kullanıcının rolüne göre arşivleme işlemi yap
+    if (consultation.senderDoctor.toString() === req.user._id.toString()) {
+      consultation.senderArchived = archived;
+    } else {
+      consultation.receiverArchived = archived;
+    }
+
+    await consultation.save();
+
+    const action = archived ? 'arşivlendi' : 'arşivden çıkarıldı';
+    res.json({ message: `Konsültasyon başarıyla ${action}` });
+  } catch (error) {
+    console.error('Konsültasyon arşivleme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon arşivlenirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyonu geri yükle (tek taraflı)
+app.put('/api/consultations/:id/restore', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece konsültasyonun tarafları geri yükleyebilir
+    if (consultation.senderDoctor.toString() !== req.user._id.toString() &&
+        consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    // Kullanıcının rolüne göre geri yükleme işlemi yap
+    if (consultation.senderDoctor.toString() === req.user._id.toString()) {
+      consultation.senderDeleted = false;
+      consultation.senderDeletedAt = null;
+    } else {
+      consultation.receiverDeleted = false;
+      consultation.receiverDeletedAt = null;
+    }
+
+    await consultation.save();
+
+    res.json({ message: 'Konsültasyon başarıyla geri yüklendi' });
+  } catch (error) {
+    console.error('Konsültasyon geri yükleme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon geri yüklenirken bir hata oluştu' });
   }
 });
 

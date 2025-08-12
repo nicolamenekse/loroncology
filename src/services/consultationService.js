@@ -167,9 +167,13 @@ export const getConsultationMessages = async (consultationId) => {
 };
 
 // Tüm konsültasyonları getir (gelen kutusu için)
-export const getConsultationInbox = async () => {
+export const getConsultationInbox = async (showArchived = false, showDeleted = false) => {
   try {
-    const response = await fetch(`${API_URL}/api/consultations/inbox`, {
+    const params = new URLSearchParams();
+    if (showArchived) params.append('showArchived', 'true');
+    if (showDeleted) params.append('showDeleted', 'true');
+    
+    const response = await fetch(`${API_URL}/api/consultations/inbox?${params.toString()}`, {
       headers: {
         'Authorization': `Bearer ${getToken()}`
       }
@@ -183,6 +187,74 @@ export const getConsultationInbox = async () => {
     return await response.json();
   } catch (error) {
     console.error('Konsültasyonlar getirilirken hata:', error);
+    throw error;
+  }
+};
+
+// Konsültasyonu sil
+export const deleteConsultation = async (consultationId) => {
+  try {
+    const response = await fetch(`${API_URL}/api/consultations/${consultationId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Konsültasyon silinemedi');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Konsültasyon silinirken hata:', error);
+    throw error;
+  }
+};
+
+// Konsültasyonu arşivle/arşivden çıkar
+export const archiveConsultation = async (consultationId, archived) => {
+  try {
+    const response = await fetch(`${API_URL}/api/consultations/${consultationId}/archive`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify({ archived })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Konsültasyon arşivlenemedi');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Konsültasyon arşivlenirken hata:', error);
+    throw error;
+  }
+};
+
+// Konsültasyonu geri yükle
+export const restoreConsultation = async (consultationId) => {
+  try {
+    const response = await fetch(`${API_URL}/api/consultations/${consultationId}/restore`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Konsültasyon geri yüklenemedi');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Konsültasyon geri yüklenirken hata:', error);
     throw error;
   }
 };

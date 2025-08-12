@@ -34,6 +34,30 @@ const consultationSchema = new mongoose.Schema({
   attachments: [{
     type: String // Base64 formatında dosyalar için
   }],
+  // Her doktor için ayrı silme ve arşivleme durumu
+  senderDeleted: {
+    type: Boolean,
+    default: false
+  },
+  receiverDeleted: {
+    type: Boolean,
+    default: false
+  },
+  senderArchived: {
+    type: Boolean,
+    default: false
+  },
+  receiverArchived: {
+    type: Boolean,
+    default: false
+  },
+  // Silme tarihleri (30 gün sonra kalıcı silme için)
+  senderDeletedAt: {
+    type: Date
+  },
+  receiverDeletedAt: {
+    type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now
