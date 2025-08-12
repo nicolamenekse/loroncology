@@ -16,7 +16,6 @@ import {
   Paper
 } from '@mui/material';
 import { createBlog } from '../services/blogService';
-import { generateBlogImage } from '../services/imageService';
 
 const BlogCreate = () => {
   const navigate = useNavigate();
@@ -26,32 +25,20 @@ const BlogCreate = () => {
     summary: '',
     category: '',
     tags: [],
-    status: 'draft',
-    coverImage: ''
+    status: 'draft'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [tagInput, setTagInput] = useState('');
-  const [previewImage, setPreviewImage] = useState(null);
 
   const categories = ['Onkoloji', 'Tedavi Yöntemleri', 'Hasta Bakımı', 'Araştırmalar', 'Genel'];
 
-  const handleChange = async (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-
-    // Kategori değiştiğinde yeni görsel al
-    if (name === 'category' && value) {
-      try {
-        const image = await generateBlogImage(formData.title, formData.content, value);
-        setPreviewImage(image);
-      } catch (err) {
-        console.error('Görsel yüklenirken hata:', err);
-      }
-    }
   };
 
   const handleTagInputKeyPress = (e) => {
@@ -80,19 +67,7 @@ const BlogCreate = () => {
     setError(null);
 
     try {
-      // Eğer coverImage belirtilmemişse, otomatik oluştur
-      if (!formData.coverImage) {
-        setLoading(true);
-        try {
-          const image = await generateBlogImage(formData.title, formData.content, formData.category);
-          formData.coverImage = image;
-        } catch (err) {
-          console.warn('Görsel oluşturulamadı:', err);
-          // Hata durumunda varsayılan görseli kullan
-          formData.coverImage = `/images/fallback/${formData.category.toLowerCase().replace(/\s+/g, '-')}.jpg`;
-        }
-      }
-
+      // Backend'de görsel oluşturma işlemi yapılacak
       const savedBlog = await createBlog(formData);
       navigate(`/blog/${savedBlog.slug}`);
     } catch (err) {
@@ -111,7 +86,7 @@ const BlogCreate = () => {
         <form onSubmit={handleSubmit}>
           <Box display="flex" flexDirection="column" gap={3}>
             {/* Görsel Önizleme */}
-            {(formData.coverImage || formData.category) && (
+            {formData.category && (
               <Box
                 sx={{
                   width: '100%',
@@ -119,18 +94,21 @@ const BlogCreate = () => {
                   borderRadius: 2,
                   overflow: 'hidden',
                   mb: 2,
-                  position: 'relative'
+                  position: 'relative',
+                  bgcolor: 'grey.100',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                <img
-                  src={formData.coverImage || previewImage || `/images/fallback/${formData.category.toLowerCase().replace(/\s+/g, '-')}.jpg`}
-                  alt="Kapak görseli önizleme"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
+                <Box textAlign="center">
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    {formData.category}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Blog kaydedildiğinde kategoriye uygun görsel otomatik oluşturulacak
+                  </Typography>
+                </Box>
                 <Box
                   sx={{
                     position: 'absolute',
@@ -143,20 +121,17 @@ const BlogCreate = () => {
                   }}
                 >
                   <Typography variant="caption">
-                    Kapak Görseli
+                    Kapak Görseli (Otomatik Oluşturulacak)
                   </Typography>
                 </Box>
               </Box>
             )}
 
-            <TextField
-              name="coverImage"
-              label="Kapak Görseli URL (isteğe bağlı)"
-              value={formData.coverImage}
-              onChange={handleChange}
-              fullWidth
-              helperText="Görsel URL'si girmezseniz, kategoriye uygun bir görsel otomatik olarak seçilecektir"
-            />
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                Blog kaydedildiğinde kategoriye uygun görsel otomatik olarak oluşturulacak ve kalıcı olarak kaydedilecektir.
+              </Typography>
+            </Alert>
 
             <TextField
               name="title"

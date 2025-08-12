@@ -165,7 +165,7 @@ const Inbox = () => {
                 <ListItemText
                   primary={
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Typography variant="subtitle1">
+                      <Typography variant="subtitle1" component="span">
                         {activeTab === 0 
                           ? `Dr. ${consultation.senderDoctor.name}`
                           : `Dr. ${consultation.receiverDoctor.name}`}
@@ -178,20 +178,20 @@ const Inbox = () => {
                     </Box>
                   }
                   secondary={
-                    <>
-                      <Typography variant="body2" color="text.secondary">
+                    <Box component="span">
+                      <Typography variant="body2" color="text.secondary" component="span" display="block">
                         Hasta: {consultation.patient.hastaAdi} ({consultation.patient.tur} - {consultation.patient.irk})
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" component="span" display="block">
                         {consultation.notes.substring(0, 100)}...
                       </Typography>
-                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                      <Box display="flex" alignItems="center" gap={1} mt={1} component="span">
                         <AccessTimeIcon fontSize="small" color="action" />
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" component="span">
                           {new Date(consultation.createdAt).toLocaleDateString('tr-TR')}
                         </Typography>
                       </Box>
-                    </>
+                    </Box>
                   }
                 />
               </ListItem>

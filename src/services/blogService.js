@@ -1,20 +1,6 @@
-import { generateBlogImage } from './imageService';
 export const createBlog = async (blogData) => {
   try {
-    // Blog içeriğine uygun görsel oluştur
-    if (!blogData.coverImage) {
-      try {
-        const imageUrl = await generateBlogImage(
-          blogData.title,
-          blogData.content,
-          blogData.category
-        );
-        blogData.coverImage = imageUrl;
-      } catch (err) {
-        console.warn('Görsel oluşturulamadı:', err);
-      }
-    }
-
+    // Backend'de görsel oluşturma işlemi yapılacak
     const response = await fetch('/api/blogs', {
       method: 'POST',
       headers: {
