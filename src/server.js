@@ -1645,12 +1645,57 @@ app.post('/api/blogs', async (req, res) => {
 
 app.get('/api/blogs', async (req, res) => {
   try {
-    const query = { ...req.query };
-    if (!query.status) {
-      query.status = 'published';
+    const { q, category, sort, page = 1, limit = 12 } = req.query;
+    
+    // Build query
+    const query = { status: 'published' };
+    
+    // Search query
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: 'i' } },
+        { content: { $regex: q, $options: 'i' } },
+        { summary: { $regex: q, $options: 'i' } },
+        { tags: { $in: [new RegExp(q, 'i')] } }
+      ];
     }
-    const blogs = await Blog.find(query).sort({ createdAt: -1 });
-    res.json(blogs);
+    
+    // Category filter
+    if (category && category !== 'Tümü') {
+      query.category = category;
+    }
+    
+    // Build sort
+    let sortOption = { createdAt: -1 }; // Default: newest first
+    if (sort === 'oldest') {
+      sortOption = { createdAt: 1 };
+    } else if (sort === 'popular') {
+      // For now, sort by creation date, but you can add view count later
+      sortOption = { createdAt: -1 };
+    }
+    
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Execute query
+    const blogs = await Blog.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+    
+    // Get total count for pagination
+    const total = await Blog.countDocuments(query);
+    
+    res.json({
+      blogs,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        total,
+        hasMore: skip + blogs.length < total
+      }
+    });
   } catch (error) {
     console.error('Blog listeleme hatası:', error);
     res.status(500).json({ 

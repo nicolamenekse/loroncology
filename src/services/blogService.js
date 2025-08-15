@@ -1,10 +1,13 @@
 export const createBlog = async (blogData) => {
   try {
-    // Backend'de görsel oluşturma işlemi yapılacak
-    const response = await fetch('/api/blogs', {
+    const API_URL = import.meta.env.VITE_API_URL || 
+      (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
+    
+    const response = await fetch(`${API_URL}/api/blogs`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify(blogData)
     });
@@ -31,7 +34,8 @@ export const getAllBlogs = async (filters = {}) => {
       throw new Error(error.message || 'Bloglar getirilemedi');
     }
     
-    return await response.json();
+    const data = await response.json();
+    return data.blogs || data; // Support both new and old API format
   } catch (error) {
     console.error('Bloglar getirilirken hata:', error);
     throw error;

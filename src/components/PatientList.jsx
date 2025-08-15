@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Container,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
   Box,
+  Button,
   Chip,
   Dialog,
   DialogTitle,
@@ -21,11 +14,9 @@ import {
   Tooltip,
   Alert,
   Snackbar,
-  CircularProgress,
   Grid,
   Card,
   CardContent,
-  CardActions,
   TextField,
   InputAdornment,
   FormControl,
@@ -34,9 +25,10 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
+  Skeleton,
+  Divider
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -50,6 +42,7 @@ const API_URL = import.meta.env.VITE_API_URL ||
 const PatientList = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [patients, setPatients] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -60,6 +53,17 @@ const PatientList = () => {
   const [sortBy, setSortBy] = useState('dateDesc');
   const navigate = useNavigate();
 
+  // Debounced search
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -67,45 +71,19 @@ const PatientList = () => {
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      console.log('API URL:', API_URL);
-      console.log('Fetching patients from:', `${API_URL}/api/patients`);
       
+      // Gerçek API'den hasta verilerini çek
       const response = await fetch(`${API_URL}/api/patients`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: Hastalar yüklenirken bir hata oluştu`);
       }
+      
       const data = await response.json();
-      console.log('Fetched patients:', data.length, 'patients');
-      console.log('Patient data details:', data.map(p => ({
-        id: p._id,
-        hastaAdi: p.hastaAdi,
-        doctorName: p.doctorName,
-        doctorEmail: p.doctorEmail,
-        hasDoctorName: !!p.doctorName,
-        hasDoctorEmail: !!p.doctorEmail
-      })));
-      
-      // Additional debugging - log each patient individually
-      data.forEach((patient, index) => {
-        console.log(`Patient ${index + 1}:`, {
-          id: patient._id,
-          hastaAdi: patient.hastaAdi,
-          doctorName: patient.doctorName,
-          doctorEmail: patient.doctorEmail,
-          doctorNameType: typeof patient.doctorName,
-          doctorEmailType: typeof patient.doctorEmail,
-          hasDoctorName: !!patient.doctorName,
-          hasDoctorEmail: !!patient.doctorEmail
-        });
-      });
-      
       setPatients(data);
       setError(null);
     } catch (error) {
@@ -144,290 +122,525 @@ const PatientList = () => {
     setSelectedPatient(null);
   };
 
-  const filteredPatients = patients.filter(patient => {
-    // Güvenlik: hastaAdi undefined olabilir, bu yüzden kontrol ediyoruz
-    const matchesSearch = patient.hastaAdi ? 
-      patient.hastaAdi.toLowerCase().includes(searchTerm.toLowerCase()) : false;
-    const matchesFilter = filterType === '' || patient.tur === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  // Filtered and sorted patients
+  const filteredAndSortedPatients = useMemo(() => {
+    let filtered = patients.filter(patient => {
+      const matchesSearch = patient.hastaAdi ? 
+        patient.hastaAdi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) : false;
+      const matchesFilter = filterType === '' || patient.tur === filterType;
+      return matchesSearch && matchesFilter;
+    });
 
-  const sortedPatients = filteredPatients.sort((a, b) => {
-    if (sortBy === 'dateDesc') {
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    } else if (sortBy === 'dateAsc') {
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    } else if (sortBy === 'nameAsc') {
-      // Güvenlik: hastaAdi undefined olabilir
-      const nameA = a.hastaAdi || '';
-      const nameB = b.hastaAdi || '';
-      return nameA.localeCompare(nameB);
-    } else if (sortBy === 'nameDesc') {
-      // Güvenlik: hastaAdi undefined olabilir
-      const nameA = a.hastaAdi || '';
-      const nameB = b.hastaAdi || '';
-      return nameB.localeCompare(nameA);
-    }
-    return 0;
-  });
+    return filtered.sort((a, b) => {
+      if (sortBy === 'dateDesc') {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortBy === 'dateAsc') {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (sortBy === 'nameAsc') {
+        const nameA = a.hastaAdi || '';
+        const nameB = b.hastaAdi || '';
+        return nameA.localeCompare(nameB);
+      } else if (sortBy === 'nameDesc') {
+        const nameA = a.hastaAdi || '';
+        const nameB = b.hastaAdi || '';
+        return nameB.localeCompare(nameA);
+      }
+      return 0;
+    });
+  }, [patients, debouncedSearchTerm, filterType, sortBy]);
 
-  const handleViewDetails = (id) => {
+  const handleViewDetails = useCallback((id) => {
     navigate(`/hasta/${id}`);
-  };
+  }, [navigate]);
 
-  const handleEditPatient = (id) => {
+  const handleEditPatient = useCallback((id) => {
     navigate(`/hasta-duzenle/${id}`);
-  };
+  }, [navigate]);
+
+
+
+  const renderSkeletonCards = () => (
+    <Grid container spacing={3}>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Grid item xs={12} sm={6} md={4} key={index}>
+          <Card sx={{ 
+            borderRadius: '16px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            border: '1px solid #EAECF0'
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Skeleton variant="text" width="60%" height={24} />
+                <Skeleton variant="rectangular" width={60} height={24} sx={{ borderRadius: '12px' }} />
+              </Box>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} variant="text" width="100%" height={20} sx={{ mb: 1 }} />
+              ))}
+              <Box sx={{ mt: 2, p: 2, backgroundColor: '#F5F8FF', borderRadius: '12px' }}>
+                <Skeleton variant="text" width="80%" height={20} />
+                <Skeleton variant="text" width="60%" height={16} />
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                <Skeleton variant="rectangular" width="48%" height={36} sx={{ borderRadius: '8px' }} />
+                <Skeleton variant="rectangular" width="48%" height={36} sx={{ borderRadius: '8px' }} />
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  const renderEmptyState = () => (
+    <Box sx={{ 
+      textAlign: 'center', 
+      py: 8,
+      backgroundColor: '#FFFFFF',
+      borderRadius: '16px',
+      border: '1px solid #EAECF0'
+    }}>
+      <PetsIcon sx={{ fontSize: 64, color: '#98A2B3', mb: 2 }} />
+      <Typography variant="h6" color="#101828" sx={{ mb: 1, fontWeight: 600 }}>
+        Kayıt bulunamadı
+      </Typography>
+      <Typography variant="body2" color="#667085" sx={{ mb: 3 }}>
+        {searchTerm || filterType ? 'Arama kriterlerine uygun hasta bulunamadı.' : 'Henüz hasta kaydı bulunmuyor.'}
+      </Typography>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => navigate('/yeni-hasta')}
+        sx={{
+          backgroundColor: '#1877F2',
+          '&:hover': { backgroundColor: '#166FE0' },
+          textTransform: 'none',
+          fontWeight: 600,
+          px: 3,
+          py: 1.5,
+          borderRadius: '12px'
+        }}
+      >
+        Yeni Hasta Ekle
+      </Button>
+    </Box>
+  );
 
   return (
-    <div className="patient-list-wrapper fade-in">
-      <Container maxWidth="lg">
-        <Paper elevation={3} className="patient-list-paper" sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            mb: 3,
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 2, sm: 0 }
-          }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: '#F8FAFC',
+      pt: 10,
+      pb: 4
+    }}>
+      <Container maxWidth="xl">
+        {/* Header Section */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 4,
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 2, sm: 0 }
+        }}>
+          <Box>
             <Typography variant="h4" component="h1" sx={{ 
-              color: '#3B82F6',
-              fontWeight: 600,
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+              color: '#101828',
+              fontWeight: 700,
+              fontSize: '24px',
+              mb: 0.5
             }}>
               Hasta Listesi
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/yeni-hasta')}
-              size="large"
-              fullWidth={isMobile}
-              sx={{ 
-                py: 1.5,
-                fontSize: { xs: '1rem', sm: '1.1rem' }
-              }}
-            >
-              Yeni Hasta Ekle
-            </Button>
+            <Typography variant="body2" color="#667085">
+              ({filteredAndSortedPatients.length} kayıt)
+            </Typography>
           </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/yeni-hasta')}
+            size="large"
+            fullWidth={isMobile}
+            sx={{ 
+              backgroundColor: '#1877F2',
+              '&:hover': { backgroundColor: '#166FE0' },
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(24, 119, 242, 0.15)'
+            }}
+          >
+            Yeni Hasta Ekle
+          </Button>
+        </Box>
 
-          {/* Arama ve Filtreleme */}
-          <Box sx={{ mb: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="Hasta Adı ile Ara"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  variant="outlined"
-                  size="small"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
+        {/* Filter Bar */}
+        <Box sx={{ 
+          mb: 4,
+          p: 3,
+          backgroundColor: '#FFFFFF',
+          borderRadius: '16px',
+          border: '1px solid #EAECF0',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+        }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                fullWidth
+                placeholder="Hasta adı ile ara"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                variant="outlined"
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: '#667085' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                    '& fieldset': { borderColor: '#EAECF0' },
+                    '&:hover fieldset': { borderColor: '#D0D5DD' },
+                    '&.Mui-focused fieldset': { borderColor: '#1877F2' }
+                  }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel sx={{ color: '#667085' }}>Tür</InputLabel>
+                <Select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  label="Tür"
+                  sx={{
+                    borderRadius: '12px',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#EAECF0' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#D0D5DD' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1877F2' }
                   }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Tür</InputLabel>
-                  <Select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    label="Tür"
-                  >
-                    <MenuItem value="">Tümü</MenuItem>
-                    <MenuItem value="Kedi">🐱 Kedi</MenuItem>
-                    <MenuItem value="Köpek">🐕 Köpek</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Sıralama</InputLabel>
-                  <Select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    label="Sıralama"
-                  >
-                    <MenuItem value="dateDesc">Tarih (Yeni-Eski)</MenuItem>
-                    <MenuItem value="dateAsc">Tarih (Eski-Yeni)</MenuItem>
-                    <MenuItem value="nameAsc">İsim (A-Z)</MenuItem>
-                    <MenuItem value="nameDesc">İsim (Z-A)</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                >
+                  <MenuItem value="">Hepsi</MenuItem>
+                  <MenuItem value="Kedi">🐱 Kedi</MenuItem>
+                  <MenuItem value="Köpek">🐕 Köpek</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-          </Box>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel sx={{ color: '#667085' }}>Sıralama</InputLabel>
+                <Select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  label="Sıralama"
+                  sx={{
+                    borderRadius: '12px',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#EAECF0' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#D0D5DD' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1877F2' }
+                  }}
+                >
+                  <MenuItem value="dateDesc">Tarih (Yeni→Eski)</MenuItem>
+                  <MenuItem value="dateAsc">Tarih (Eski→Yeni)</MenuItem>
+                  <MenuItem value="nameAsc">İsim (A→Z)</MenuItem>
+                  <MenuItem value="nameDesc">İsim (Z→A)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
 
-          {/* Hasta Listesi */}
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
+        {/* Error State */}
+        {error && (
+          <Alert severity="error" sx={{ 
+            mb: 3,
+            borderRadius: '12px',
+            border: '1px solid #FEE4E2',
+            backgroundColor: '#FEF3F2'
+          }}>
+            <Typography variant="body2" color="#D92D20">
               {error}
-            </Alert>
-          ) : sortedPatients.length === 0 ? (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              {searchTerm || filterType ? 'Arama kriterlerine uygun hasta bulunamadı.' : 'Henüz hasta kaydı bulunmuyor.'}
-            </Alert>
-          ) : (
-            <Grid container spacing={2}>
-              {sortedPatients.map((patient) => (
-                <Grid item xs={12} sm={6} md={4} key={patient._id}>
-                  <Card 
-                    className="patient-card"
-                    sx={{ 
-                      // height: '100%', // Remove fixed height constraint
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'pointer',
-                      minHeight: '300px', // Set minimum height instead
-                      overflow: 'visible' // Ensure content is not cut off
-                    }}
-                    onClick={() => handleViewDetails(patient._id)}
-                  >
-                    <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        mb: 2
-                      }}>
-                        <Typography variant="h6" component="div" sx={{ 
-                          fontWeight: 600,
-                          fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                        }}>
-                          {patient.hastaAdi || 'İsim Belirtilmemiş'}
-                        </Typography>
-                        <Chip 
-                          label={patient.tur} 
-                          color={patient.tur === 'Kedi' ? 'primary' : 'secondary'}
-                          size="small"
-                        />
-                      </Box>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        <strong>Protokol No:</strong> {patient.protokolNo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        <strong>Sahibi:</strong> {patient.hastaSahibi}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        <strong>Irk:</strong> {patient.irk}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        <strong>Yaş:</strong> {patient.yas} yaş
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        <strong>VKS:</strong> {patient.vks}
-                      </Typography>
-                      
-                      {/* Doctor Information - Make it more prominent */}
-                      <Box sx={{ 
-                        mt: 2, 
-                        p: 1.5, 
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-                        borderRadius: 1,
-                        border: '1px solid rgba(59, 130, 246, 0.2)'
-                      }}>
-                        <Typography variant="body2" color="primary" gutterBottom sx={{ fontWeight: 600 }}>
-                          <strong>Doktor:</strong> {patient.doctorName ? `Doktor ${patient.doctorName}` : 'Belirtilmemiş'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                          fontSize: '0.85rem',
-                          fontStyle: 'italic'
-                        }}>
-                          {patient.doctorEmail || 'Email belirtilmemiş'}
-                        </Typography>
-                        {/* Debug info */}
-                        {console.log('Patient doctor info:', { 
-                          hastaAdi: patient.hastaAdi, 
-                          doctorName: patient.doctorName, 
-                          doctorEmail: patient.doctorEmail 
-                        })}
-                      </Box>
-                    </CardContent>
-                    <CardActions sx={{ 
-                      p: 2, 
-                      pt: 0,
-                      display: 'flex',
-                      gap: 1,
-                      flexDirection: { xs: 'column', sm: 'row' }
-                    }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                        fullWidth
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditPatient(patient._id);
-                        }}
-                        startIcon={<EditIcon />}
-                      >
-                        Düzenle
-                      </Button>
+            </Typography>
+            <Button 
+              size="small" 
+              onClick={fetchPatients}
+              sx={{ 
+                mt: 1,
+                color: '#D92D20',
+                borderColor: '#D92D20',
+                '&:hover': { borderColor: '#B42318' }
+              }}
+              variant="outlined"
+            >
+              Tekrar Dene
+            </Button>
+          </Alert>
+        )}
 
-                      <Button
+        {/* Patient Cards */}
+        {loading ? (
+          renderSkeletonCards()
+        ) : filteredAndSortedPatients.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <Grid container spacing={3}>
+            {filteredAndSortedPatients.map((patient) => (
+              <Grid item xs={12} sm={6} md={4} key={patient._id}>
+                <Card 
+                  sx={{ 
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                    border: '1px solid #EAECF0',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                      borderColor: '#D0D5DD',
+                      transform: 'translateY(-2px)'
+                    },
+                    '&:focus-within': {
+                      outline: '2px solid #1877F2',
+                      outlineOffset: '2px'
+                    }
+                  }}
+                  onClick={() => handleViewDetails(patient._id)}
+                >
+                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    {/* Header */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      mb: 2
+                    }}>
+                      <Typography variant="h6" component="div" sx={{ 
+                        fontWeight: 600,
+                        fontSize: '18px',
+                        color: '#101828',
+                        lineHeight: 1.3
+                      }}>
+                        {patient.hastaAdi || 'İsim Belirtilmemiş'}
+                      </Typography>
+                      <Chip 
+                        label={patient.tur} 
                         size="small"
-                        variant="outlined"
-                        color="error"
-                        fullWidth
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPatient(patient);
-                          setDeleteDialogOpen(true);
+                        sx={{
+                          backgroundColor: patient.tur === 'Kedi' ? '#F0F9FF' : '#F0FDF4',
+                          color: patient.tur === 'Kedi' ? '#0369A1' : '#166534',
+                          borderColor: patient.tur === 'Kedi' ? '#BAE6FD' : '#BBF7D0',
+                          fontWeight: 500,
+                          borderRadius: '9999px',
+                          fontSize: '12px',
+                          height: '24px'
                         }}
-                        startIcon={<DeleteIcon />}
-                      >
-                        Sil
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Paper>
+                      />
+                    </Box>
+
+                    {/* Patient Info */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                          Protokol:
+                        </Typography>
+                        <Typography variant="body2" color="#101828" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                          {patient.protokolNo || 'Belirtilmemiş'}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                          Sahibi:
+                        </Typography>
+                        <Typography variant="body2" color="#101828" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                          {patient.hastaSahibi || 'Belirtilmemiş'}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                          Irk:
+                        </Typography>
+                        <Typography variant="body2" color="#101828" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                          {patient.irk || 'Belirtilmemiş'}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                          Yaş:
+                        </Typography>
+                        <Typography variant="body2" color="#101828" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                          {patient.yas ? `${patient.yas} yaş` : 'Belirtilmemiş'}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                          VKS:
+                        </Typography>
+                        <Typography variant="body2" color="#101828" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                          {patient.vks || 'Belirtilmemiş'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    {/* Doctor Information */}
+                    <Box sx={{ 
+                      mt: 2, 
+                      p: 2, 
+                      backgroundColor: '#F5F8FF', 
+                      borderRadius: '12px',
+                      border: '1px solid #D0D5DD'
+                    }}>
+                      <Typography variant="body2" color="#1877F2" gutterBottom sx={{ fontWeight: 600, fontSize: '14px' }}>
+                        Doktor: {patient.doctorName ? `Dr. ${patient.doctorName}` : 'Belirtilmemiş'}
+                      </Typography>
+                      <Typography variant="body2" color="#667085" sx={{ 
+                        fontSize: '13px',
+                        fontStyle: 'italic'
+                      }}>
+                        {patient.doctorEmail || 'Email belirtilmemiş'}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ 
+                    p: 3, 
+                    pt: 0,
+                    display: 'flex',
+                    gap: 1
+                  }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditPatient(patient._id);
+                      }}
+                      startIcon={<EditIcon />}
+                      sx={{
+                        borderColor: '#1877F2',
+                        color: '#1877F2',
+                        textTransform: 'none',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        borderRadius: '8px',
+                        py: 1,
+                        '&:hover': {
+                          borderColor: '#166FE0',
+                          backgroundColor: '#F0F9FF'
+                        }
+                      }}
+                    >
+                      Düzenle
+                    </Button>
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPatient(patient);
+                        setDeleteDialogOpen(true);
+                      }}
+                      startIcon={<DeleteIcon />}
+                      sx={{
+                        borderColor: '#D92D20',
+                        color: '#D92D20',
+                        textTransform: 'none',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        borderRadius: '8px',
+                        py: 1,
+                        '&:hover': {
+                          borderColor: '#B42318',
+                          backgroundColor: '#FEF3F2'
+                        }
+                      }}
+                    >
+                      Sil
+                    </Button>
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleDeleteCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            border: '1px solid #EAECF0'
+          }
+        }}
       >
-        <DialogTitle>Hasta Kaydını Sil</DialogTitle>
+        <DialogTitle sx={{ 
+          color: '#101828',
+          fontWeight: 600,
+          fontSize: '18px',
+          pb: 1
+        }}>
+          Hastayı silmek üzeresiniz
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx={{ color: '#667085', fontSize: '14px' }}>
             {selectedPatient && (
               <>
                 <strong>{selectedPatient.hastaAdi}</strong> isimli hastanın kaydını silmek istediğinizden emin misiniz?
-                <br />
-                <br />
-                Protokol No: {selectedPatient.protokolNo}
-                <br />
-                Hasta Sahibi: {selectedPatient.hastaSahibi}
+                <br /><br />
+                <Box sx={{ backgroundColor: '#F8FAFC', p: 2, borderRadius: '8px' }}>
+                  <Typography variant="body2" color="#667085" sx={{ mb: 0.5 }}>
+                    <strong>Protokol No:</strong> {selectedPatient.protokolNo}
+                  </Typography>
+                  <Typography variant="body2" color="#667085">
+                    <strong>Hasta Sahibi:</strong> {selectedPatient.hastaSahibi}
+                  </Typography>
+                </Box>
               </>
             )}
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteCancel} color="primary">
-            İptal
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button 
+            onClick={handleDeleteCancel}
+            sx={{
+              color: '#667085',
+              textTransform: 'none',
+              fontWeight: 500,
+              '&:hover': { backgroundColor: '#F8FAFC' }
+            }}
+          >
+            Geri
           </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+          <Button 
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#D92D20',
+              '&:hover': { backgroundColor: '#B42318' },
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3
+            }}
+          >
             Sil
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 
