@@ -2380,7 +2380,7 @@ app.get('/api/users/all-doctors', authMiddleware, async (req, res) => {
     const doctors = await User.find({
       _id: { $ne: req.user._id } // Kendisi hariç
     })
-    .select('name mainSpecialty subspecialties')
+    .select('name mainSpecialty subspecialties avatar city institution bio createdAt')
     .sort('name');
     
     console.log('Found all doctors:', doctors.map(d => ({
@@ -2418,6 +2418,11 @@ app.get('/api/users/all-doctors', authMiddleware, async (req, res) => {
         name: doctor.name,
         mainSpecialty: doctor.mainSpecialty || 'Belirtilmemiş',
         subspecialties: doctor.subspecialties || [],
+        avatar: doctor.avatar,
+        city: doctor.city,
+        institution: doctor.institution,
+        bio: doctor.bio,
+        createdAt: doctor.createdAt,
         connectionStatus,
         connectionId
       };

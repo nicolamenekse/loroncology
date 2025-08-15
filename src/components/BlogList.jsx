@@ -170,7 +170,7 @@ const BlogList = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Skeleton variant="text" width="30%" height={16} />
                 <Skeleton variant="text" width="20%" height={16} />
-              </Box>
+      </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -192,7 +192,7 @@ const BlogList = () => {
       </Typography>
       <Typography variant="body2" color="#667085" sx={{ mb: 3 }}>
         Arama kriterlerinize uygun blog yazısı bulunamadı.
-      </Typography>
+        </Typography>
       <Button 
         onClick={clearFilters}
         variant="outlined"
@@ -208,8 +208,8 @@ const BlogList = () => {
       >
         Filtreleri Temizle
       </Button>
-    </Box>
-  );
+      </Box>
+    );
 
   const renderErrorState = () => (
     <Alert severity="error" sx={{ 
@@ -220,8 +220,8 @@ const BlogList = () => {
     }}>
       <Typography variant="body2" color="#D92D20">
         {error}
-      </Typography>
-      <Button 
+        </Typography>
+        <Button
         size="small" 
         onClick={fetchBlogs}
         sx={{ 
@@ -233,19 +233,19 @@ const BlogList = () => {
         variant="outlined"
       >
         Tekrar Dene
-      </Button>
+        </Button>
     </Alert>
   );
 
   const renderBlogCard = (blog, isFeatured = false) => (
-    <Card 
+            <Card 
       component={Link}
       to={`/blog/${blog.slug}`}
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        overflow: 'hidden',
+              sx={{ 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                overflow: 'hidden',
         transition: 'all 0.2s ease',
         textDecoration: 'none',
         color: 'inherit',
@@ -253,7 +253,7 @@ const BlogList = () => {
         borderRadius: '16px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         border: '1px solid #EAECF0',
-        '&:hover': {
+                '&:hover': {
           boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
           transform: 'translateY(-2px)',
           '& .blog-image': {
@@ -267,14 +267,14 @@ const BlogList = () => {
       }}
     >
       <Box sx={{ position: 'relative' }}>
-        <CardMedia
-          component="img"
+              <CardMedia
+                component="img"
           height={isFeatured ? 300 : 200}
           image={blog.coverImage || `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2QjcyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WZXRlcmluZXIgQmxvZzwvdGV4dD4KPC9zdmc+Cg==`}
-          alt={blog.title}
+                alt={blog.title}
           className="blog-image"
-          sx={{
-            objectFit: 'cover',
+                sx={{
+                  objectFit: 'cover',
             transition: 'transform 0.3s ease',
             borderRadius: isFeatured ? '16px 16px 0 0' : '12px 12px 0 0'
           }}
@@ -282,9 +282,9 @@ const BlogList = () => {
         />
         
         {/* Category Badge */}
-        <Chip 
-          label={blog.category} 
-          size="small" 
+                  <Chip 
+                    label={blog.category} 
+                    size="small" 
           sx={{
             position: 'absolute',
             top: 12,
@@ -295,13 +295,13 @@ const BlogList = () => {
             fontSize: '11px',
             height: '20px'
           }}
-        />
-      </Box>
+                  />
+                </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 3 }}>
-        <Typography 
+                <Typography 
           variant={isFeatured ? "h5" : "h6"} 
-          sx={{ 
+                  sx={{ 
             color: '#101828',
             fontWeight: 600,
             fontSize: isFeatured ? '20px' : '16px',
@@ -311,31 +311,31 @@ const BlogList = () => {
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden'
-          }}
-        >
-          {blog.title}
-        </Typography>
+                  }}
+                >
+                  {blog.title}
+                </Typography>
 
-        <Typography 
-          variant="body2" 
+                <Typography 
+                  variant="body2" 
           color="#667085" 
-          sx={{ 
-            mb: 2,
-            display: '-webkit-box',
+                  sx={{ 
+                    mb: 2,
+                    display: '-webkit-box',
             WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
+                    WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             lineHeight: 1.5
-          }}
-        >
-          {blog.summary}
-        </Typography>
+                  }}
+                >
+                  {blog.summary}
+                </Typography>
 
         <Box sx={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mt: 'auto'
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mt: 'auto'
         }}>
           <Typography variant="caption" color="#667085">
             {blog.readingTime} dk okuma · {new Date(blog.createdAt).toLocaleDateString('tr-TR')} · {blog.author}
@@ -386,12 +386,12 @@ const BlogList = () => {
             </Typography>
             <Typography variant="body2" color="#667085">
               Veteriner onkoloji alanında güncel bilgiler ve araştırmalar
-            </Typography>
+                  </Typography>
           </Box>
           
           {user && (
-            <Button
-              component={Link}
+                  <Button
+                    component={Link}
               to="/blog/yeni"
               variant="contained"
               startIcon={<AddIcon />}
@@ -550,7 +550,7 @@ const BlogList = () => {
                 
                 <Chip 
                   label={featuredBlog.category} 
-                  size="small" 
+                    size="small"
                   sx={{
                     position: 'absolute',
                     top: 16,
@@ -619,7 +619,7 @@ const BlogList = () => {
                   }}
                 >
                   Devamını Oku
-                </Button>
+                  </Button>
               </CardContent>
             </Card>
           </Box>
@@ -636,9 +636,9 @@ const BlogList = () => {
               {regularBlogs.map((blog) => (
                 <Grid item xs={12} sm={6} md={4} key={blog._id}>
                   {renderBlogCard(blog)}
-                </Grid>
-              ))}
-            </Grid>
+          </Grid>
+        ))}
+      </Grid>
 
             {/* Load More Button */}
             {hasMore && (
@@ -663,11 +663,11 @@ const BlogList = () => {
                 >
                   Daha Fazla Yükle
                 </Button>
-              </Box>
+        </Box>
             )}
           </>
-        )}
-      </Container>
+      )}
+    </Container>
     </Box>
   );
 };

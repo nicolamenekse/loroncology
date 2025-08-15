@@ -392,7 +392,7 @@ const Home = () => {
       pb: 4
     }}>
       <Container maxWidth="xl">
-                 {/* Hero Section */}
+        {/* Hero Section */}
          <Box sx={{ 
            textAlign: 'center', 
            mb: 6,
@@ -402,8 +402,8 @@ const Home = () => {
            color: 'white',
            boxShadow: '0 4px 20px rgba(24, 119, 242, 0.15)'
          }}>
-           <Avatar
-             sx={{
+          <Avatar
+            sx={{
                width: 64,
                height: 64,
                margin: '0 auto 1.5rem auto',
@@ -412,35 +412,35 @@ const Home = () => {
              }}
            >
              <LocalHospitalIcon sx={{ fontSize: 32 }} />
-           </Avatar>
-           
-           <Typography 
-             variant="h2" 
-             component="h1" 
-             gutterBottom 
-             sx={{
-               fontWeight: 700,
+          </Avatar>
+          
+          <Typography 
+            variant="h2" 
+            component="h1" 
+            gutterBottom 
+            sx={{
+              fontWeight: 700,
                fontSize: { xs: '1.75rem', md: '2.25rem' },
                mb: 1.5,
                textTransform: 'none'
              }}
            >
              LorOncology
-           </Typography>
-           
-           <Typography 
+          </Typography>
+          
+          <Typography 
              variant="h4" 
-             component="h2" 
-             sx={{
+            component="h2" 
+            sx={{
                fontWeight: 400,
                color: '#EAF4FF',
                mb: 4,
                fontSize: { xs: '1rem', md: '1.125rem' },
                textTransform: 'none'
-             }}
-           >
-             Veteriner Onkoloji Hasta Takip Sistemi
-           </Typography>
+            }}
+          >
+            Veteriner Onkoloji Hasta Takip Sistemi
+          </Typography>
 
            <Box sx={{ 
              display: 'flex', 
@@ -453,8 +453,8 @@ const Home = () => {
                variant="contained"
                size="large"
                startIcon={<AddIcon />}
-               onClick={() => navigate('/yeni-hasta')}
-               sx={{
+              onClick={() => navigate('/yeni-hasta')}
+              sx={{
                  background: '#FFFFFF',
                  color: '#1877F2',
                  textTransform: 'none',
@@ -463,7 +463,7 @@ const Home = () => {
                  py: 1.5,
                  borderRadius: '12px',
                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                 '&:hover': {
+                '&:hover': {
                    background: '#F8FAFC',
                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                  }
@@ -505,7 +505,7 @@ const Home = () => {
                icon={<PetsIcon />}
                label={`Toplam Hasta: ${dashboardData.recentPatients.length}`}
                variant="outlined"
-               sx={{ 
+                sx={{ 
                  borderRadius: '20px',
                  borderColor: 'rgba(255, 255, 255, 0.3)',
                  color: 'white',
@@ -601,7 +601,7 @@ const Home = () => {
                          key={patient.id}
                          button
                          onClick={() => navigate(`/hasta/${patient.id}`)}
-                         sx={{
+                sx={{
                            px: 2,
                            py: 2,
                            borderRadius: '12px',
@@ -645,14 +645,14 @@ const Home = () => {
                              sx={{ display: 'block', mb: 0.5 }}
                            >
                              Protokol: {patient.protocol}
-                           </Typography>
-                           <Typography
+              </Typography>
+              <Typography
                              variant="caption"
                              color="#98A2B3"
                            >
                              {formatDate(patient.date)}
-                           </Typography>
-                         </Box>
+              </Typography>
+            </Box>
                          <ChevronRightIcon 
                            sx={{ 
                              color: '#667085',
@@ -727,14 +727,14 @@ const Home = () => {
                          key={blog.id}
                          button
                          onClick={() => navigate(`/blog/${blog.slug}`)}
-                         sx={{
+              sx={{
                            px: 2,
                            py: 2,
                            borderRadius: '12px',
                            mb: 1,
-                           cursor: 'pointer',
+                cursor: 'pointer',
                            transition: 'all 0.2s ease',
-                           '&:hover': {
+                '&:hover': {
                              background: '#F9FAFB',
                              transform: 'translateX(4px)'
                            }
@@ -758,7 +758,7 @@ const Home = () => {
                              <Typography 
                                variant="body2" 
                                color="#667085" 
-                               sx={{ 
+                sx={{ 
                                  mb: 1.5,
                                  display: '-webkit-box',
                                  WebkitLineClamp: 1,
@@ -881,7 +881,7 @@ const Home = () => {
                          <ListItemIcon sx={{ minWidth: 40 }}>
                            <Avatar 
                              src={`/avatars/${consultation.doctorAvatar}`}
-                             sx={{ 
+                sx={{
                                width: 36, 
                                height: 36, 
                                fontSize: '14px',
@@ -894,8 +894,8 @@ const Home = () => {
                          </ListItemIcon>
                          <ListItemText
                            primary={
-                             <Typography
-                               variant="body1"
+              <Typography
+                variant="body1"
                                fontWeight={600}
                                color="#101828"
                                sx={{ mb: 0.5 }}
@@ -1021,7 +1021,7 @@ const Home = () => {
                          <ListItemIcon sx={{ minWidth: 40 }}>
                            <Avatar 
                              src={`/avatars/${colleague.avatar}`}
-                             sx={{ 
+                sx={{
                                width: 36, 
                                height: 36, 
                                fontSize: '14px',
@@ -1050,7 +1050,7 @@ const Home = () => {
                                sx={{ fontSize: '13px' }}
                              >
                                {colleague.specialty}
-                             </Typography>
+              </Typography>
                            }
                          />
                        </ListItem>
@@ -1066,8 +1066,8 @@ const Home = () => {
       </Container>
 
              {/* Mobil için Yüzen Yeni Hasta Butonu */}
-       <Box
-         sx={{
+        <Box 
+          sx={{ 
            position: 'fixed',
            bottom: 24,
            right: 24,
@@ -1079,7 +1079,7 @@ const Home = () => {
            variant="contained"
            startIcon={<AddIcon />}
            onClick={() => navigate('/yeni-hasta')}
-           sx={{
+            sx={{ 
              background: 'linear-gradient(135deg, #1877F2 0%, #00B5E2 100%)',
              color: 'white',
              borderRadius: '50px',
@@ -1098,7 +1098,7 @@ const Home = () => {
          >
            Yeni Hasta
          </Button>
-       </Box>
+        </Box>
     </Box>
   );
 };
