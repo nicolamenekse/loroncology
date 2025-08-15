@@ -15,10 +15,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText
+  FormHelperText,
+  Avatar,
+  IconButton
 } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Person as PersonIcon, Edit as EditIcon } from '@mui/icons-material';
 import VerificationStatus from './VerificationStatus';
+import AvatarSelector from '../AvatarSelector';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -26,11 +30,13 @@ const Register = () => {
     email: '',
     password: '',
     role: 'doctor',
-    mainSpecialty: ''
+    mainSpecialty: '',
+    avatar: 'default-avatar.svg'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -41,6 +47,21 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleAvatarSelect = (avatar) => {
+    setFormData(prev => ({
+      ...prev,
+      avatar
+    }));
+  };
+
+  const openAvatarSelector = () => {
+    setAvatarSelectorOpen(true);
+  };
+
+  const closeAvatarSelector = () => {
+    setAvatarSelectorOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -285,6 +306,52 @@ const Register = () => {
                   </FormHelperText>
                 </FormControl>
 
+                {/* Avatar Seçim Alanı */}
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Profil Fotoğrafı Seçin
+                  </Typography>
+                  <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                    <Avatar
+                      src={`/avatars/${formData.avatar}`}
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        border: '3px solid #EAECF0',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: '#1877F2',
+                          transform: 'scale(1.05)'
+                        }
+                      }}
+                      onClick={openAvatarSelector}
+                    >
+                      <PersonIcon sx={{ fontSize: 40 }} />
+                    </Avatar>
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        background: '#1877F2',
+                        color: 'white',
+                        width: 28,
+                        height: 28,
+                        '&:hover': {
+                          background: '#166FE0'
+                        }
+                      }}
+                      onClick={openAvatarSelector}
+                    >
+                      <EditIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                    Tıklayarak farklı avatar seçebilirsiniz
+                  </Typography>
+                </Box>
+
                 <Button
                   type="submit"
                   fullWidth
@@ -329,6 +396,15 @@ const Register = () => {
           )}
         </Paper>
       </Container>
+
+      {/* Avatar Seçim Dialog'u */}
+      <AvatarSelector
+        open={avatarSelectorOpen}
+        onClose={closeAvatarSelector}
+        selectedAvatar={formData.avatar}
+        onAvatarSelect={handleAvatarSelect}
+        title="Profil Fotoğrafı Seç"
+      />
     </Box>
   );
 };

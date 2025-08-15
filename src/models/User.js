@@ -112,6 +112,10 @@ const userSchema = new mongoose.Schema({
   emailVerifyExpires: {
     type: Date,
     default: null
+  },
+  avatar: {
+    type: String,
+    default: 'default-avatar.svg' // Varsayılan avatar
   }
 });
 

@@ -183,7 +183,8 @@ const Home = () => {
               doctorName: consultation.senderDoctor?.name || 'Dr. Bilinmeyen',
               patientName: consultation.patient?.hastaAdi || 'Hasta Bilinmeyen',
               status: consultation.status,
-              date: consultation.createdAt
+              date: consultation.createdAt,
+              doctorAvatar: consultation.senderDoctor?.avatar || 'default-avatar.svg'
             };
           });
         
@@ -259,7 +260,8 @@ const Home = () => {
               return {
                 id: colleague._id,
                 name: colleague.name || 'İsim Belirtilmemiş',
-                specialty: colleague.mainSpecialty || 'Uzmanlık Belirtilmemiş'
+                specialty: colleague.mainSpecialty || 'Uzmanlık Belirtilmemiş',
+                avatar: colleague.avatar || 'default-avatar.svg'
               };
             } catch (error) {
               console.warn('Meslektaş verisi işlenirken hata:', error, connection);
@@ -319,10 +321,7 @@ const Home = () => {
     return new Date(dateString).toLocaleDateString('tr-TR');
   };
 
-  const truncateText = (text, maxLength) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
+
 
      const renderSkeletonList = () => (
      <List>
@@ -620,42 +619,40 @@ const Home = () => {
                          </ListItemIcon>
                          <ListItemText
                            primary={
-                             <Box>
-                               <Typography
-                                 variant="body1"
-                                 fontWeight={600}
-                                 color="#101828"
-                                 sx={{ mb: 0.5 }}
-                               >
-                                 {patient.name}
-                               </Typography>
-                               <Typography
-                                 variant="body2"
-                                 color="#667085"
-                                 sx={{ fontSize: '13px' }}
-                               >
-                                 {patient.type}
-                               </Typography>
-                             </Box>
+                             <Typography
+                               variant="body1"
+                               fontWeight={600}
+                               color="#101828"
+                               sx={{ mb: 0.5 }}
+                             >
+                               {patient.name}
+                             </Typography>
                            }
                            secondary={
-                             <Box sx={{ mt: 1 }}>
-                               <Typography
-                                 variant="caption"
-                                 color="#98A2B3"
-                                 sx={{ display: 'block', mb: 0.5 }}
-                               >
-                                 Protokol: {patient.protocol}
-                               </Typography>
-                               <Typography
-                                 variant="caption"
-                                 color="#98A2B3"
-                               >
-                                 {formatDate(patient.date)}
-                               </Typography>
-                             </Box>
+                             <Typography
+                               variant="body2"
+                               color="#667085"
+                               sx={{ fontSize: '13px', mb: 0.5 }}
+                             >
+                               {patient.type}
+                             </Typography>
                            }
                          />
+                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1 }}>
+                           <Typography
+                             variant="caption"
+                             color="#98A2B3"
+                             sx={{ display: 'block', mb: 0.5 }}
+                           >
+                             Protokol: {patient.protocol}
+                           </Typography>
+                           <Typography
+                             variant="caption"
+                             color="#98A2B3"
+                           >
+                             {formatDate(patient.date)}
+                           </Typography>
+                         </Box>
                          <ChevronRightIcon 
                            sx={{ 
                              color: '#667085',
@@ -758,42 +755,42 @@ const Home = () => {
                              </Typography>
                            }
                            secondary={
-                             <Box>
-                               <Typography 
-                                 variant="body2" 
-                                 color="#667085" 
-                                 sx={{ 
-                                   mb: 1.5,
-                                   display: '-webkit-box',
-                                   WebkitLineClamp: 1,
-                                   WebkitBoxOrient: 'vertical',
-                                   overflow: 'hidden'
-                                 }}
-                               >
-                                 {blog.summary}
-                               </Typography>
-                               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                 {blog.tags.slice(0, 2).map((tag, index) => (
-                                   <Chip
-                                     key={index}
-                                     label={tag}
-                                     size="small"
-                                     variant="outlined"
-                                     sx={{
-                                       fontSize: '11px',
-                                       height: '18px',
-                                       borderRadius: '9999px',
-                                       borderColor: '#E5E7EB',
-                                       color: '#6B7280',
-                                       background: '#F9FAFB',
-                                       '& .MuiChip-label': { px: 1 }
-                                     }}
-                                   />
-                                 ))}
-                               </Box>
-                             </Box>
+                             <Typography 
+                               variant="body2" 
+                               color="#667085" 
+                               sx={{ 
+                                 mb: 1.5,
+                                 display: '-webkit-box',
+                                 WebkitLineClamp: 1,
+                                 WebkitBoxOrient: 'vertical',
+                                 overflow: 'hidden'
+                               }}
+                             >
+                               {blog.summary}
+                             </Typography>
                            }
                          />
+                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1 }}>
+                           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                             {blog.tags.slice(0, 2).map((tag, index) => (
+                               <Chip
+                                 key={index}
+                                 label={tag}
+                                 size="small"
+                                 variant="outlined"
+                                 sx={{
+                                   fontSize: '11px',
+                                   height: '18px',
+                                   borderRadius: '9999px',
+                                   borderColor: '#E5E7EB',
+                                   color: '#6B7280',
+                                   background: '#F9FAFB',
+                                   '& .MuiChip-label': { px: 1 }
+                                 }}
+                               />
+                             ))}
+                           </Box>
+                         </Box>
                          <ChevronRightIcon 
                            sx={{ 
                              color: '#667085',
@@ -882,40 +879,49 @@ const Home = () => {
                          }}
                        >
                          <ListItemIcon sx={{ minWidth: 40 }}>
-                           <MailIcon sx={{ color: '#667085', fontSize: 20 }} />
+                           <Avatar 
+                             src={`/avatars/${consultation.doctorAvatar}`}
+                             sx={{ 
+                               width: 36, 
+                               height: 36, 
+                               fontSize: '14px',
+                               background: '#E5E7EB',
+                               color: '#6B7280'
+                             }}
+                           >
+                             {consultation.doctorName?.charAt(0)}
+                           </Avatar>
                          </ListItemIcon>
                          <ListItemText
                            primary={
-                             <Box>
-                               <Typography
-                                 variant="body1"
-                                 fontWeight={600}
-                                 color="#101828"
-                                 sx={{ mb: 0.5 }}
-                               >
-                                 {consultation.doctorName}
-                               </Typography>
-                               <Typography
-                                 variant="body2"
-                                 color="#667085"
-                                 sx={{ fontSize: '13px' }}
-                               >
-                                 {consultation.patientName}
-                               </Typography>
-                             </Box>
+                             <Typography
+                               variant="body1"
+                               fontWeight={600}
+                               color="#101828"
+                               sx={{ mb: 0.5 }}
+                             >
+                               {consultation.doctorName}
+                             </Typography>
                            }
                            secondary={
-                             <Box sx={{ mt: 1 }}>
-                               <Typography
-                                 variant="caption"
-                                 color="#98A2B3"
-                                 sx={{ display: 'block', mb: 0.5 }}
-                               >
-                                 {formatDate(consultation.date)}
-                               </Typography>
-                             </Box>
+                             <Typography
+                               variant="body2"
+                               color="#667085"
+                               sx={{ fontSize: '13px' }}
+                             >
+                               {consultation.patientName}
+                             </Typography>
                            }
                          />
+                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1 }}>
+                           <Typography
+                             variant="caption"
+                             color="#98A2B3"
+                             sx={{ display: 'block', mb: 0.5 }}
+                           >
+                             {formatDate(consultation.date)}
+                           </Typography>
+                         </Box>
                          <Box sx={{ ml: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                            <Chip
                              label={getStatusText(consultation.status)}
@@ -1014,6 +1020,7 @@ const Home = () => {
                        >
                          <ListItemIcon sx={{ minWidth: 40 }}>
                            <Avatar 
+                             src={`/avatars/${colleague.avatar}`}
                              sx={{ 
                                width: 36, 
                                height: 36, 

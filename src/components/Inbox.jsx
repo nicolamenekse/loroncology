@@ -601,7 +601,12 @@ const Inbox = () => {
                 }
               >
                 <ListItemAvatar>
-                  <Avatar>
+                  <Avatar
+                    src={`/avatars/${activeTab === 0 
+                      ? consultation.senderDoctor.avatar || 'default-avatar.svg'
+                      : consultation.receiverDoctor.avatar || 'default-avatar.svg'
+                    }`}
+                  >
                     <PersonIcon />
                   </Avatar>
                 </ListItemAvatar>

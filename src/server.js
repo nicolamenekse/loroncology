@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import fs from 'fs';
 import sgMail from '@sendgrid/mail';
 import PatientHistory from './models/PatientHistory.js';
 import Blog from './models/Blog.js';
@@ -99,6 +100,29 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is working!' });
 });
 
+// Test file system access
+app.get('/api/test-fs', (req, res) => {
+  try {
+    const testPath = path.join(__dirname, '../public/avatars');
+    const exists = fs.existsSync(testPath);
+    const files = exists ? fs.readdirSync(testPath) : [];
+    
+    res.json({
+      message: 'File system test',
+      __dirname,
+      testPath,
+      exists,
+      files: files.slice(0, 5) // Show first 5 files
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'File system test failed',
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Debug endpoint - mevcut bağlantıları kontrol et
 app.get('/api/debug/connections', authMiddleware, async (req, res) => {
   try {
@@ -122,6 +146,23 @@ app.get('/api/debug/connections', authMiddleware, async (req, res) => {
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../dist')));
+
+// Serve static files from the public directory for avatars
+const avatarsStaticPath = (() => {
+  const path1 = path.join(__dirname, '../public/avatars');
+  if (fs.existsSync(path1)) return path1;
+  
+  const path2 = path.join(process.cwd(), 'public/avatars');
+  if (fs.existsSync(path2)) return path2;
+  
+  const path3 = path.join(process.cwd(), 'src/../public/avatars');
+  if (fs.existsSync(path3)) return path3;
+  
+  return path1; // fallback to original path
+})();
+
+console.log('Serving avatars from:', avatarsStaticPath);
+app.use('/avatars', express.static(avatarsStaticPath));
 
 // MongoDB Connection - Güvenlik: Hassas bilgi environment variable'dan alınıyor
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -227,7 +268,7 @@ app.post('/api/auth/register', async (req, res) => {
     console.log('SendGrid Configured:', !!SENDGRID_API_KEY);
     console.log('EMAIL_FROM:', process.env.EMAIL_FROM);
     console.log('APP_URL:', process.env.APP_URL);
-    const { email, password, name, mainSpecialty } = req.body;
+    const { email, password, name, mainSpecialty, avatar } = req.body;
 
     // Email ve şifre kontrolü
     if (!email || !password || !name) {
@@ -300,6 +341,9 @@ app.post('/api/auth/register', async (req, res) => {
       if (name) {
         existingUser.name = name;
       }
+      if (avatar) {
+        existingUser.avatar = avatar;
+      }
       user = await existingUser.save();
       console.log('Existing user updated with new verification token');
     } else {
@@ -311,6 +355,7 @@ app.post('/api/auth/register', async (req, res) => {
         name,
         role: 'doctor', // Explicitly set role
         mainSpecialty: mappedSpecialty, // Include mapped specialty
+        avatar: avatar || 'default-avatar.svg', // Include avatar
         emailVerifyTokenHash: tokenHash,
         emailVerifyExpires: tokenExpires
       });
@@ -674,7 +719,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
 // Profil güncelleme endpoint'i
 app.put('/api/auth/profile', authMiddleware, async (req, res) => {
   try {
-    const { mainSpecialty, subspecialties, profileCompleted } = req.body;
+    const { mainSpecialty, subspecialties, profileCompleted, avatar } = req.body;
 
     // Kullanıcıyı bul
     const user = await User.findById(req.user._id);
@@ -697,6 +742,11 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
       user.profileCompleted = profileCompleted;
     }
 
+    // Avatar güncelle
+    if (avatar) {
+      user.avatar = avatar;
+    }
+
     await user.save();
 
     res.json({
@@ -708,7 +758,8 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
         role: user.role,
         mainSpecialty: user.mainSpecialty,
         subspecialties: user.subspecialties,
-        profileCompleted: user.profileCompleted
+        profileCompleted: user.profileCompleted,
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -1939,8 +1990,8 @@ app.get('/api/consultations/incoming', authMiddleware, async (req, res) => {
   try {
     const consultations = await Consultation.find({ receiverDoctor: req.user._id })
       .populate('patient') // Tüm hasta bilgilerini getir
-      .populate('senderDoctor', 'name email')
-      .populate('receiverDoctor', 'name email')
+      .populate('senderDoctor', 'name email avatar')
+      .populate('receiverDoctor', 'name email avatar')
       .sort('-createdAt');
 
     res.json(consultations);
@@ -1955,8 +2006,8 @@ app.get('/api/consultations/sent', authMiddleware, async (req, res) => {
   try {
     const consultations = await Consultation.find({ senderDoctor: req.user._id })
       .populate('patient') // Tüm hasta bilgilerini getir
-      .populate('senderDoctor', 'name email')
-      .populate('receiverDoctor', 'name email')
+      .populate('senderDoctor', 'name email avatar')
+      .populate('receiverDoctor', 'name email avatar')
       .sort('-createdAt');
 
     res.json(consultations);
@@ -2041,8 +2092,8 @@ app.get('/api/consultations/inbox', authMiddleware, async (req, res) => {
 
     const consultations = await Consultation.find(query)
       .populate('patient') // Tüm hasta bilgilerini getir
-      .populate('senderDoctor', 'name email mainSpecialty subspecialties')
-      .populate('receiverDoctor', 'name email mainSpecialty subspecialties')
+      .populate('senderDoctor', 'name email mainSpecialty subspecialties avatar')
+      .populate('receiverDoctor', 'name email mainSpecialty subspecialties avatar')
       .sort('-createdAt');
 
     // Her konsültasyon için tip bilgisi ekle
@@ -2495,8 +2546,8 @@ app.get('/api/colleagues/connections', authMiddleware, async (req, res) => {
       $or: [{ sender: userId }, { receiver: userId }],
       status: 'accepted'
     })
-    .populate('sender', 'name email mainSpecialty subspecialties')
-    .populate('receiver', 'name email mainSpecialty subspecialties');
+    .populate('sender', 'name email mainSpecialty subspecialties avatar')
+    .populate('receiver', 'name email mainSpecialty subspecialties avatar');
 
     res.json(connections);
   } catch (error) {
@@ -2529,6 +2580,82 @@ app.delete('/api/colleagues/remove/:connectionId', authMiddleware, async (req, r
   } catch (error) {
     console.error('Bağlantı kaldırma hatası:', error);
     res.status(500).json({ message: 'Bağlantı kaldırılırken bir hata oluştu' });
+  }
+});
+
+// Avatar endpoint'leri
+app.get('/api/avatars', (req, res) => {
+  try {
+    // Mevcut avatar dosyalarını listele - try multiple paths
+    let avatarsDir = path.join(__dirname, '../public/avatars');
+    console.log('=== Avatar Endpoint Debug ===');
+    console.log('__dirname:', __dirname);
+    console.log('Avatar directory path (attempt 1):', avatarsDir);
+    console.log('Directory exists (attempt 1):', fs.existsSync(avatarsDir));
+    
+    // If first path doesn't work, try alternative paths
+    if (!fs.existsSync(avatarsDir)) {
+      avatarsDir = path.join(process.cwd(), 'public/avatars');
+      console.log('Avatar directory path (attempt 2):', avatarsDir);
+      console.log('Directory exists (attempt 2):', fs.existsSync(avatarsDir));
+    }
+    
+    if (!fs.existsSync(avatarsDir)) {
+      avatarsDir = path.join(process.cwd(), 'src/../public/avatars');
+      console.log('Avatar directory path (attempt 3):', avatarsDir);
+      console.log('Directory exists (attempt 3):', fs.existsSync(avatarsDir));
+    }
+    
+    if (!fs.existsSync(avatarsDir)) {
+      console.log('Avatar directory not found in any location, returning empty array');
+      return res.json({ avatars: [] });
+    }
+    
+    const files = fs.readdirSync(avatarsDir);
+    console.log('Files in directory:', files);
+    const avatarFiles = files.filter(file => 
+      file.toLowerCase().endsWith('.png') || 
+      file.toLowerCase().endsWith('.jpg') || 
+      file.toLowerCase().endsWith('.jpeg') ||
+      file.toLowerCase().endsWith('.svg')
+    );
+    console.log('Filtered avatar files:', avatarFiles);
+    
+    res.json({ avatars: avatarFiles });
+  } catch (error) {
+    console.error('Avatar listesi hatası:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Avatar listesi getirilirken bir hata oluştu' });
+  }
+});
+
+// Avatar güncelleme endpoint'i
+app.put('/api/users/avatar', authMiddleware, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const userId = req.user._id;
+    
+    if (!avatar) {
+      return res.status(400).json({ message: 'Avatar seçimi zorunludur' });
+    }
+    
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { avatar },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+    }
+    
+    res.json({ 
+      message: 'Avatar başarıyla güncellendi',
+      avatar: user.avatar
+    });
+  } catch (error) {
+    console.error('Avatar güncelleme hatası:', error);
+    res.status(500).json({ message: 'Avatar güncellenirken bir hata oluştu' });
   }
 });
 

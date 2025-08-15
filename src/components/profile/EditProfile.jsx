@@ -15,7 +15,9 @@ import {
   Alert,
   CircularProgress,
   Divider,
-  Chip
+  Chip,
+  Avatar,
+  IconButton
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile, fetchUserProfile as fetchProfile } from '../../services/authService';
@@ -24,6 +26,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Person as PersonIcon, Edit as EditIcon } from '@mui/icons-material';
+import AvatarSelector from '../AvatarSelector';
 
 // Alt uzmanlık alanları
 const subspecialtiesByMain = {
@@ -88,9 +92,11 @@ const EditProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [user, setUser] = useState(null);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
   const [formData, setFormData] = useState({
     mainSpecialty: '',
-    subspecialties: []
+    subspecialties: [],
+    avatar: ''
   });
 
   useEffect(() => {
@@ -101,7 +107,8 @@ const EditProfile = () => {
         setUser(data); // Backend'den gelen güncel kullanıcı bilgilerini sakla
         setFormData({
           mainSpecialty: data.mainSpecialty || '',
-          subspecialties: data.subspecialties || []
+          subspecialties: data.subspecialties || [],
+          avatar: data.avatar || 'default-avatar.svg'
         });
       } catch (err) {
         console.error('Profil yükleme hatası:', err);
@@ -162,6 +169,21 @@ const EditProfile = () => {
     }
   };
 
+  const handleAvatarSelect = (avatar) => {
+    setFormData(prev => ({
+      ...prev,
+      avatar
+    }));
+  };
+
+  const openAvatarSelector = () => {
+    setAvatarSelectorOpen(true);
+  };
+
+  const closeAvatarSelector = () => {
+    setAvatarSelectorOpen(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -169,11 +191,12 @@ const EditProfile = () => {
     setSuccess('');
 
     try {
-                   const response = await updateProfile({
-               mainSpecialty: formData.mainSpecialty,
-               subspecialties: formData.subspecialties,
-               profileCompleted: true
-             });
+      const response = await updateProfile({
+        mainSpecialty: formData.mainSpecialty,
+        subspecialties: formData.subspecialties,
+        avatar: formData.avatar,
+        profileCompleted: true
+      });
       setSuccess('Profil başarıyla güncellendi');
     } catch (err) {
       setError(err.message);
@@ -228,6 +251,52 @@ const EditProfile = () => {
               ))}
             </Select>
           </FormControl>
+
+          {/* Avatar Seçim Alanı */}
+          <Box sx={{ mb: 4, textAlign: 'center' }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2, color: '#2c3e50' }}>
+              Profil Fotoğrafı
+            </Typography>
+            <Box sx={{ position: 'relative', display: 'inline-block' }}>
+              <Avatar
+                src={`/avatars/${formData.avatar}`}
+                sx={{
+                  width: 100,
+                  height: 100,
+                  border: '4px solid #EAECF0',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#1877F2',
+                    transform: 'scale(1.05)'
+                  }
+                }}
+                onClick={openAvatarSelector}
+              >
+                <PersonIcon sx={{ fontSize: 50 }} />
+              </Avatar>
+              <IconButton
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  background: '#1877F2',
+                  color: 'white',
+                  width: 32,
+                  height: 32,
+                  '&:hover': {
+                    background: '#166FE0'
+                  }
+                }}
+                onClick={openAvatarSelector}
+              >
+                <EditIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Tıklayarak farklı profil fotoğrafı seçebilirsiniz
+            </Typography>
+          </Box>
 
           {formData.mainSpecialty && (
             <>
@@ -506,6 +575,15 @@ const EditProfile = () => {
           </Box>
         </Box>
       </Paper>
+
+      {/* Avatar Seçim Dialog'u */}
+      <AvatarSelector
+        open={avatarSelectorOpen}
+        onClose={closeAvatarSelector}
+        selectedAvatar={formData.avatar}
+        onAvatarSelect={handleAvatarSelect}
+        title="Profil Fotoğrafı Seç"
+      />
     </Container>
   );
 };
