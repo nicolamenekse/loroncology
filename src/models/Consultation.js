@@ -58,6 +58,11 @@ const consultationSchema = new mongoose.Schema({
   receiverDeletedAt: {
     type: Date
   },
+  // Okunma durumu
+  isRead: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

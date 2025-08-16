@@ -1,20 +1,22 @@
-/* Modern Veteriner Hastanesi Tasarımı */
+/* Facebook-style Loroncology Design */
 :root {
-  --primary-color: #2c3e50;
-  --secondary-color: #3498db;
-  --accent-color: #e74c3c;
-  --background-color: #f5f6fa;
-  --text-color: #2c3e50;
-  --white: #ffffff;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --facebook-blue: #1877f2;
+  --facebook-blue-hover: #166fe5;
+  --facebook-gray: #65676b;
+  --facebook-light-gray: #f0f2f5;
+  --facebook-border: #dddfe2;
+  --facebook-text: #1c1e21;
+  --facebook-white: #ffffff;
+  --facebook-shadow: 0 2px 4px rgba(0,0,0,.1);
+  --facebook-shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--facebook-light-gray);
+  color: var(--facebook-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
@@ -24,191 +26,22 @@ body {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  text-align: center;
 }
 
-/* Header Styles */
-.header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 0;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 70px;
-  padding: 0 2rem;
-}
-
-.logo-link {
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: transform 0.3s ease;
-}
-
-.logo-link:hover {
-  transform: translateY(-1px);
-}
-
-.logo-link h1 {
-  color: var(--primary-color);
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-/* Desktop Navigation */
-.desktop-nav {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  align-items: center;
-}
-
-.desktop-nav li {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.desktop-nav a {
-  color: var(--primary-color);
-  text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  font-size: 15px;
-}
-
-.desktop-nav a:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
-}
-
-.desktop-nav .auth-button {
-  padding: 8px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.desktop-nav .auth-button.login {
-  color: #3B82F6;
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.desktop-nav .auth-button.login:hover {
-  background: rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
-}
-
-.desktop-nav .auth-button.register {
-  color: white;
-  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
-}
-
-.desktop-nav .auth-button.register:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-/* Mobile Navigation */
-.hamburger-menu {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  font-size: 24px;
-  padding: 8px;
-  cursor: pointer;
-}
-
-.mobile-nav {
-  display: none;
-  position: absolute;
-  top: 70px;
-  right: 0;
-  background: white;
-  width: 250px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-  transform: translateY(-100%);
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.mobile-nav.active {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.mobile-nav .nav-links {
-  list-style: none;
-  margin: 0;
-  padding: 16px;
-}
-
-.mobile-nav .nav-links li {
-  margin: 8px 0;
-}
-
-.mobile-nav .nav-links a {
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 500;
-  text-align: left;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.mobile-nav .nav-links a:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
-}
-
-.mobile-nav .nav-links .auth-button {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  border-radius: 8px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.mobile-nav .nav-links .auth-button.login {
-  color: #3B82F6;
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.mobile-nav .nav-links .auth-button.register {
-  color: white;
-  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+/* App Container */
+.app {
+  min-height: 100vh;
+  background-color: var(--facebook-light-gray);
 }
 
 /* Main Content */
 .main-content {
-  padding-top: 90px;
-  min-height: calc(100vh - 90px);
+  padding-top: 16px;
+  min-height: calc(100vh - 56px);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* Auth Pages */
@@ -216,15 +49,14 @@ body {
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--facebook-white);
+  border-radius: 8px;
+  box-shadow: var(--facebook-shadow);
+  border: 1px solid var(--facebook-border);
 }
 
 .auth-title {
-  color: var(--primary-color);
+  color: var(--facebook-text);
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 24px;
@@ -239,36 +71,38 @@ body {
 
 .auth-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--facebook-border);
+  border-radius: 6px;
   font-size: 15px;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--facebook-white);
+  box-sizing: border-box;
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: #3B82F6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--facebook-blue);
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
 }
 
 .auth-button {
   width: 100%;
   padding: 12px;
   border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
-  color: white;
-  font-weight: 500;
+  border-radius: 6px;
+  background: var(--facebook-blue);
+  color: var(--facebook-white);
+  font-weight: 600;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  text-transform: none;
 }
 
 .auth-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: var(--facebook-blue-hover);
+  box-shadow: var(--facebook-shadow-hover);
 }
 
 .auth-button:disabled {
@@ -277,7 +111,7 @@ body {
 }
 
 .auth-link {
-  color: #3B82F6;
+  color: var(--facebook-blue);
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -287,37 +121,194 @@ body {
   text-decoration: underline;
 }
 
+/* Card Styles */
+.card {
+  background: var(--facebook-white);
+  border-radius: 8px;
+  box-shadow: var(--facebook-shadow);
+  border: 1px solid var(--facebook-border);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--facebook-border);
+  background: var(--facebook-white);
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.card-footer {
+  padding: 16px;
+  border-top: 1px solid var(--facebook-border);
+  background: var(--facebook-light-gray);
+}
+
+/* Button Styles */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--facebook-blue);
+  color: var(--facebook-white);
+}
+
+.btn-primary:hover {
+  background: var(--facebook-blue-hover);
+}
+
+.btn-secondary {
+  background: var(--facebook-light-gray);
+  color: var(--facebook-text);
+}
+
+.btn-secondary:hover {
+  background: #e4e6eb;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--facebook-blue);
+  border: 1px solid var(--facebook-blue);
+}
+
+.btn-outline:hover {
+  background: rgba(24, 119, 242, 0.1);
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--facebook-text);
+  font-size: 14px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--facebook-border);
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: var(--facebook-white);
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--facebook-blue);
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  background: var(--facebook-white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--facebook-shadow);
+  border: 1px solid var(--facebook-border);
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--facebook-border);
+}
+
+.table th {
+  background: var(--facebook-light-gray);
+  font-weight: 600;
+  color: var(--facebook-text);
+}
+
+.table tr:hover {
+  background: var(--facebook-light-gray);
+}
+
+/* Alert Styles */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.alert-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--facebook-light-gray);
+  border-top: 4px solid var(--facebook-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-  .nav-container {
-    height: 60px;
-    padding: 0 1rem;
-  }
-
-  .logo-link h1 {
-    font-size: 20px;
-  }
-
-  .desktop-nav {
-    display: none;
-  }
-
-  .hamburger-menu {
-    display: block;
-  }
-
-  .mobile-nav {
-    display: block;
-    top: 60px;
-  }
-
   .main-content {
-    padding-top: 80px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
-
+  
   .auth-container {
     margin: 1rem;
     padding: 1.5rem;
+  }
+  
+  .card {
+    margin: 8px;
   }
 }
 
@@ -336,3 +327,26 @@ body {
 .fade-in {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+
+.p-1 { padding: 8px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+
+.d-flex { display: flex; }
+.justify-center { justify-content: center; }
+.align-center { align-items: center; }
+.gap-1 { gap: 8px; }
+.gap-2 { gap: 16px; }

@@ -110,3 +110,24 @@ export const removeConnection = async (connectionId) => {
     throw error;
   }
 };
+
+// Bekleyen arkadaşlık istekleri sayısını getir
+export const getPendingConnectionCount = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/colleagues/pending-count`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Bekleyen istek sayısı getirilemedi');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Bekleyen istek sayısı getirilirken hata:', error);
+    return { pendingCount: 0 };
+  }
+};

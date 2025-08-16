@@ -34,7 +34,8 @@ import {
   Menu,
   MenuItem,
   Snackbar,
-  Alert
+  Alert,
+  Badge
 } from '@mui/material';
 import {
   Mail as MailIcon,
@@ -62,6 +63,7 @@ import {
   archiveConsultation,
   restoreConsultation
 } from '../services/consultationService';
+import { markConsultationAsRead, markAllConsultationsAsRead, getUnreadConsultationCount } from '../services/notificationService';
 
 const Inbox = () => {
   const { user } = useAuth();
@@ -83,14 +85,65 @@ const Inbox = () => {
   const [archiveConfirmDialog, setArchiveConfirmDialog] = useState(false);
   const [restoreConfirmDialog, setRestoreConfirmDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const { unreadCount: count } = await getUnreadConsultationCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Okunmamış konsültasyon sayısı getirilemedi:', error);
+    }
+  };
+
+  // Unread count'u getir
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount();
+    }
+  }, [user]);
+
+  // Tab değiştiğinde unread count'u güncelle (sadece gelen konsültasyonlar tab'ında)
+  useEffect(() => {
+    if (user && activeTab === 0) {
+      fetchUnreadCount();
+    }
+  }, [user, activeTab]);
+
+  // Sayfa odaklandığında unread count'u güncelle
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user && activeTab === 0) {
+        fetchUnreadCount();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, activeTab]);
+
+  // Header'daki unread count'u güncellemek için event listener
+  useEffect(() => {
+    const updateHeaderCount = () => {
+      // Custom event ile header'ı bilgilendir
+      window.dispatchEvent(new CustomEvent('consultationRead'));
+    };
+
+    window.addEventListener('consultationRead', updateHeaderCount);
+    return () => window.removeEventListener('consultationRead', updateHeaderCount);
+  }, []);
 
   useEffect(() => {
     fetchConsultations();
-  }, [activeTab, showArchived, showDeleted]);
+  }, [user, showArchived, showDeleted, activeTab]);
 
   const fetchConsultations = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
       const allConsultations = await getConsultationInbox(showArchived, showDeleted);
       
       // Tab'a göre filtrele
@@ -116,6 +169,23 @@ const Inbox = () => {
       const messages = await getConsultationMessages(consultation._id);
       setMessages(messages);
       setMessageDialog(true);
+      
+      // Konsültasyon açıldığında okundu olarak işaretle (sadece gelen konsültasyonlar için)
+      if (activeTab === 0 && consultation.type === 'incoming' && !consultation.isRead) {
+        try {
+          await markConsultationAsRead(consultation._id);
+          // Konsültasyon listesini güncelle
+          setConsultations(prev => prev.map(c => 
+            c._id === consultation._id ? { ...c, isRead: true } : c
+          ));
+          // Unread count'u güncelle
+          setUnreadCount(prev => Math.max(0, prev - 1));
+          // Header'daki unread count'u güncelle
+          window.dispatchEvent(new CustomEvent('consultationRead'));
+        } catch (error) {
+          console.error('Konsültasyon okundu olarak işaretlenemedi:', error);
+        }
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -230,6 +300,28 @@ const Inbox = () => {
       setRestoreConfirmDialog(false);
       handleMenuClose();
       await fetchConsultations();
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message,
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllConsultationsAsRead();
+      setSnackbar({
+        open: true,
+        message: 'Tüm konsültasyonlar okundu olarak işaretlendi',
+        severity: 'success'
+      });
+      await fetchConsultations();
+      // Unread count'u sıfırla
+      setUnreadCount(0);
+      // Header'daki unread count'u güncelle
+      window.dispatchEvent(new CustomEvent('consultationRead'));
     } catch (err) {
       setSnackbar({
         open: true,
@@ -538,6 +630,16 @@ const Inbox = () => {
           Konsültasyon Gelen Kutusu
         </Typography>
         <Box display="flex" gap={2}>
+          {!showDeleted && !showArchived && (
+            <Button
+              variant="outlined"
+              startIcon={<MailIcon />}
+              onClick={handleMarkAllAsRead}
+              color="primary"
+            >
+              Tümünü Okundu İşaretle
+            </Button>
+          )}
           {!showDeleted && (
             <Button
               variant={showArchived ? "contained" : "outlined"}
@@ -567,7 +669,14 @@ const Inbox = () => {
 
       <Paper sx={{ mb: 4 }}>
         <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-          <Tab icon={<MailIcon />} label="Gelen Konsültasyonlar" />
+          <Tab 
+            icon={
+              <Badge badgeContent={unreadCount} color="error">
+                <MailIcon />
+              </Badge>
+            } 
+            label={`Gelen Konsültasyonlar${unreadCount > 0 ? ` (${unreadCount})` : ''}`} 
+          />
           <Tab icon={<SendIcon />} label="Gönderilen Konsültasyonlar" />
         </Tabs>
       </Paper>
@@ -587,7 +696,16 @@ const Inbox = () => {
               <ListItem
                 button={!showDeleted}
                 onClick={!showDeleted ? () => handleConsultationClick(consultation) : undefined}
-                sx={showDeleted ? { opacity: 0.7 } : {}}
+                sx={{
+                  ...(showDeleted ? { opacity: 0.7 } : {}),
+                  ...(activeTab === 0 && consultation.type === 'incoming' && !consultation.isRead && !showArchived && !showDeleted ? {
+                    backgroundColor: '#f0f8ff',
+                    borderLeft: '4px solid #1877f2',
+                    '&:hover': {
+                      backgroundColor: '#e6f3ff',
+                    }
+                  } : {})
+                }}
                 secondaryAction={
                   <IconButton
                     edge="end"
@@ -623,6 +741,14 @@ const Inbox = () => {
                         label={getStatusText(consultation.status)}
                         color={getStatusColor(consultation.status)}
                       />
+                      {activeTab === 0 && consultation.type === 'incoming' && !consultation.isRead && !showArchived && !showDeleted && (
+                        <Chip
+                          size="small"
+                          label="Yeni"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      )}
                     </Box>
                   }
                   secondary={
@@ -788,6 +914,20 @@ const Inbox = () => {
         onClose={() => setMessageDialog(false)}
         maxWidth="md"
         fullWidth
+        onOpen={() => {
+          // Dialog açıldığında konsültasyonu okundu olarak işaretle
+          if (selectedConsultation && activeTab === 0 && selectedConsultation.type === 'incoming' && !selectedConsultation.isRead) {
+            markConsultationAsRead(selectedConsultation._id).then(() => {
+              setConsultations(prev => prev.map(c => 
+                c._id === selectedConsultation._id ? { ...c, isRead: true } : c
+              ));
+              // Unread count'u güncelle
+              setUnreadCount(prev => Math.max(0, prev - 1));
+            }).catch(error => {
+              console.error('Konsültasyon okundu olarak işaretlenemedi:', error);
+            });
+          }
+        }}
       >
         <DialogTitle>
           {selectedConsultation && (

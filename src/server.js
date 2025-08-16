@@ -654,7 +654,8 @@ app.post('/api/auth/login', async (req, res) => {
         id: user._id, // Keep both for compatibility
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -2101,7 +2102,8 @@ app.get('/api/consultations/inbox', authMiddleware, async (req, res) => {
       const isIncoming = consultation.receiverDoctor._id.toString() === req.user._id.toString();
       return {
         ...consultation.toObject(),
-        type: isIncoming ? 'incoming' : 'sent'
+        type: isIncoming ? 'incoming' : 'sent',
+        isRead: consultation.isRead || false
       };
     });
 
@@ -2109,6 +2111,70 @@ app.get('/api/consultations/inbox', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Konsültasyon getirme hatası:', error);
     res.status(500).json({ message: 'Konsültasyonlar getirilirken bir hata oluştu' });
+  }
+});
+
+// Okunmamış konsültasyon sayısını getir
+app.get('/api/consultations/unread-count', authMiddleware, async (req, res) => {
+  try {
+    const unreadCount = await Consultation.countDocuments({
+      receiverDoctor: req.user._id,
+      isRead: false,
+      receiverDeleted: false,
+      receiverArchived: false
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Okunmamış konsültasyon sayısı getirme hatası:', error);
+    res.status(500).json({ message: 'Okunmamış konsültasyon sayısı getirilirken bir hata oluştu' });
+  }
+});
+
+// Konsültasyonu okundu olarak işaretle
+app.put('/api/consultations/:id/mark-read', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+    if (!consultation) {
+      return res.status(404).json({ message: 'Konsültasyon bulunamadı' });
+    }
+
+    // Sadece alıcı doktor okundu olarak işaretleyebilir
+    if (consultation.receiverDoctor.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok' });
+    }
+
+    consultation.isRead = true;
+    await consultation.save();
+
+    res.json({ message: 'Konsültasyon okundu olarak işaretlendi' });
+  } catch (error) {
+    console.error('Konsültasyon okundu işaretleme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyon okundu olarak işaretlenirken bir hata oluştu' });
+  }
+});
+
+// Tüm konsültasyonları okundu olarak işaretle
+app.put('/api/consultations/mark-all-read', authMiddleware, async (req, res) => {
+  try {
+    const result = await Consultation.updateMany(
+      {
+        receiverDoctor: req.user._id,
+        isRead: false,
+        receiverDeleted: false,
+        receiverArchived: false
+      },
+      {
+        isRead: true
+      }
+    );
+
+    res.json({ message: `${result.modifiedCount} konsültasyon okundu olarak işaretlendi` });
+  } catch (error) {
+    console.error('Tüm konsültasyonları okundu işaretleme hatası:', error);
+    res.status(500).json({ message: 'Konsültasyonlar okundu olarak işaretlenirken bir hata oluştu' });
   }
 });
 
@@ -2558,6 +2624,21 @@ app.get('/api/colleagues/connections', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Bağlantı listesi hatası:', error);
     res.status(500).json({ message: 'Bağlantılar getirilirken bir hata oluştu' });
+  }
+});
+
+// Bekleyen arkadaşlık istekleri sayısını getir
+app.get('/api/colleagues/pending-count', authMiddleware, async (req, res) => {
+  try {
+    const pendingCount = await ColleagueConnection.countDocuments({
+      receiver: req.user._id,
+      status: 'pending'
+    });
+
+    res.json({ pendingCount });
+  } catch (error) {
+    console.error('Bekleyen istek sayısı getirme hatası:', error);
+    res.status(500).json({ message: 'Bekleyen istek sayısı getirilirken bir hata oluştu' });
   }
 });
 
