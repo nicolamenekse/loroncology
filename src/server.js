@@ -679,13 +679,13 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     const pendingRequests = await ColleagueConnection.find({
       receiver: req.user._id,
       status: 'pending'
-    }).populate('sender', 'name mainSpecialty');
+    }).populate('sender', 'name mainSpecialty avatar subspecialties');
 
     // Gönderilen bağlantı isteklerini getir
     const sentRequests = await ColleagueConnection.find({
       sender: req.user._id,
       status: 'pending'
-    }).populate('receiver', 'name mainSpecialty');
+    }).populate('receiver', 'name mainSpecialty avatar subspecialties');
 
     // Kabul edilen bağlantıları getir
     const connections = await ColleagueConnection.find({
@@ -695,8 +695,30 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
       ],
       status: 'accepted'
     })
-    .populate('sender', 'name mainSpecialty')
-    .populate('receiver', 'name mainSpecialty');
+    .populate('sender', 'name mainSpecialty avatar subspecialties')
+    .populate('receiver', 'name mainSpecialty avatar subspecialties');
+
+    // Debug: Bağlantı verilerini kontrol et
+    if (connections.length > 0) {
+      console.log('API /auth/me - Bağlantı detayları:');
+      connections.forEach((connection, index) => {
+        console.log(`Bağlantı ${index}:`, {
+          connectionId: connection._id,
+          sender: {
+            id: connection.sender?._id,
+            name: connection.sender?.name,
+            avatar: connection.sender?.avatar,
+            keys: connection.sender ? Object.keys(connection.sender) : []
+          },
+          receiver: {
+            id: connection.receiver?._id,
+            name: connection.receiver?.name,
+            avatar: connection.receiver?.avatar,
+            keys: connection.receiver ? Object.keys(connection.receiver) : []
+          }
+        });
+      });
+    }
 
     console.log('API /auth/me - Kullanıcı bilgileri:', {
               userId: req.user._id,
@@ -721,36 +743,53 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
 app.put('/api/auth/profile', authMiddleware, async (req, res) => {
   try {
     const { mainSpecialty, subspecialties, profileCompleted, avatar } = req.body;
+    
+    console.log('=== Profil Güncelleme İsteği ===');
+    console.log('Kullanıcı ID:', req.user._id);
+    console.log('Gelen veri:', { mainSpecialty, subspecialties, profileCompleted, avatar });
 
     // Kullanıcıyı bul
     const user = await User.findById(req.user._id);
     if (!user) {
+      console.log('Kullanıcı bulunamadı');
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }
 
-    // Ana uzmanlık alanı kontrolü
-    if (mainSpecialty && !user.mainSpecialty) {
+    console.log('Mevcut kullanıcı verisi:', {
+      mainSpecialty: user.mainSpecialty,
+      subspecialties: user.subspecialties,
+      profileCompleted: user.profileCompleted,
+      avatar: user.avatar
+    });
+
+    // Ana uzmanlık alanını güncelle (her zaman güncelle)
+    if (mainSpecialty !== undefined) {
       user.mainSpecialty = mainSpecialty;
+      console.log('Ana uzmanlık güncellendi:', mainSpecialty);
     }
 
     // Alt uzmanlık alanlarını güncelle
     if (Array.isArray(subspecialties)) {
       user.subspecialties = subspecialties;
+      console.log('Alt uzmanlıklar güncellendi:', subspecialties);
     }
 
     // Profil tamamlanma durumunu güncelle
     if (typeof profileCompleted === 'boolean') {
       user.profileCompleted = profileCompleted;
+      console.log('Profil tamamlanma durumu güncellendi:', profileCompleted);
     }
 
     // Avatar güncelle
-    if (avatar) {
+    if (avatar !== undefined) {
       user.avatar = avatar;
+      console.log('Avatar güncellendi:', avatar);
     }
 
     await user.save();
+    console.log('Kullanıcı veritabanında güncellendi');
 
-    res.json({
+    const responseData = {
       message: 'Profil başarıyla güncellendi',
       user: {
         id: user._id,
@@ -762,7 +801,11 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
         profileCompleted: user.profileCompleted,
         avatar: user.avatar
       }
-    });
+    };
+
+    console.log('Yanıt verisi:', responseData);
+    res.json(responseData);
+    
   } catch (error) {
     console.error('Profil güncelleme hatası:', error);
     res.status(500).json({ message: 'Profil güncellenirken bir hata oluştu' });
