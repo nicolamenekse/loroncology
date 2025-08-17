@@ -1,83 +1,64 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from './models/User.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Patient from './models/Patient.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('MongoDB bağlantısı başarılı');
-  } catch (error) {
-    console.error('MongoDB bağlantı hatası:', error);
-    process.exit(1);
-  }
-};
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/loroncology';
 
-const updateExistingPatients = async () => {
+async function updateExistingPatients() {
   try {
-    console.log('Mevcut hastalar güncelleniyor...');
-    
-    // Get all patients that don't have doctorName or doctorEmail
-    const patientsToUpdate = await Patient.find({
-      $or: [
-        { doctorName: { $exists: false } },
-        { doctorEmail: { $exists: false } },
-        { doctorName: null },
-        { doctorEmail: null }
-      ]
-    });
-    
-    console.log(`${patientsToUpdate.length} hasta güncellenecek`);
-    
+    console.log('🔌 MongoDB\'ye bağlanılıyor...');
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ MongoDB\'ye bağlantı başarılı');
+
+    // Mevcut hastaları kontrol et
+    const patients = await Patient.find({});
+    console.log(`📊 Toplam ${patients.length} hasta bulundu`);
+
+    // isDeleted ve deletedAt alanları eksik olan hastaları bul
+    const patientsToUpdate = patients.filter(patient => 
+      patient.isDeleted === undefined || patient.deletedAt === undefined
+    );
+
     if (patientsToUpdate.length === 0) {
-      console.log('Güncellenecek hasta bulunamadı');
+      console.log('✅ Tüm hastalar zaten güncel');
       return;
     }
-    
-    let updatedCount = 0;
-    
+
+    console.log(`🔄 ${patientsToUpdate.length} hasta güncellenecek`);
+
+    // Her hastayı güncelle
     for (const patient of patientsToUpdate) {
-      try {
-        // Get user information
-        const user = await User.findById(patient.userId);
-        if (!user) {
-          console.log(`Kullanıcı bulunamadı: ${patient.userId} (Hasta: ${patient.hastaAdi})`);
-          continue;
-        }
-        
-        // Update patient with doctor information
-        await Patient.findByIdAndUpdate(patient._id, {
-          doctorName: user.name,
-          doctorEmail: user.email
-        });
-        
-        console.log(`Hasta güncellendi: ${patient.hastaAdi} -> Doktor: ${user.name}`);
-        updatedCount++;
-        
-      } catch (error) {
-        console.error(`Hasta güncellenirken hata: ${patient._id}`, error);
+      const updateData = {};
+      
+      if (patient.isDeleted === undefined) {
+        updateData.isDeleted = false;
       }
+      
+      if (patient.deletedAt === undefined) {
+        updateData.deletedAt = null;
+      }
+
+      await Patient.findByIdAndUpdate(patient._id, updateData);
+      console.log(`✅ Hasta güncellendi: ${patient.hastaAdi} (${patient._id})`);
     }
-    
-    console.log(`\nGüncelleme tamamlandı! ${updatedCount} hasta güncellendi.`);
-    
-  } catch (error) {
-    console.error('Güncelleme hatası:', error);
-  }
-};
 
-const main = async () => {
-  try {
-    await connectDB();
-    await updateExistingPatients();
-    process.exit(0);
-  } catch (error) {
-    console.error('Ana hata:', error);
-    process.exit(1);
-  }
-};
+    console.log('🎉 Tüm hastalar başarıyla güncellendi!');
 
-main();
+  } catch (error) {
+    console.error('❌ Hata oluştu:', error);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 MongoDB bağlantısı kapatıldı');
+  }
+}
+
+// Script'i çalıştır
+updateExistingPatients();

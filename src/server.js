@@ -15,7 +15,7 @@ import Consultation from './models/Consultation.js';
 import Message from './models/Message.js';
 import ColleagueConnection from './models/ColleagueConnection.js';
 import { generatePatientAnalysis, generateTreatmentSuggestions, analyzeLaboratoryResults } from './services/aiService.js';
-import { generateToken, authMiddleware, requireRole } from './services/backend/authService.js';
+import { generateToken, authMiddleware } from './services/backend/authService.js';
 import { adminMiddleware } from './middleware/adminMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,7 +71,7 @@ const corsOptions = {
     'https://loroncology.onrender.com',
     'https://loronkoloji.onrender.com'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
   optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -82,7 +82,7 @@ app.use(cors(corsOptions));
 // Additional middleware for mobile compatibility
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
@@ -1375,7 +1375,7 @@ app.get('/api/patients', authMiddleware, async (req, res) => {
       userIdType: typeof p.userId
     })));
     
-    const patients = await Patient.find({ userId }).sort({ createdAt: -1 });
+    const patients = await Patient.findActive({ userId }).sort({ createdAt: -1 });
     console.log(`${patients.length} hasta bulundu`);
     console.log('Bulunan hastalar:', patients.map(p => ({ 
       id: p._id, 
@@ -1390,6 +1390,29 @@ app.get('/api/patients', authMiddleware, async (req, res) => {
       message: 'Hastalar getirilirken bir hata oluştu',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  }
+});
+
+// Geri Dönüşüm Kutusu Endpoint'leri - Spesifik route'lar önce tanımlanmalı
+app.get('/api/patients/deleted', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const deletedPatients = await Patient.findDeleted({ userId }).sort({ deletedAt: -1 });
+    res.json(deletedPatients);
+  } catch (error) {
+    console.error('Silinen hastalar getirme hatası:', error);
+    res.status(500).json({ message: 'Silinen hastalar getirilirken bir hata oluştu' });
+  }
+});
+
+app.get('/api/patients/deleted/count', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const count = await Patient.countDeleted({ userId });
+    res.json({ count });
+  } catch (error) {
+    console.error('Silinen hasta sayısı getirme hatası:', error);
+    res.status(500).json({ message: 'Silinen hasta sayısı getirilirken bir hata oluştu' });
   }
 });
 
@@ -1545,12 +1568,9 @@ app.delete('/api/patients/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ message: 'Bu hasta kaydını silme yetkiniz yok' });
     }
     
-    // Hastayı sil
-    await Patient.findByIdAndDelete(req.params.id);
-    
-    // Hasta silindiğinde history kayıtlarını da sil
-    await PatientHistory.deleteMany({ patientId: req.params.id });
-    console.log('Hasta ve geçmiş kayıtları silindi:', req.params.id);
+    // Hastayı soft delete yap
+    await patient.softDelete();
+    console.log('Hasta soft delete yapıldı:', req.params.id);
     
     res.json({ message: 'Hasta başarıyla silindi' });
   } catch (error) {
@@ -2785,6 +2805,63 @@ app.put('/api/users/avatar', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Avatar güncelleme hatası:', error);
     res.status(500).json({ message: 'Avatar güncellenirken bir hata oluştu' });
+  }
+});
+
+
+
+app.patch('/api/patients/:id/restore', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const patient = await Patient.findById(req.params.id);
+    
+    if (!patient) {
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    if (patient.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Bu hasta kaydını geri getirme yetkiniz yok' });
+    }
+    
+    if (!patient.isDeleted) {
+      return res.status(400).json({ message: 'Bu hasta zaten aktif' });
+    }
+    
+    await patient.restore();
+    res.json({ message: 'Hasta başarıyla geri getirildi' });
+  } catch (error) {
+    console.error('Hasta geri getirme hatası:', error);
+    res.status(500).json({ message: 'Hasta geri getirilirken bir hata oluştu' });
+  }
+});
+
+app.delete('/api/patients/:id/permanent-delete', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const patient = await Patient.findById(req.params.id);
+    
+    if (!patient) {
+      return res.status(404).json({ message: 'Hasta bulunamadı' });
+    }
+    
+    if (patient.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Bu hasta kaydını silme yetkiniz yok' });
+    }
+    
+    if (!patient.isDeleted) {
+      return res.status(400).json({ message: 'Bu hasta zaten aktif' });
+    }
+    
+    // Hastayı kalıcı olarak sil
+    await Patient.findByIdAndDelete(req.params.id);
+    
+    // Hasta silindiğinde history kayıtlarını da sil
+    await PatientHistory.deleteMany({ patientId: req.params.id });
+    
+    res.json({ message: 'Hasta kalıcı olarak silindi' });
+  } catch (error) {
+    console.error('Hasta kalıcı silme hatası:', error);
+    res.status(500).json({ message: 'Hasta kalıcı olarak silinirken bir hata oluştu' });
   }
 });
 

@@ -149,10 +149,47 @@ const patientSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 // Add compound index for user-specific uniqueness of protokolNo
 patientSchema.index({ userId: 1, protokolNo: 1 }, { unique: true });
+
+// Soft delete method
+patientSchema.methods.softDelete = function() {
+  this.isDeleted = true;
+  this.deletedAt = new Date();
+  return this.save();
+};
+
+// Restore method
+patientSchema.methods.restore = function() {
+  this.isDeleted = false;
+  this.deletedAt = null;
+  return this.save();
+};
+
+// Override find to exclude deleted patients by default
+patientSchema.statics.findActive = function(filter = {}) {
+  return this.find({ ...filter, isDeleted: false });
+};
+
+// Find deleted patients
+patientSchema.statics.findDeleted = function(filter = {}) {
+  return this.find({ ...filter, isDeleted: true });
+};
+
+// Count deleted patients
+patientSchema.statics.countDeleted = function(filter = {}) {
+  return this.countDocuments({ ...filter, isDeleted: true });
+};
 
 const Patient = mongoose.model('Patient', patientSchema);
 

@@ -15,6 +15,7 @@ import PatientForm from './components/PatientForm';
 import PatientList from './components/PatientList';
 import PatientDetail from './components/PatientDetail';
 import PatientEdit from './components/PatientEdit';
+import TrashBin from './components/TrashBin';
 import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
 import BlogCreate from './components/BlogCreate';
@@ -80,6 +81,11 @@ const AppContent = () => {
           <Route path="/hasta-duzenle/:id" element={
             <ProtectedRoute>
               <PatientEdit />
+            </ProtectedRoute>
+          } />
+          <Route path="/geri-donusum-kutusu" element={
+            <ProtectedRoute>
+              <TrashBin />
             </ProtectedRoute>
           } />
           <Route path="/blog" element={<BlogList />} />

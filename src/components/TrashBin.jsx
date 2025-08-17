@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -31,29 +31,30 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PetsIcon from '@mui/icons-material/Pets';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import RestoreIcon from '@mui/icons-material/Restore';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
 
-const PatientList = () => {
+const TrashBin = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
   
-  const [patients, setPatients] = useState([]);
-  const [deletedPatientsCount, setDeletedPatientsCount] = useState(0);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletedPatients, setDeletedPatients] = useState([]);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [permanentDeleteDialogOpen, setPermanentDeleteDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
   const [sortBy, setSortBy] = useState('dateDesc');
-  const navigate = useNavigate();
 
   // Debounced search
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -67,59 +68,62 @@ const PatientList = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchPatients();
-    fetchDeletedPatientsCount();
+    fetchDeletedPatients();
   }, []);
 
-  const fetchPatients = async () => {
+  const fetchDeletedPatients = async () => {
     try {
       setLoading(true);
       
-      // Gerçek API'den hasta verilerini çek
-      const response = await fetch(`${API_URL}/api/patients`, {
+      // Gerçek API'den silinen hasta verilerini çek
+      const response = await fetch(`${API_URL}/api/patients/deleted`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: Hastalar yüklenirken bir hata oluştu`);
+        throw new Error(`HTTP ${response.status}: Silinen hastalar yüklenirken bir hata oluştu`);
       }
       
       const data = await response.json();
-      setPatients(data);
+      setDeletedPatients(data);
       setError(null);
     } catch (error) {
-      console.error('Fetch patients error:', error);
+      console.error('Fetch deleted patients error:', error);
       setError(`Bağlantı hatası: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchDeletedPatientsCount = async () => {
+  const handleRestoreConfirm = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/patients/deleted/count`, {
+      const response = await fetch(`${API_URL}/api/patients/${selectedPatient._id}/restore`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setDeletedPatientsCount(data.count || 0);
+
+      if (!response.ok) {
+        throw new Error('Hasta geri getirilirken bir hata oluştu');
       }
+
+      setDeletedPatients(deletedPatients.filter(p => p._id !== selectedPatient._id));
+      setRestoreDialogOpen(false);
+      setSelectedPatient(null);
+      setSuccess(`${selectedPatient.hastaAdi} başarıyla geri getirildi!`);
+      setError(null);
     } catch (error) {
-      console.error('Fetch deleted patients count error:', error);
-      // Hata durumunda sayacı 0 olarak bırak
+      console.error('Error:', error);
+      setError(error.message);
     }
   };
 
-
-
-  const handleDeleteConfirm = async () => {
+  const handlePermanentDeleteConfirm = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/patients/${selectedPatient._id}`, {
+      const response = await fetch(`${API_URL}/api/patients/${selectedPatient._id}/permanent-delete`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -127,62 +131,52 @@ const PatientList = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Hasta silinirken bir hata oluştu');
+        throw new Error('Hasta kalıcı olarak silinirken bir hata oluştu');
       }
 
-      setPatients(patients.filter(p => p._id !== selectedPatient._id));
-      setDeleteDialogOpen(false);
+      setDeletedPatients(deletedPatients.filter(p => p._id !== selectedPatient._id));
+      setPermanentDeleteDialogOpen(false);
       setSelectedPatient(null);
+      setSuccess(`${selectedPatient.hastaAdi} kalıcı olarak silindi!`);
       setError(null);
-      // Silinen hasta sayısını güncelle
-      fetchDeletedPatientsCount();
     } catch (error) {
       console.error('Error:', error);
       setError(error.message);
     }
   };
 
-  const handleDeleteCancel = () => {
-    setDeleteDialogOpen(false);
+  const handleRestoreCancel = () => {
+    setRestoreDialogOpen(false);
     setSelectedPatient(null);
   };
 
-  // Filtered and sorted patients
-  const filteredAndSortedPatients = useMemo(() => {
-    let filtered = patients.filter(patient => {
-      const matchesSearch = patient.hastaAdi ? 
-        patient.hastaAdi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) : false;
-      const matchesFilter = filterType === '' || patient.tur === filterType;
-      return matchesSearch && matchesFilter;
-    });
+  const handlePermanentDeleteCancel = () => {
+    setPermanentDeleteDialogOpen(false);
+    setSelectedPatient(null);
+  };
 
-    return filtered.sort((a, b) => {
-      if (sortBy === 'dateDesc') {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      } else if (sortBy === 'dateAsc') {
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      } else if (sortBy === 'nameAsc') {
-        const nameA = a.hastaAdi || '';
-        const nameB = b.hastaAdi || '';
-        return nameA.localeCompare(nameB);
-      } else if (sortBy === 'nameDesc') {
-        const nameA = a.hastaAdi || '';
-        const nameB = b.hastaAdi || '';
-        return nameB.localeCompare(nameA);
-      }
-      return 0;
-    });
-  }, [patients, debouncedSearchTerm, filterType, sortBy]);
-
-  const handleViewDetails = useCallback((id) => {
-    navigate(`/hasta/${id}`);
-  }, [navigate]);
-
-  const handleEditPatient = useCallback((id) => {
-    navigate(`/hasta-duzenle/${id}`);
-  }, [navigate]);
-
-
+  // Filtered and sorted deleted patients
+  const filteredAndSortedDeletedPatients = deletedPatients.filter(patient => {
+    const matchesSearch = patient.hastaAdi ? 
+      patient.hastaAdi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) : false;
+    const matchesFilter = filterType === '' || patient.tur === filterType;
+    return matchesSearch && matchesFilter;
+  }).sort((a, b) => {
+    if (sortBy === 'dateDesc') {
+      return new Date(b.deletedAt || b.updatedAt) - new Date(a.deletedAt || a.updatedAt);
+    } else if (sortBy === 'dateAsc') {
+      return new Date(a.deletedAt || a.updatedAt) - new Date(b.deletedAt || b.updatedAt);
+    } else if (sortBy === 'nameAsc') {
+      const nameA = a.hastaAdi || '';
+      const nameB = b.hastaAdi || '';
+      return nameA.localeCompare(nameB);
+    } else if (sortBy === 'nameDesc') {
+      const nameA = a.hastaAdi || '';
+      const nameB = b.hastaAdi || '';
+      return nameB.localeCompare(nameA);
+    }
+    return 0;
+  });
 
   const renderSkeletonCards = () => (
     <Grid container spacing={3}>
@@ -191,7 +185,8 @@ const PatientList = () => {
           <Card sx={{ 
             borderRadius: '8px',
             boxShadow: 'var(--facebook-shadow)',
-            border: '1px solid var(--facebook-border)'
+            border: '1px solid var(--facebook-border)',
+            opacity: 0.7
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -224,17 +219,17 @@ const PatientList = () => {
       borderRadius: '8px',
       border: '1px solid var(--facebook-border)'
     }}>
-      <PetsIcon sx={{ fontSize: 64, color: '#98A2B3', mb: 2 }} />
+      <DeleteIcon sx={{ fontSize: 64, color: '#98A2B3', mb: 2 }} />
       <Typography variant="h6" color="#101828" sx={{ mb: 1, fontWeight: 600 }}>
-        Kayıt bulunamadı
+        Geri Dönüşüm Kutusu Boş
       </Typography>
       <Typography variant="body2" color="#667085" sx={{ mb: 3 }}>
-        {searchTerm || filterType ? 'Arama kriterlerine uygun hasta bulunamadı.' : 'Henüz hasta kaydı bulunmuyor.'}
+        {searchTerm || filterType ? 'Arama kriterlerine uygun silinen hasta bulunamadı.' : 'Henüz silinen hasta bulunmuyor.'}
       </Typography>
       <Button
         variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => navigate('/yeni-hasta')}
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/hastalar')}
         sx={{
           backgroundColor: 'var(--facebook-blue)',
           '&:hover': { backgroundColor: 'var(--facebook-blue-hover)' },
@@ -245,7 +240,7 @@ const PatientList = () => {
           borderRadius: '6px'
         }}
       >
-        Yeni Hasta Ekle
+        Hasta Listesine Dön
       </Button>
     </Box>
   );
@@ -267,64 +262,42 @@ const PatientList = () => {
           flexDirection: { xs: 'column', sm: 'row' },
           gap: { xs: 2, sm: 0 }
         }}>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ 
-              color: '#101828',
-              fontWeight: 700,
-              fontSize: '24px',
-              mb: 0.5
-            }}>
-              Hasta Listesi
-            </Typography>
-            <Typography variant="body2" color="#667085">
-              ({filteredAndSortedPatients.length} kayıt)
-            </Typography>
-          </Box>
-                    <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-            <Badge badgeContent={deletedPatientsCount} color="error" sx={{ '& .MuiBadge-badge': { fontSize: '12px' } }}>
-              <Button
-                variant="outlined"
-                startIcon={<DeleteIcon />}
-                onClick={() => navigate('/geri-donusum-kutusu')}
-                size="large"
-                fullWidth={isMobile}
-                sx={{ 
-                  borderColor: '#D92D20',
-                  color: '#D92D20',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  px: 3,
-                  py: 1.5,
-                  borderRadius: '6px',
-                  '&:hover': {
-                    borderColor: '#B42318',
-                    backgroundColor: '#FEF3F2'
-                  }
-                }}
-              >
-                Geri Dönüşüm Kutusu
-              </Button>
-            </Badge>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/yeni-hasta')}
-              size="large"
-              fullWidth={isMobile}
-              sx={{ 
-                backgroundColor: 'var(--facebook-blue)',
-                '&:hover': { backgroundColor: 'var(--facebook-blue-hover)' },
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate('/hastalar')}
+              sx={{
+                borderColor: '#D0D5DD',
+                color: '#667085',
                 textTransform: 'none',
-                fontWeight: 600,
-                px: 4,
-                py: 1.5,
+                fontWeight: 500,
                 borderRadius: '6px',
-                boxShadow: 'var(--facebook-shadow)'
-            }}
-          >
-            Yeni Hasta Ekle
-          </Button>
+                '&:hover': {
+                  borderColor: '#98A2B3',
+                  backgroundColor: '#F8FAFC'
+                }
+              }}
+            >
+              Geri
+            </Button>
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ 
+                color: '#101828',
+                fontWeight: 700,
+                fontSize: '24px',
+                mb: 0.5
+              }}>
+                Geri Dönüşüm Kutusu
+              </Typography>
+              <Typography variant="body2" color="#667085">
+                ({filteredAndSortedDeletedPatients.length} silinen kayıt)
+              </Typography>
+            </Box>
           </Box>
+          <Badge badgeContent={deletedPatients.length} color="error" sx={{ '& .MuiBadge-badge': { fontSize: '12px' } }}>
+            <DeleteIcon sx={{ fontSize: 32, color: '#D92D20' }} />
+          </Badge>
         </Box>
 
         {/* Filter Bar */}
@@ -340,7 +313,7 @@ const PatientList = () => {
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
-                placeholder="Hasta adı ile ara"
+                placeholder="Silinen hasta adı ile ara"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 variant="outlined"
@@ -396,8 +369,8 @@ const PatientList = () => {
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1877F2' }
                   }}
                 >
-                  <MenuItem value="dateDesc">Tarih (Yeni→Eski)</MenuItem>
-                  <MenuItem value="dateAsc">Tarih (Eski→Yeni)</MenuItem>
+                  <MenuItem value="dateDesc">Silinme Tarihi (Yeni→Eski)</MenuItem>
+                  <MenuItem value="dateAsc">Silinme Tarihi (Eski→Yeni)</MenuItem>
                   <MenuItem value="nameAsc">İsim (A→Z)</MenuItem>
                   <MenuItem value="nameDesc">İsim (Z→A)</MenuItem>
                 </Select>
@@ -419,7 +392,7 @@ const PatientList = () => {
             </Typography>
             <Button 
               size="small" 
-              onClick={fetchPatients}
+              onClick={fetchDeletedPatients}
               sx={{ 
                 mt: 1,
                 color: '#D92D20',
@@ -433,38 +406,53 @@ const PatientList = () => {
           </Alert>
         )}
 
-        {/* Patient Cards */}
+        {/* Success State */}
+        {success && (
+          <Alert severity="success" sx={{ 
+            mb: 3,
+            borderRadius: '12px',
+            border: '1px solid #D1FADF',
+            backgroundColor: '#F6FEF9'
+          }}>
+            <Typography variant="body2" color="#039855">
+              {success}
+            </Typography>
+          </Alert>
+        )}
+
+        {/* Deleted Patient Cards */}
         {loading ? (
           renderSkeletonCards()
-        ) : filteredAndSortedPatients.length === 0 ? (
+        ) : filteredAndSortedDeletedPatients.length === 0 ? (
           renderEmptyState()
         ) : (
           <Grid container spacing={3}>
-            {filteredAndSortedPatients.map((patient) => (
+            {filteredAndSortedDeletedPatients.map((patient) => (
               <Grid item xs={12} sm={6} md={4} key={patient._id}>
-                <Card 
-                  sx={{ 
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    backgroundColor: 'var(--facebook-white)',
-                    borderRadius: '8px',
-                    boxShadow: 'var(--facebook-shadow)',
-                    border: '1px solid var(--facebook-border)',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      boxShadow: 'var(--facebook-shadow-hover)',
-                      borderColor: '#D0D5DD',
-                      transform: 'translateY(-2px)'
-                    },
-                    '&:focus-within': {
-                      outline: '2px solid var(--facebook-blue)',
-                      outlineOffset: '2px'
-                    }
-                  }}
-                  onClick={() => handleViewDetails(patient._id)}
-                >
+                                 <Card 
+                   sx={{ 
+                     height: '100%',
+                     display: 'flex',
+                     flexDirection: 'column',
+                     backgroundColor: 'var(--facebook-white)',
+                     borderRadius: '8px',
+                     boxShadow: 'var(--facebook-shadow)',
+                     border: '1px solid var(--facebook-border)',
+                     opacity: 0.8,
+                     position: 'relative',
+                     '&::before': {
+                       content: '""',
+                       position: 'absolute',
+                       top: 0,
+                       left: 0,
+                       right: 0,
+                       height: '4px',
+                       backgroundColor: '#D92D20',
+                       borderTopLeftRadius: '8px',
+                       borderTopRightRadius: '8px'
+                     }
+                   }}
+                 >
                   <CardContent sx={{ flexGrow: 1, p: 3 }}>
                     {/* Header */}
                     <Box sx={{ 
@@ -558,6 +546,25 @@ const PatientList = () => {
                         {patient.doctorEmail || 'Email belirtilmemiş'}
                       </Typography>
                     </Box>
+
+                    {/* Deletion Info */}
+                    <Box sx={{ 
+                      mt: 2, 
+                      p: 2, 
+                      backgroundColor: '#FEF3F2', 
+                      borderRadius: '12px',
+                      border: '1px solid #FEE4E2'
+                    }}>
+                      <Typography variant="body2" color="#D92D20" gutterBottom sx={{ fontWeight: 600, fontSize: '14px' }}>
+                        🗑️ Silinme Bilgisi
+                      </Typography>
+                      <Typography variant="body2" color="#667085" sx={{ fontSize: '13px' }}>
+                        {patient.deletedAt ? 
+                          `Silinme Tarihi: ${new Date(patient.deletedAt).toLocaleDateString('tr-TR')}` : 
+                          'Silinme tarihi belirtilmemiş'
+                        }
+                      </Typography>
+                    </Box>
                   </CardContent>
 
                   {/* Action Buttons */}
@@ -567,58 +574,54 @@ const PatientList = () => {
                     display: 'flex',
                     gap: 1
                   }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      fullWidth
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditPatient(patient._id);
-                      }}
-                      startIcon={<EditIcon />}
-                      sx={{
-                        borderColor: 'var(--facebook-blue)',
-                        color: 'var(--facebook-blue)',
-                        textTransform: 'none',
-                        fontWeight: 500,
-                        fontSize: '14px',
-                        borderRadius: '6px',
-                        py: 1,
-                        '&:hover': {
-                          borderColor: 'var(--facebook-blue-hover)',
-                          backgroundColor: 'rgba(24, 119, 242, 0.1)'
-                        }
-                      }}
-                    >
-                      Düzenle
-                    </Button>
+                                         <Button
+                       size="small"
+                       variant="contained"
+                       fullWidth
+                       onClick={() => {
+                         setSelectedPatient(patient);
+                         setRestoreDialogOpen(true);
+                       }}
+                       startIcon={<RestoreIcon />}
+                       sx={{
+                         backgroundColor: '#039855',
+                         '&:hover': { backgroundColor: '#027A48' },
+                         textTransform: 'none',
+                         fontWeight: 500,
+                         fontSize: '14px',
+                         borderRadius: '6px',
+                         py: 1,
+                         boxShadow: 'var(--facebook-shadow)'
+                       }}
+                     >
+                       Geri Getir
+                     </Button>
 
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      fullWidth
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPatient(patient);
-                        setDeleteDialogOpen(true);
-                      }}
-                      startIcon={<DeleteIcon />}
-                      sx={{
-                        borderColor: '#D92D20',
-                        color: '#D92D20',
-                        textTransform: 'none',
-                        fontWeight: 500,
-                        fontSize: '14px',
-                        borderRadius: '6px',
-                        py: 1,
-                        '&:hover': {
-                          borderColor: '#B42318',
-                          backgroundColor: '#FEF3F2'
-                        }
-                      }}
-                    >
-                      Sil
-                    </Button>
+                                         <Button
+                       size="small"
+                       variant="outlined"
+                       fullWidth
+                       onClick={() => {
+                         setSelectedPatient(patient);
+                         setPermanentDeleteDialogOpen(true);
+                       }}
+                       startIcon={<DeleteForeverIcon />}
+                       sx={{
+                         borderColor: '#D92D20',
+                         color: '#D92D20',
+                         textTransform: 'none',
+                         fontWeight: 500,
+                         fontSize: '14px',
+                         borderRadius: '6px',
+                         py: 1,
+                         '&:hover': {
+                           borderColor: '#B42318',
+                           backgroundColor: '#FEF3F2'
+                         }
+                       }}
+                     >
+                       Kalıcı Sil
+                     </Button>
                   </Box>
                 </Card>
               </Grid>
@@ -627,10 +630,10 @@ const PatientList = () => {
         )}
       </Container>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Restore Confirmation Dialog */}
       <Dialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteCancel}
+        open={restoreDialogOpen}
+        onClose={handleRestoreCancel}
         PaperProps={{
           sx: {
             borderRadius: '8px',
@@ -644,17 +647,17 @@ const PatientList = () => {
           fontSize: '18px',
           pb: 1
         }}>
-          Hastayı silmek üzeresiniz
+          Hastayı geri getirmek üzeresiniz
         </DialogTitle>
         <DialogContent>
           <Box sx={{ color: '#667085', fontSize: '14px' }}>
             {selectedPatient && (
               <>
                 <Typography variant="body2" sx={{ mb: 2 }}>
-                  <strong>{selectedPatient.hastaAdi}</strong> isimli hastanın kaydını silmek istediğinizden emin misiniz?
+                  <strong>{selectedPatient.hastaAdi}</strong> isimli hastanın kaydını geri getirmek istediğinizden emin misiniz?
                 </Typography>
                 <Box sx={{ backgroundColor: 'var(--facebook-light-gray)', p: 2, borderRadius: '8px' }}>
-                  <Typography variant="body2" color="#667085" sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="#667085" sx={{ mb: 0.5 }}>
                     <strong>Protokol No:</strong> {selectedPatient.protokolNo}
                   </Typography>
                   <Typography variant="body2" color="#667085">
@@ -667,7 +670,7 @@ const PatientList = () => {
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 1 }}>
           <Button 
-            onClick={handleDeleteCancel}
+            onClick={handleRestoreCancel}
             sx={{
               color: '#667085',
               textTransform: 'none',
@@ -678,7 +681,82 @@ const PatientList = () => {
             Geri
           </Button>
           <Button 
-            onClick={handleDeleteConfirm}
+            onClick={handleRestoreConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#039855',
+              '&:hover': { backgroundColor: '#027A48' },
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              borderRadius: '6px'
+            }}
+          >
+            Geri Getir
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Permanent Delete Confirmation Dialog */}
+      <Dialog
+        open={permanentDeleteDialogOpen}
+        onClose={handlePermanentDeleteCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '8px',
+            border: '1px solid var(--facebook-border)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          color: '#D92D20',
+          fontWeight: 600,
+          fontSize: '18px',
+          pb: 1
+        }}>
+          ⚠️ Kalıcı Silme Uyarısı
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ color: '#667085', fontSize: '14px' }}>
+            {selectedPatient && (
+              <>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  <strong>{selectedPatient.hastaAdi}</strong> isimli hastanın kaydını <strong>kalıcı olarak</strong> silmek üzeresiniz!
+                </Typography>
+                <Box sx={{ backgroundColor: '#FEF3F2', p: 2, borderRadius: '8px', border: '1px solid #FEE4E2', mb: 2 }}>
+                  <Typography variant="body2" color="#D92D20" sx={{ mb: 0.5, fontWeight: 600 }}>
+                    ⚠️ Bu işlem geri alınamaz!
+                  </Typography>
+                  <Typography variant="body2" color="#667085">
+                    Hasta kaydı ve tüm veriler kalıcı olarak silinecektir.
+                  </Typography>
+                </Box>
+                <Box sx={{ backgroundColor: 'var(--facebook-light-gray)', p: 2, borderRadius: '8px' }}>
+                  <Typography variant="body2" color="#667085" sx={{ mb: 0.5 }}>
+                    <strong>Protokol No:</strong> {selectedPatient.protokolNo}
+                  </Typography>
+                  <Typography variant="body2" color="#667085">
+                    <strong>Hasta Sahibi:</strong> {selectedPatient.hastaSahibi}
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button 
+            onClick={handlePermanentDeleteCancel}
+            sx={{
+              color: '#667085',
+              textTransform: 'none',
+              fontWeight: 500,
+              '&:hover': { backgroundColor: '#F8FAFC' }
+            }}
+          >
+            İptal
+          </Button>
+          <Button 
+            onClick={handlePermanentDeleteConfirm}
             variant="contained"
             sx={{
               backgroundColor: '#D92D20',
@@ -689,12 +767,28 @@ const PatientList = () => {
               borderRadius: '6px'
             }}
           >
-            Sil
+            Kalıcı Olarak Sil
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={() => setSuccess(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSuccess(null)} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          {success}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
 
-export default PatientList; 
+export default TrashBin;
