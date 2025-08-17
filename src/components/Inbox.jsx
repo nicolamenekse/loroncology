@@ -721,8 +721,8 @@ const Inbox = () => {
                 <ListItemAvatar>
                   <Avatar
                     src={`/avatars/${activeTab === 0 
-                      ? consultation.senderDoctor.avatar || 'default-avatar.svg'
-                      : consultation.receiverDoctor.avatar || 'default-avatar.svg'
+                      ? (consultation.senderDoctor?.avatar || 'default-avatar.svg')
+                      : (consultation.receiverDoctor?.avatar || 'default-avatar.svg')
                     }`}
                   >
                     <PersonIcon />
@@ -733,8 +733,8 @@ const Inbox = () => {
                     <Box display="flex" alignItems="center" gap={2}>
                       <Typography variant="subtitle1" component="span">
                         {activeTab === 0 
-                          ? `Dr. ${consultation.senderDoctor.name}`
-                          : `Dr. ${consultation.receiverDoctor.name}`}
+                          ? `Dr. ${consultation.senderDoctor?.name || 'Bilinmeyen'}`
+                          : `Dr. ${consultation.receiverDoctor?.name || 'Bilinmeyen'}`}
                       </Typography>
                       <Chip
                         size="small"
@@ -754,10 +754,10 @@ const Inbox = () => {
                   secondary={
                     <Box component="span">
                       <Typography variant="body2" color="text.secondary" component="span" display="block">
-                        Hasta: {consultation.patient.hastaAdi} ({consultation.patient.tur} - {consultation.patient.irk})
+                        Hasta: {consultation.patient ? `${consultation.patient.hastaAdi || 'Bilinmeyen'} (${consultation.patient.tur || 'Bilinmeyen'} - ${consultation.patient.irk || 'Bilinmeyen'})` : 'Hasta bilgisi bulunamadı'}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" component="span" display="block">
-                        {consultation.notes.substring(0, 100)}...
+                        {consultation.notes ? consultation.notes.substring(0, 100) + '...' : 'Not bulunamadı'}
                       </Typography>
                       <Box display="flex" alignItems="center" gap={1} mt={1} component="span">
                         <AccessTimeIcon fontSize="small" color="action" />
@@ -932,7 +932,7 @@ const Inbox = () => {
         <DialogTitle>
           {selectedConsultation && (
             <>
-              Hasta: {selectedConsultation.patient.hastaAdi} ({selectedConsultation.patient.tur} - {selectedConsultation.patient.irk})
+              Hasta: {selectedConsultation.patient ? `${selectedConsultation.patient.hastaAdi || 'Bilinmeyen'} (${selectedConsultation.patient.tur || 'Bilinmeyen'} - ${selectedConsultation.patient.irk || 'Bilinmeyen'})` : 'Hasta bilgisi bulunamadı'}
               <Chip
                 size="small"
                 label={getStatusText(selectedConsultation?.status)}
@@ -948,44 +948,52 @@ const Inbox = () => {
               Hasta Bilgileri:
             </Typography>
             <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
-              <Typography variant="body2">
-                <strong>Hasta Adı:</strong> {selectedConsultation?.patient.hastaAdi}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Hasta Sahibi:</strong> {selectedConsultation?.patient.hastaSahibi}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Tür:</strong> {selectedConsultation?.patient.tur}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Irk:</strong> {selectedConsultation?.patient.irk}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Yaş:</strong> {selectedConsultation?.patient.yas} yaş
-              </Typography>
-              <Typography variant="body2">
-                <strong>Cinsiyet:</strong> {selectedConsultation?.patient.cinsiyet}
-              </Typography>
-              {selectedConsultation?.patient.kilo && (
-                <Typography variant="body2">
-                  <strong>Kilo:</strong> {selectedConsultation?.patient.kilo} kg
+              {selectedConsultation?.patient ? (
+                <>
+                  <Typography variant="body2">
+                    <strong>Hasta Adı:</strong> {selectedConsultation.patient.hastaAdi || 'Bilinmeyen'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Hasta Sahibi:</strong> {selectedConsultation.patient.hastaSahibi || 'Bilinmeyen'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Tür:</strong> {selectedConsultation.patient.tur || 'Bilinmeyen'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Irk:</strong> {selectedConsultation.patient.irk || 'Bilinmeyen'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Yaş:</strong> {selectedConsultation.patient.yas || 'Bilinmeyen'} yaş
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Cinsiyet:</strong> {selectedConsultation.patient.cinsiyet || 'Bilinmeyen'}
+                  </Typography>
+                  {selectedConsultation.patient.kilo && (
+                    <Typography variant="body2">
+                      <strong>Kilo:</strong> {selectedConsultation.patient.kilo} kg
+                    </Typography>
+                  )}
+                  {selectedConsultation.patient.protokolNo && (
+                    <Typography variant="body2">
+                      <strong>Protokol No:</strong> {selectedConsultation.patient.protokolNo}
+                    </Typography>
+                  )}
+                  
+                  <Button
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    onClick={() => handleViewPatientDetails(selectedConsultation.patient)}
+                    sx={{ mt: 2 }}
+                    size="small"
+                  >
+                    Hasta Detaylarını Görüntüle
+                  </Button>
+                </>
+              ) : (
+                <Typography variant="body2" color="error">
+                  Hasta bilgisi bulunamadı
                 </Typography>
               )}
-              {selectedConsultation?.patient.protokolNo && (
-                <Typography variant="body2">
-                  <strong>Protokol No:</strong> {selectedConsultation?.patient.protokolNo}
-                </Typography>
-              )}
-              
-              <Button
-                variant="outlined"
-                startIcon={<VisibilityIcon />}
-                onClick={() => handleViewPatientDetails(selectedConsultation?.patient)}
-                sx={{ mt: 2 }}
-                size="small"
-              >
-                Hasta Detaylarını Görüntüle
-              </Button>
             </Box>
             
             <Typography variant="subtitle2" gutterBottom>
