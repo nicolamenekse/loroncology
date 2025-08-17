@@ -166,8 +166,9 @@ const Home = () => {
         
         consultations = incomingConsultations
           .filter(consultation => {
-            // Sadece bekleyen ve kabul edilen konsültasyonları göster
-            const isValidStatus = consultation.status === 'beklemede' || consultation.status === 'kabul';
+            // Sadece bekleyen ve kabul edilen konsültasyonları göster (hem Türkçe hem İngilizce)
+            const isValidStatus = consultation.status === 'beklemede' || consultation.status === 'kabul' || 
+                                 consultation.status === 'pending' || consultation.status === 'accepted';
             console.log(`Konsültasyon ${consultation._id} geçerli durum mu?`, isValidStatus, {
               status: consultation.status,
               consultation: consultation
@@ -301,18 +302,24 @@ const Home = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'beklemede': return 'warning';
-      case 'kabul': return 'success';
-      case 'ret': return 'error';
+      case 'beklemede':
+      case 'pending': return 'warning';
+      case 'kabul':
+      case 'accepted': return 'success';
+      case 'ret':
+      case 'rejected': return 'error';
       default: return 'default';
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'beklemede': return 'Beklemede';
-      case 'kabul': return 'Kabul Edildi';
-      case 'ret': return 'Reddedildi';
+      case 'beklemede':
+      case 'pending': return 'Beklemede';
+      case 'kabul':
+      case 'accepted': return 'Kabul Edildi';
+      case 'ret':
+      case 'rejected': return 'Reddedildi';
       default: return status;
     }
   };
@@ -860,7 +867,7 @@ const Home = () => {
                     )
                 ) : (
                                      <List sx={{ pt: 0 }}>
-                     {dashboardData.consultations.slice(0, 5).map((consultation) => (
+                     {dashboardData.consultations.slice(0, 3).map((consultation) => (
                        <ListItem
                          key={consultation.id}
                          button
