@@ -24,7 +24,9 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PetsIcon from '@mui/icons-material/Pets';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,12 +36,225 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShareIcon from '@mui/icons-material/Share';
 import ConsultationDialog from './ConsultationDialog';
 import ParameterInput from './ParameterInput';
-import { hemogramParameters, biyokimyaParameters } from '../config/referenceRanges';
 import AIAnalysis from './AIAnalysis';
 import ParameterCalculator from './ParameterCalculator';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
+
+// Styled components for modern Facebook-like design
+const StyledContainer = styled(Container)({
+  paddingTop: '80px',
+  paddingBottom: '32px',
+  '@media (max-width: 600px)': {
+    paddingTop: '64px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+  },
+});
+
+const StyledPaper = styled(Paper)({
+  backgroundColor: '#ffffff',
+  borderRadius: '12px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  border: '1px solid #dddfe2',
+  overflow: 'hidden',
+  '@media (max-width: 600px)': {
+    borderRadius: '8px',
+    margin: '8px',
+  },
+});
+
+const HeaderSection = styled(Box)({
+  background: 'linear-gradient(135deg, #1877f2 0%, #3b82f6 100%)',
+  color: '#ffffff',
+  padding: '32px',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+    opacity: 0.3,
+  },
+  '@media (max-width: 600px)': {
+    padding: '24px',
+  },
+});
+
+const HeaderContent = styled(Box)({
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  flexDirection: 'row',
+  gap: '16px',
+  '@media (max-width: 600px)': {
+    flexDirection: 'column',
+  },
+});
+
+const HeaderTitle = styled(Typography)({
+  fontSize: '2.5rem',
+  fontWeight: 700,
+  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  '@media (max-width: 600px)': {
+    fontSize: '2rem',
+    textAlign: 'center',
+  },
+  '@media (max-width: 480px)': {
+    fontSize: '1.75rem',
+  },
+});
+
+const ActionButtons = styled(Box)({
+  display: 'flex',
+  gap: '16px',
+  flexDirection: 'row',
+  width: 'auto',
+  '@media (max-width: 600px)': {
+    flexDirection: 'column',
+    width: '100%',
+  },
+});
+
+const StyledButton = styled(Button)(({ variant }) => ({
+  borderRadius: '8px',
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  padding: '12px 24px',
+  minHeight: '44px',
+  boxShadow: variant === 'contained' ? '0 2px 8px rgba(24, 119, 242, 0.3)' : 'none',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-1px)',
+    boxShadow: variant === 'contained' ? '0 4px 12px rgba(24, 119, 242, 0.4)' : '0 2px 8px rgba(0,0,0,0.1)',
+  },
+  '@media (max-width: 600px)': {
+    width: '100%',
+  },
+}));
+
+const ContentSection = styled(Box)({
+  padding: '32px',
+  '@media (max-width: 600px)': {
+    padding: '24px',
+  },
+});
+
+const StyledTabs = styled(Tabs)({
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#1877f2',
+    height: '3px',
+    borderRadius: '2px',
+  },
+  '& .MuiTab-root': {
+    textTransform: 'none',
+    fontWeight: 600,
+    fontSize: '1rem',
+    minHeight: '48px',
+    color: '#65676b',
+    '&.Mui-selected': {
+      color: '#1877f2',
+    },
+    '&:hover': {
+      backgroundColor: 'rgba(24, 119, 242, 0.04)',
+    },
+  },
+});
+
+const SectionTitle = styled(Typography)({
+  color: '#1877f2',
+  fontWeight: 700,
+  fontSize: '1.25rem',
+  marginBottom: '16px',
+  paddingBottom: '8px',
+  borderBottom: '2px solid #e4e6ea',
+  position: 'relative',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: '-2px',
+    left: 0,
+    width: '40px',
+    height: '2px',
+    backgroundColor: '#1877f2',
+  },
+  '@media (max-width: 600px)': {
+    fontSize: '1.1rem',
+  },
+});
+
+const InfoCard = styled(Card)({
+  backgroundColor: '#f8f9fa',
+  border: '1px solid #e4e6ea',
+  borderRadius: '8px',
+  boxShadow: 'none',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: '#ffffff',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    transform: 'translateY(-1px)',
+  },
+});
+
+const InfoCardContent = styled(CardContent)({
+  padding: '16px',
+  '&:last-child': {
+    paddingBottom: '16px',
+  },
+});
+
+const LabelText = styled(Typography)({
+  color: '#65676b',
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  marginBottom: '4px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+});
+
+const ValueText = styled(Typography)({
+  color: '#1c1e21',
+  fontSize: '1rem',
+  fontWeight: 500,
+  lineHeight: 1.4,
+});
+
+const StyledAccordion = styled(Accordion)({
+  backgroundColor: '#ffffff',
+  border: '1px solid #e4e6ea',
+  borderRadius: '8px',
+  boxShadow: 'none',
+  marginBottom: '16px',
+  '&:before': {
+    display: 'none',
+  },
+  '& .MuiAccordionSummary-root': {
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+    '&:hover': {
+      backgroundColor: '#e4e6ea',
+    },
+  },
+  '& .MuiAccordionDetails-root': {
+    padding: '24px',
+    backgroundColor: '#ffffff',
+  },
+});
+
+const HistoryChip = styled(Chip)({
+  backgroundColor: '#e7f3ff',
+  color: '#1877f2',
+  fontWeight: 600,
+  fontSize: '0.8rem',
+  height: '24px',
+});
 
 const PatientDetail = () => {
   const [patient, setPatient] = useState(null);
@@ -52,6 +267,7 @@ const PatientDetail = () => {
   const [consultationDialog, setConsultationDialog] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
+
 
   useEffect(() => {
     fetchPatientDetails();
@@ -72,7 +288,6 @@ const PatientDetail = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message);
       setError(error.message);
       setLoading(false);
     }
@@ -111,875 +326,742 @@ const PatientDetail = () => {
     window.print();
   };
 
+  if (loading) {
+    return (
+      <StyledContainer maxWidth="lg">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress size={60} sx={{ color: '#1877f2' }} />
+        </Box>
+      </StyledContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <StyledContainer maxWidth="lg">
+        <Alert severity="error" sx={{ mt: 4, borderRadius: '8px' }}>
+          {error}
+        </Alert>
+      </StyledContainer>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <StyledContainer maxWidth="lg">
+        <Alert severity="info" sx={{ mt: 4, borderRadius: '8px' }}>
+          Hasta bulunamadı.
+        </Alert>
+      </StyledContainer>
+    );
+  }
+
   return (
     <div className="patient-detail-wrapper fade-in">
-      <Container maxWidth="lg">
-        <Paper elevation={3} className="patient-detail-paper" sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            mb: 3,
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 2, sm: 0 }
-          }}>
-            <Typography variant="h4" component="h1" sx={{ 
-              color: '#3B82F6',
-              fontWeight: 600,
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
-            }}>
-              Hasta Detayları
-            </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 2,
-              flexDirection: { xs: 'column', sm: 'row' },
-              width: { xs: '100%', sm: 'auto' }
-            }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => navigate('/hastalar')}
-                fullWidth
-                sx={{ 
-                  py: 1.5,
-                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                }}
-              >
-                Geri Dön
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={handlePrint}
-                startIcon={<PrintIcon />}
-                fullWidth
-                sx={{ 
-                  py: 1.5,
-                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                }}
-              >
-                Yazdır
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate(`/hasta-duzenle/${id}`)}
-                fullWidth
-                sx={{ 
-                  py: 1.5,
-                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                }}
-              >
-                Düzenle
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setConsultationDialog(true)}
-                fullWidth
-                startIcon={<ShareIcon />}
-                sx={{ 
-                  py: 1.5,
-                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                }}
-              >
-                Konsültasyon İste
-              </Button>
-            </Box>
-          </Box>
-
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          ) : patient ? (
-            <>
-              {/* Print Header - Only visible when printing */}
-              <Box sx={{ 
-                display: 'none',
-                '@media print': {
-                  display: 'block',
-                  mb: 4
-                }
-              }}>
-                <Box sx={{ textAlign: 'center', borderBottom: '2px solid #000', pb: 2, mb: 3 }}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    LORONKOLOJI HASTA KAYIT FORMU
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    Hasta Detay Raporu - {new Date().toLocaleDateString('tr-TR')}
-                  </Typography>
-                </Box>
-                
-                <Box className="print-grid">
-                  <Box>
-                    <Typography className="print-label">Protokol No</Typography>
-                    <Typography className="print-value">{patient.protokolNo}</Typography>
-                  </Box>
-                            <Box>
-            <Typography className="print-label">Doktor Adı</Typography>
-            <Typography className="print-value">{patient.doctorName ? `Doktor ${patient.doctorName}` : 'Belirtilmemiş'}</Typography>
-          </Box>
-                  <Box>
-                    <Typography className="print-label">Doktor Email</Typography>
-                    <Typography className="print-value">{patient.doctorEmail || 'Belirtilmemiş'}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Hasta Adı</Typography>
-                    <Typography className="print-value">{patient.hastaAdi}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Hasta Sahibi</Typography>
-                    <Typography className="print-value">{patient.hastaSahibi}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Tür</Typography>
-                    <Typography className="print-value">{patient.tur}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Irk</Typography>
-                    <Typography className="print-value">{patient.irk}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Yaş</Typography>
-                    <Typography className="print-value">{patient.yas} yaş</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Cinsiyet</Typography>
-                    <Typography className="print-value">{patient.cinsiyet}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">Kilo</Typography>
-                    <Typography className="print-value">{patient.kilo} kg</Typography>
-                  </Box>
-                  <Box>
-                    <Typography className="print-label">VKS</Typography>
-                    <Typography className="print-value">{patient.vks}</Typography>
-                  </Box>
-                </Box>
-
-                <Typography className="print-section-title">Klinik Bilgileri</Typography>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Anamnez</Typography>
-                  <Typography className="print-value">{patient.anamnez}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Radyolojik Bulgular</Typography>
-                  <Typography className="print-value">{patient.radyolojikBulgular}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Ultrasonografik Bulgular</Typography>
-                  <Typography className="print-value">{patient.ultrasonografikBulgular}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Tomografi Bulgular</Typography>
-                  <Typography className="print-value">{patient.tomografiBulgular}</Typography>
-                </Box>
-
-                <Typography className="print-section-title">Patoloji Bilgileri</Typography>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Patoloji</Typography>
-                  <Typography className="print-value">{patient.patoloji}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Mikroskopisi</Typography>
-                  <Typography className="print-value">{patient.mikroskopisi}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Patolojik Teşhis</Typography>
-                  <Typography className="print-value">{patient.patolojikTeshis}</Typography>
-                </Box>
-
-                <Typography className="print-section-title">Tedavi ve Reçete</Typography>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Tedavi</Typography>
-                  <Typography className="print-value">{patient.tedavi}</Typography>
-                </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography className="print-label">Reçete</Typography>
-                  <Typography className="print-value">{patient.recete}</Typography>
-                </Box>
+      <StyledContainer maxWidth="lg">
+        <StyledPaper elevation={0}>
+          {/* Header Section */}
+          <HeaderSection>
+            <HeaderContent>
+              <Box>
+                <HeaderTitle variant="h1">
+                  {patient.hastaAdi}
+                </HeaderTitle>
+                <Typography variant="h6" sx={{ opacity: 0.9, mt: 1 }}>
+                  Protokol No: {patient.protokolNo} • {patient.tur} • {patient.cinsiyet}
+                </Typography>
               </Box>
+              <ActionButtons>
+                <StyledButton
+                  variant="outlined"
+                  onClick={() => navigate('/hastalar')}
+                  sx={{ 
+                    color: '#ffffff', 
+                    borderColor: '#ffffff',
+                    '&:hover': {
+                      borderColor: '#ffffff',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    }
+                  }}
+                >
+                  <ArrowBackIcon sx={{ mr: 1 }} />
+                  Geri Dön
+                </StyledButton>
+                <StyledButton
+                  variant="outlined"
+                  onClick={handlePrint}
+                  startIcon={<PrintIcon />}
+                  sx={{ 
+                    color: '#ffffff', 
+                    borderColor: '#ffffff',
+                    '&:hover': {
+                      borderColor: '#ffffff',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    }
+                  }}
+                >
+                  Yazdır
+                </StyledButton>
+                <StyledButton
+                  variant="contained"
+                  onClick={() => navigate(`/hasta-duzenle/${id}`)}
+                  startIcon={<EditIcon />}
+                  sx={{ 
+                    backgroundColor: '#ffffff',
+                    color: '#1877f2',
+                    '&:hover': {
+                      backgroundColor: '#f8f9fa',
+                    }
+                  }}
+                >
+                  Düzenle
+                </StyledButton>
+                <StyledButton
+                  variant="outlined"
+                  onClick={() => setConsultationDialog(true)}
+                  startIcon={<ShareIcon />}
+                  sx={{ 
+                    color: '#ffffff', 
+                    borderColor: '#ffffff',
+                    '&:hover': {
+                      borderColor: '#ffffff',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    }
+                  }}
+                >
+                  Konsültasyon
+                </StyledButton>
+              </ActionButtons>
+            </HeaderContent>
+          </HeaderSection>
 
-              {/* Tabs Navigation */}
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-                <Tabs value={tabValue} onChange={handleTabChange} aria-label="hasta detayları ve geçmiş">
-                  <Tab label="Hasta Bilgileri" icon={<PetsIcon />} />
-                  <Tab label="Değişiklik Geçmişi" icon={<HistoryIcon />} />
-                </Tabs>
-              </Box>
+          {/* Content Section */}
+          <ContentSection>
+            {/* Tabs Navigation */}
+            <Box sx={{ borderBottom: 1, borderColor: '#e4e6ea', mb: 4 }}>
+              <StyledTabs value={tabValue} onChange={handleTabChange} aria-label="hasta detayları ve geçmiş">
+                <Tab label="Hasta Bilgileri" icon={<PetsIcon />} />
+                <Tab label="Değişiklik Geçmişi" icon={<HistoryIcon />} />
+              </StyledTabs>
+            </Box>
 
-              {/* Tab Panel 1: Hasta Bilgileri */}
-              {tabValue === 0 && (
-                <Grid container spacing={3}>
+            {/* Tab Panel 1: Hasta Bilgileri */}
+            {tabValue === 0 && (
+              <Grid container spacing={3}>
                 {/* Hasta Bilgileri */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ 
-                    color: '#3B82F6',
-                    mb: 2,
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}>
+                  <SectionTitle variant="h6">
                     Hasta Bilgileri
-                  </Typography>
+                  </SectionTitle>
+                </Grid>
+                
+                {/* Basic Info Cards */}
+                <Grid item xs={12} sm={6} md={4}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Protokol No</LabelText>
+                      <ValueText variant="body1">{patient.protokolNo}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Protokol No
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.protokolNo}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Hasta Adı</LabelText>
+                      <ValueText variant="body1">{patient.hastaAdi}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Hasta Adı
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.hastaAdi}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Hasta Sahibi</LabelText>
+                      <ValueText variant="body1">{patient.hastaSahibi}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Hasta Sahibi
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.hastaSahibi}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Tür</LabelText>
+                      <ValueText variant="body1">{patient.tur}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Tür
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.tur}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Irk</LabelText>
+                      <ValueText variant="body1">{patient.irk}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Irk
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.irk}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Cinsiyet</LabelText>
+                      <ValueText variant="body1">{patient.cinsiyet}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Cinsiyet
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.cinsiyet}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Yaş</LabelText>
+                      <ValueText variant="body1">{patient.yas} yaş</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Yaş
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.yas} yaş
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Kilo</LabelText>
+                      <ValueText variant="body1">{patient.kilo} kg</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Kilo
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.kilo} kg
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    VKS
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.vks}
-                  </Typography>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">VKS</LabelText>
+                      <ValueText variant="body1">{patient.vks}</ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
 
                 {/* Klinik Bilgileri */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ 
-                    color: '#3B82F6',
-                    mt: 2,
-                    mb: 2,
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}>
+                  <SectionTitle variant="h6" sx={{ mt: 4 }}>
                     Klinik Bilgileri
-                  </Typography>
+                  </SectionTitle>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Anamnez
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.anamnez}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Radyolojik Bulgular
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.radyolojikBulgular}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Ultrasonografik Bulgular
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.ultrasonografikBulgular}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Tomografi Bulgular
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.tomografiBulgular}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Patoloji
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.patoloji}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Mikroskopisi
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.mikroskopisi}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Patolojik Teşhis
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.patolojikTeshis}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Tedavi
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.tedavi}
-                  </Typography>
-                </Grid>
-                <ParameterCalculator
-                  patient={patient}
-                  readOnly={true}
-                />
                 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Reçete
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.recete}
-                  </Typography>
+                <Grid item xs={12}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Anamnez</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.anamnez || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Biyopsi Not
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    {patient.biyopsiNot}
-                  </Typography>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Radyolojik Bulgular</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.radyolojikBulgular || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Ultrasonografik Bulgular</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.ultrasonografikBulgular || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Tomografi Bulgular</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.tomografiBulgular || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
 
-                {/* Patoloji ve Biyopsi Bilgileri */}
+                {/* Patoloji Bilgileri */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ 
-                    color: '#3B82F6',
-                    mt: 2,
-                    mb: 2,
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}>
-                    Patoloji ve Biyopsi Bilgileri
-                  </Typography>
+                  <SectionTitle variant="h6" sx={{ mt: 4 }}>
+                    Patoloji Bilgileri
+                  </SectionTitle>
                 </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Patoloji</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.patoloji || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Mikroskopisi</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.mikroskopisi || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Biyopsi Türü
-                  </Typography>
-                  <Box sx={{ mt: 1 }}>
-                    {patient.biyopsi?.iiab && (
-                      <Chip 
-                        label="İİAB (ince iğne aspirasyon biyopsisi)" 
-                        color="primary" 
-                        variant="outlined" 
-                        sx={{ m: 0.5 }}
-                      />
-                    )}
-                    {patient.biyopsi?.tuse && (
-                      <Chip 
-                        label="Tuşe" 
-                        color="primary" 
-                        variant="outlined" 
-                        sx={{ m: 0.5 }}
-                      />
-                    )}
-                    {patient.biyopsi?.trucat && (
-                      <Chip 
-                        label="Trucat Biyopsi" 
-                        color="primary" 
-                        variant="outlined" 
-                        sx={{ m: 0.5 }}
-                      />
-                    )}
-                    {patient.biyopsi?.operasyon && (
-                      <Chip 
-                        label="Operasyon" 
-                        color="primary" 
-                        variant="outlined" 
-                        sx={{ m: 0.5 }}
-                      />
-                    )}
-                    {!patient.biyopsi?.iiab && !patient.biyopsi?.tuse && 
-                     !patient.biyopsi?.trucat && !patient.biyopsi?.operasyon && (
-                      <Typography variant="body2" color="text.secondary">
-                        Biyopsi yapılmadı
-                      </Typography>
-                    )}
-                  </Box>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Patolojik Teşhis</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.patolojikTeshis || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+
+                {/* Parameter Calculator */}
+                <Grid item xs={12}>
+                  <ParameterCalculator
+                    patient={patient}
+                    readOnly={true}
+                  />
+                </Grid>
+
+                {/* Tedavi ve Reçete */}
+                <Grid item xs={12}>
+                  <SectionTitle variant="h6" sx={{ mt: 4 }}>
+                    Tedavi ve Reçete
+                  </SectionTitle>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Tedavi</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.tedavi || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Reçete</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.recete || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+
+                {/* Biyopsi Bilgileri */}
+                <Grid item xs={12}>
+                  <SectionTitle variant="h6" sx={{ mt: 4 }}>
+                    Biyopsi Bilgileri
+                  </SectionTitle>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Biyopsi Türü</LabelText>
+                      <Box sx={{ mt: 1 }}>
+                        {patient.biyopsi?.iiab && (
+                          <Chip 
+                            label="İİAB (ince iğne aspirasyon biyopsisi)" 
+                            color="primary" 
+                            variant="outlined" 
+                            sx={{ m: 0.5 }}
+                          />
+                        )}
+                        {patient.biyopsi?.tuse && (
+                          <Chip 
+                            label="Tuşe" 
+                            color="primary" 
+                            variant="outlined" 
+                            sx={{ m: 0.5 }}
+                          />
+                        )}
+                        {patient.biyopsi?.trucat && (
+                          <Chip 
+                            label="Trucat Biyopsi" 
+                            color="primary" 
+                            variant="outlined" 
+                            sx={{ m: 0.5 }}
+                          />
+                        )}
+                        {patient.biyopsi?.operasyon && (
+                          <Chip 
+                            label="Operasyon" 
+                            color="primary" 
+                            variant="outlined" 
+                            sx={{ m: 0.5 }}
+                          />
+                        )}
+                        {!patient.biyopsi?.iiab && !patient.biyopsi?.tuse && 
+                         !patient.biyopsi?.trucat && !patient.biyopsi?.operasyon && (
+                          <Typography variant="body2" color="text.secondary">
+                            Biyopsi yapılmadı
+                          </Typography>
+                        )}
+                      </Box>
+                    </InfoCardContent>
+                  </InfoCard>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <InfoCard>
+                    <InfoCardContent>
+                      <LabelText variant="subtitle2">Biyopsi Notları</LabelText>
+                      <ValueText variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {patient.biyopsiNot || 'Belirtilmemiş'}
+                      </ValueText>
+                    </InfoCardContent>
+                  </InfoCard>
                 </Grid>
               </Grid>
-              )}
+            )}
 
-              {/* Tab Panel 2: Değişiklik Geçmişi */}
-              {tabValue === 1 && (
-                <Box>
-                  {historyLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-                      <CircularProgress />
-                      <Typography sx={{ ml: 2 }}>Geçmiş kayıtlar yükleniyor...</Typography>
-                    </Box>
-                  ) : historyError ? (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                      {historyError}
-                    </Alert>
-                  ) : history.length === 0 ? (
-                    <Alert severity="info" sx={{ mb: 2 }}>
-                      Bu hasta için henüz değişiklik geçmişi bulunmuyor.
-                    </Alert>
-                  ) : (
-                    <Box>
-                      <Typography variant="h6" sx={{ mb: 3, color: '#2c3e50' }}>
-                        Toplam {history.length} değişiklik kaydı
-                      </Typography>
-                      
-                      {history.map((record, index) => (
-                        <Accordion key={index} className="patient-detail-accordion">
-                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                              <Chip 
-                                label={`Versiyon ${record.version}`} 
-                                color="primary" 
-                                size="small" 
-                                sx={{ mr: 2 }}
-                              />
-                              <Typography sx={{ mr: 2 }}>
-                                {new Date(record.changeDate).toLocaleDateString('tr-TR', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </Typography>
-                              <Typography color="text.secondary">
-                                {record.changeReason}
-                              </Typography>
-                            </Box>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <Grid container spacing={3}>
-                              {/* Hasta Bilgileri Bölümü */}
-                              <Grid item xs={12}>
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Hasta Bilgileri
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Protokol No
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.protokolNo || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Hasta Adı
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.hastaAdi || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Hasta Sahibi
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.hastaSahibi || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Tür
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.tur || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Irk
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.irk || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Cinsiyet
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.cinsiyet || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Yaş
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.yas ? `${record.previousData.yas} yaş` : '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Kilo
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.kilo ? `${record.previousData.kilo} kg` : '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  VKS
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.previousData.vks || '-'}
-                                </Typography>
-                              </Grid>
-
-                              {/* Klinik Bilgileri Bölümü */}
-                              <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Klinik Bilgileri
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Anamnez
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.anamnez || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Radyolojik Bulgular
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.radyolojikBulgular || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Ultrasonografik Bulgular
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.ultrasonografikBulgular || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Tomografi Bulgular
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.tomografiBulgular || '-'}
-                                </Typography>
-                              </Grid>
-
-                              {/* Patoloji Bilgileri Bölümü */}
-                              <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Patoloji Bilgileri
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Patoloji
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.patoloji || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Mikroskopisi
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.mikroskopisi || '-'}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Patolojik Teşhis
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.patolojikTeshis || '-'}
-                                </Typography>
-                              </Grid>
-
-                              {/* Tedavi ve Laboratuvar Bölümü */}
-                              <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Tedavi ve Laboratuvar
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Tedavi
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.tedavi || '-'}
-                                </Typography>
-                              </Grid>
-                              
-                              {/* Hemogram Parametreleri - History */}
-                              <Grid item xs={12}>
-                                <Typography variant="h6" sx={{ 
-                                  color: '#3B82F6',
-                                  mt: 2,
-                                  mb: 2,
-                                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                                }}>
-                                  Hemogram Parametreleri (Önceki Değerler)
-                                </Typography>
-                              </Grid>
-                              
-                              {record.previousData.hemogram && typeof record.previousData.hemogram === 'object' ? 
-                                Object.entries(record.previousData.hemogram).map(([key, value]) => {
-                                  if (!value) return null;
-                                  return (
-                                    <Grid item xs={12} sm={6} md={3} key={`history-hemogram-${key}`}>
-                                      <ParameterInput
-                                        parameter={key}
-                                        parameterType="hemogram"
-                                        value={value}
-                                        onChange={() => {}} // Read-only mode
-                                        size="small"
-                                        InputProps={{ readOnly: true }}
-                                      />
-                                    </Grid>
-                                  );
-                                })
-                                :
-                                <Grid item xs={12}>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {record.previousData.hemogram || 'Hemogram verisi yok'}
-                                  </Typography>
-                                </Grid>
-                              }
-
-                              {/* Biyokimya Parametreleri - History */}
-                              <Grid item xs={12}>
-                                <Typography variant="h6" sx={{ 
-                                  color: '#3B82F6',
-                                  mt: 3,
-                                  mb: 2,
-                                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                                }}>
-                                  Biyokimya Parametreleri (Önceki Değerler)
-                                </Typography>
-                              </Grid>
-                              
-                              {record.previousData.biyokimya && typeof record.previousData.biyokimya === 'object' ? 
-                                Object.entries(record.previousData.biyokimya).map(([key, value]) => {
-                                  if (!value) return null;
-                                  return (
-                                    <Grid item xs={12} sm={6} md={3} key={`history-biyokimya-${key}`}>
-                                      <ParameterInput
-                                        parameter={key}
-                                        parameterType="biyokimya"
-                                        value={value}
-                                        onChange={() => {}} // Read-only mode
-                                        size="small"
-                                        InputProps={{ readOnly: true }}
-                                      />
-                                    </Grid>
-                                  );
-                                })
-                                :
-                                <Grid item xs={12}>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {record.previousData.biyokimya || 'Biyokimya verisi yok'}
-                                  </Typography>
-                                </Grid>
-                              }
-
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Reçete
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.recete || '-'}
-                                </Typography>
-                              </Grid>
-
-                              {/* Biyopsi Bilgileri Bölümü */}
-                              <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Biyopsi Bilgileri
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Biyopsi Türü
-                                </Typography>
-                                <Box sx={{ mt: 1 }}>
-                                  {record.previousData.biyopsi?.iiab && (
-                                    <Chip 
-                                      label="İİAB (ince iğne aspirasyon biyopsisi)" 
-                                      color="primary" 
-                                      variant="outlined" 
-                                      size="small"
-                                      sx={{ m: 0.5 }}
-                                    />
-                                  )}
-                                  {record.previousData.biyopsi?.tuse && (
-                                    <Chip 
-                                      label="Tuşe" 
-                                      color="primary" 
-                                      variant="outlined" 
-                                      size="small"
-                                      sx={{ m: 0.5 }}
-                                    />
-                                  )}
-                                  {record.previousData.biyopsi?.trucat && (
-                                    <Chip 
-                                      label="Trucat Biyopsi" 
-                                      color="primary" 
-                                      variant="outlined" 
-                                      size="small"
-                                      sx={{ m: 0.5 }}
-                                    />
-                                  )}
-                                  {record.previousData.biyopsi?.operasyon && (
-                                    <Chip 
-                                      label="Operasyon" 
-                                      color="primary" 
-                                      variant="outlined" 
-                                      size="small"
-                                      sx={{ m: 0.5 }}
-                                    />
-                                  )}
-                                  {!record.previousData.biyopsi?.iiab && 
-                                   !record.previousData.biyopsi?.tuse && 
-                                   !record.previousData.biyopsi?.trucat && 
-                                   !record.previousData.biyopsi?.operasyon && (
-                                    <Typography variant="body2" color="text.secondary">
-                                      Biyopsi yapılmadı
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Biyopsi Notları
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.previousData.biyopsiNot || '-'}
-                                </Typography>
-                              </Grid>
-
-                              {/* Değişiklik Bilgileri */}
-                              <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" sx={{ color: '#2c3e50', mb: 2 }}>
-                                  Değişiklik Bilgileri
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Düzenleyen
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.modifiedBy}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Değişiklik Tarihi
-                                </Typography>
-                                <Typography variant="body2">
-                                  {new Date(record.changeDate).toLocaleDateString('tr-TR', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Versiyon
-                                </Typography>
-                                <Typography variant="body2">
-                                  {record.version}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  Değişiklik Nedeni
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                  {record.changeReason}
-                                </Typography>
-                              </Grid>
+            {/* Tab Panel 2: Değişiklik Geçmişi */}
+            {tabValue === 1 && (
+              <Box>
+                {historyLoading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 4 }}>
+                    <CircularProgress size={40} sx={{ color: '#1877f2', mr: 2 }} />
+                    <Typography>Geçmiş kayıtlar yükleniyor...</Typography>
+                  </Box>
+                ) : historyError ? (
+                  <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
+                    {historyError}
+                  </Alert>
+                ) : history.length === 0 ? (
+                  <Alert severity="info" sx={{ mb: 3, borderRadius: '8px' }}>
+                    Bu hasta için henüz değişiklik geçmişi bulunmuyor.
+                  </Alert>
+                ) : (
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 3, color: '#1877f2', fontWeight: 600 }}>
+                      Toplam {history.length} değişiklik kaydı
+                    </Typography>
+                    
+                    {history.map((record, index) => (
+                      <StyledAccordion key={index}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: 2 }}>
+                            <HistoryChip 
+                              label={`Versiyon ${record.version}`} 
+                              size="small" 
+                            />
+                            <Typography sx={{ fontWeight: 500 }}>
+                              {new Date(record.changeDate).toLocaleDateString('tr-TR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: '0.9rem' }}>
+                              {record.changeReason}
+                            </Typography>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Grid container spacing={3}>
+                            {/* Hasta Bilgileri Bölümü */}
+                            <Grid item xs={12}>
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Hasta Bilgileri
+                              </SectionTitle>
                             </Grid>
-                          </AccordionDetails>
-                        </Accordion>
-                      ))}
-                    </Box>
-                  )}
-                </Box>
-              )}
-            </>
-          ) : (
-            <Alert severity="info">
-              Hasta bulunamadı.
-            </Alert>
-          )}
-        </Paper>
-      </Container>
+                            
+                            {/* Basic Info Grid */}
+                            {[
+                              { label: 'Protokol No', value: record.previousData.protokolNo },
+                              { label: 'Hasta Adı', value: record.previousData.hastaAdi },
+                              { label: 'Hasta Sahibi', value: record.previousData.hastaSahibi },
+                              { label: 'Tür', value: record.previousData.tur },
+                              { label: 'Irk', value: record.previousData.irk },
+                              { label: 'Cinsiyet', value: record.previousData.cinsiyet },
+                              { label: 'Yaş', value: record.previousData.yas ? `${record.previousData.yas} yaş` : '-' },
+                              { label: 'Kilo', value: record.previousData.kilo ? `${record.previousData.kilo} kg` : '-' },
+                              { label: 'VKS', value: record.previousData.vks }
+                            ].map((item, idx) => (
+                              <Grid item xs={12} sm={6} md={4} key={idx}>
+                                <InfoCard>
+                                  <InfoCardContent>
+                                    <LabelText variant="subtitle2">{item.label}</LabelText>
+                                    <ValueText variant="body2">{item.value || '-'}</ValueText>
+                                  </InfoCardContent>
+                                </InfoCard>
+                              </Grid>
+                            ))}
+
+                            {/* Klinik Bilgileri Bölümü */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Klinik Bilgileri
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {[
+                              { label: 'Anamnez', value: record.previousData.anamnez, fullWidth: true },
+                              { label: 'Radyolojik Bulgular', value: record.previousData.radyolojikBulgular },
+                              { label: 'Ultrasonografik Bulgular', value: record.previousData.ultrasonografikBulgular },
+                              { label: 'Tomografi Bulgular', value: record.previousData.tomografiBulgular, fullWidth: true }
+                            ].map((item, idx) => (
+                              <Grid item xs={12} sm={item.fullWidth ? 12 : 6} key={idx}>
+                                <InfoCard>
+                                  <InfoCardContent>
+                                    <LabelText variant="subtitle2">{item.label}</LabelText>
+                                    <ValueText variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                      {item.value || '-'}
+                                    </ValueText>
+                                  </InfoCardContent>
+                                </InfoCard>
+                              </Grid>
+                            ))}
+
+                            {/* Patoloji Bilgileri Bölümü */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Patoloji Bilgileri
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {[
+                              { label: 'Patoloji', value: record.previousData.patoloji },
+                              { label: 'Mikroskopisi', value: record.previousData.mikroskopisi },
+                              { label: 'Patolojik Teşhis', value: record.previousData.patolojikTeshis, fullWidth: true }
+                            ].map((item, idx) => (
+                              <Grid item xs={12} sm={item.fullWidth ? 12 : 6} key={idx}>
+                                <InfoCard>
+                                  <InfoCardContent>
+                                    <LabelText variant="subtitle2">{item.label}</LabelText>
+                                    <ValueText variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                      {item.value || '-'}
+                                    </ValueText>
+                                  </InfoCardContent>
+                                </InfoCard>
+                              </Grid>
+                            ))}
+
+                            {/* Hemogram Parametreleri - History */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Hemogram Parametreleri (Önceki Değerler)
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {record.previousData.hemogram && typeof record.previousData.hemogram === 'object' ? 
+                              Object.entries(record.previousData.hemogram).map(([key, value]) => {
+                                if (!value) return null;
+                                return (
+                                  <Grid item xs={12} sm={6} md={3} key={`history-hemogram-${key}`}>
+                                    <ParameterInput
+                                      parameter={key}
+                                      parameterType="hemogram"
+                                      value={value}
+                                      onChange={() => {}} // Read-only mode
+                                      size="small"
+                                      InputProps={{ readOnly: true }}
+                                    />
+                                  </Grid>
+                                );
+                              })
+                              :
+                              <Grid item xs={12}>
+                                <Typography variant="body2" color="text.secondary">
+                                  {record.previousData.hemogram || 'Hemogram verisi yok'}
+                                </Typography>
+                              </Grid>
+                            }
+
+                            {/* Biyokimya Parametreleri - History */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Biyokimya Parametreleri (Önceki Değerler)
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {record.previousData.biyokimya && typeof record.previousData.biyokimya === 'object' ? 
+                              Object.entries(record.previousData.biyokimya).map(([key, value]) => {
+                                if (!value) return null;
+                                return (
+                                  <Grid item xs={12} sm={6} md={3} key={`history-biyokimya-${key}`}>
+                                    <ParameterInput
+                                      parameter={key}
+                                      parameterType="biyokimya"
+                                      value={value}
+                                      onChange={() => {}} // Read-only mode
+                                      size="small"
+                                      InputProps={{ readOnly: true }}
+                                    />
+                                  </Grid>
+                                );
+                              })
+                              :
+                              <Grid item xs={12}>
+                                <Typography variant="body2" color="text.secondary">
+                                  {record.previousData.biyokimya || 'Biyokimya verisi yok'}
+                                </Typography>
+                              </Grid>
+                            }
+
+                            {/* Tedavi ve Reçete */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Tedavi ve Reçete
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {[
+                              { label: 'Tedavi', value: record.previousData.tedavi, fullWidth: true },
+                              { label: 'Reçete', value: record.previousData.recete, fullWidth: true }
+                            ].map((item, idx) => (
+                              <Grid item xs={12} key={idx}>
+                                <InfoCard>
+                                  <InfoCardContent>
+                                    <LabelText variant="subtitle2">{item.label}</LabelText>
+                                    <ValueText variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                      {item.value || '-'}
+                                    </ValueText>
+                                  </InfoCardContent>
+                                </InfoCard>
+                              </Grid>
+                            ))}
+
+                            {/* Biyopsi Bilgileri Bölümü */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Biyopsi Bilgileri
+                              </SectionTitle>
+                            </Grid>
+                            
+                            <Grid item xs={12}>
+                              <InfoCard>
+                                <InfoCardContent>
+                                  <LabelText variant="subtitle2">Biyopsi Türü</LabelText>
+                                  <Box sx={{ mt: 1 }}>
+                                    {record.previousData.biyopsi?.iiab && (
+                                      <Chip 
+                                        label="İİAB (ince iğne aspirasyon biyopsisi)" 
+                                        color="primary" 
+                                        variant="outlined" 
+                                        size="small"
+                                        sx={{ m: 0.5 }}
+                                      />
+                                    )}
+                                    {record.previousData.biyopsi?.tuse && (
+                                      <Chip 
+                                        label="Tuşe" 
+                                        color="primary" 
+                                        variant="outlined" 
+                                        size="small"
+                                        sx={{ m: 0.5 }}
+                                      />
+                                    )}
+                                    {record.previousData.biyopsi?.trucat && (
+                                      <Chip 
+                                        label="Trucat Biyopsi" 
+                                        color="primary" 
+                                        variant="outlined" 
+                                        size="small"
+                                        sx={{ m: 0.5 }}
+                                      />
+                                    )}
+                                    {record.previousData.biyopsi?.operasyon && (
+                                      <Chip 
+                                        label="Operasyon" 
+                                        color="primary" 
+                                        variant="outlined" 
+                                        size="small"
+                                        sx={{ m: 0.5 }}
+                                      />
+                                    )}
+                                    {!record.previousData.biyopsi?.iiab && 
+                                     !record.previousData.biyopsi?.tuse && 
+                                     !record.previousData.biyopsi?.trucat && 
+                                     !record.previousData.biyopsi?.operasyon && (
+                                      <Typography variant="body2" color="text.secondary">
+                                        Biyopsi yapılmadı
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                </InfoCardContent>
+                              </InfoCard>
+                            </Grid>
+                            
+                            <Grid item xs={12}>
+                              <InfoCard>
+                                <InfoCardContent>
+                                  <LabelText variant="subtitle2">Biyopsi Notları</LabelText>
+                                  <ValueText variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                    {record.previousData.biyopsiNot || '-'}
+                                  </ValueText>
+                                </InfoCardContent>
+                              </InfoCard>
+                            </Grid>
+
+                            {/* Değişiklik Bilgileri */}
+                            <Grid item xs={12}>
+                              <Divider sx={{ my: 3 }} />
+                              <SectionTitle variant="h6" sx={{ fontSize: '1.1rem' }}>
+                                Değişiklik Bilgileri
+                              </SectionTitle>
+                            </Grid>
+                            
+                            {[
+                              { label: 'Düzenleyen', value: record.modifiedBy },
+                              { label: 'Değişiklik Tarihi', value: new Date(record.changeDate).toLocaleDateString('tr-TR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })},
+                              { label: 'Versiyon', value: record.version }
+                            ].map((item, idx) => (
+                              <Grid item xs={12} sm={6} md={4} key={idx}>
+                                <InfoCard>
+                                  <InfoCardContent>
+                                    <LabelText variant="subtitle2">{item.label}</LabelText>
+                                    <ValueText variant="body2">{item.value}</ValueText>
+                                  </InfoCardContent>
+                                </InfoCard>
+                              </Grid>
+                            ))}
+                            
+                            <Grid item xs={12}>
+                              <InfoCard>
+                                <InfoCardContent>
+                                  <LabelText variant="subtitle2">Değişiklik Nedeni</LabelText>
+                                  <ValueText variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                    {record.changeReason}
+                                  </ValueText>
+                                </InfoCardContent>
+                              </InfoCard>
+                            </Grid>
+                          </Grid>
+                        </AccordionDetails>
+                      </StyledAccordion>
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            )}
+          </ContentSection>
+        </StyledPaper>
+      </StyledContainer>
       
       {/* AI Analiz Bölümü */}
       <AIAnalysis patientId={id} />
