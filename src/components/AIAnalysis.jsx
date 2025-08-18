@@ -20,11 +20,13 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScienceIcon from '@mui/icons-material/Science';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.MODE === 'production' ? 'https://loroncology.onrender.com' : 'http://localhost:5000');
 
 const AIAnalysis = ({ patientId }) => {
+  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [analysis, setAnalysis] = useState(null);
@@ -59,13 +61,19 @@ const AIAnalysis = ({ patientId }) => {
   };
 
   const generateAnalysis = async () => {
+    if (!token) {
+      setError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_URL}/api/patients/${patientId}/analyze`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -84,13 +92,19 @@ const AIAnalysis = ({ patientId }) => {
   };
 
   const generateTreatmentSuggestions = async () => {
+    if (!token) {
+      setError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_URL}/api/patients/${patientId}/treatment-suggestions`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -109,13 +123,19 @@ const AIAnalysis = ({ patientId }) => {
   };
 
   const generateLabAnalysis = async () => {
+    if (!token) {
+      setError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_URL}/api/patients/${patientId}/analyze-lab`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -131,13 +151,6 @@ const AIAnalysis = ({ patientId }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const clearAnalysis = () => {
-    setAnalysis(null);
-    setTreatmentSuggestions(null);
-    setLabAnalysis(null);
-    setError(null);
   };
 
   return (
@@ -337,30 +350,62 @@ const AIAnalysis = ({ patientId }) => {
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            whiteSpace: 'pre-line',
-                            color: '#1F2937',
-                            lineHeight: 1.6,
-                            '&::-webkit-scrollbar': {
-                              width: '8px'
-                            },
-                            '&::-webkit-scrollbar-track': {
-                              background: 'rgba(0,0,0,0.1)',
-                              borderRadius: '4px'
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(59, 130, 246, 0.5)',
-                              borderRadius: '4px',
-                              '&:hover': {
-                                background: 'rgba(59, 130, 246, 0.7)'
-                              }
-                            }
-                          }}
-                        >
-                          {analysis}
-                        </Typography>
+                        {analysis.error ? (
+                          <Typography variant="body2" color="error">
+                            {analysis.rawResponse}
+                          </Typography>
+                        ) : (
+                          <Box>
+                            {analysis.differentials && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3B82F6', mb: 1 }}>
+                                  🎯 Diferansiyel Tanılar:
+                                </Typography>
+                                {analysis.differentials.map((diff, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(59, 130, 246, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {diff.dx} (Olasılık: {Math.round(diff.likelihood * 100)}%)
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {diff.rationale}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {analysis.tests && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#10B981', mb: 1 }}>
+                                  🔬 Önerilen Testler:
+                                </Typography>
+                                {analysis.tests.map((test, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(16, 185, 129, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {test.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {test.why}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {analysis.red_flags && analysis.red_flags.length > 0 && (
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#EF4444', mb: 1 }}>
+                                  ⚠️ Kırmızı Bayraklar:
+                                </Typography>
+                                {analysis.red_flags.map((flag, index) => (
+                                  <Typography key={index} variant="body2" color="error" sx={{ mb: 0.5 }}>
+                                    • {flag}
+                                  </Typography>
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        )}
                       </AccordionDetails>
                     </Accordion>
                   )}
@@ -397,30 +442,102 @@ const AIAnalysis = ({ patientId }) => {
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            whiteSpace: 'pre-line',
-                            color: '#1F2937',
-                            lineHeight: 1.6,
-                            '&::-webkit-scrollbar': {
-                              width: '8px'
-                            },
-                            '&::-webkit-scrollbar-track': {
-                              background: 'rgba(0,0,0,0.1)',
-                              borderRadius: '4px'
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(16, 185, 129, 0.5)',
-                              borderRadius: '4px',
-                              '&:hover': {
-                                background: 'rgba(16, 185, 129, 0.7)'
-                              }
-                            }
-                          }}
-                        >
-                          {treatmentSuggestions}
-                        </Typography>
+                        {treatmentSuggestions.error ? (
+                          <Typography variant="body2" color="error">
+                            {treatmentSuggestions.rawResponse}
+                          </Typography>
+                        ) : (
+                          <Box>
+                            {treatmentSuggestions.treatments && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#10B981', mb: 1 }}>
+                                  💊 Tedavi Önerileri:
+                                </Typography>
+                                {treatmentSuggestions.treatments.map((treatment, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(16, 185, 129, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {treatment.treatment} 
+                                      <span style={{ 
+                                        color: treatment.priority === 'yüksek' ? '#EF4444' : 
+                                               treatment.priority === 'orta' ? '#F59E0B' : '#10B981',
+                                        marginLeft: '8px',
+                                        fontSize: '0.8em'
+                                      }}>
+                                        ({treatment.priority} öncelik)
+                                      </span>
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {treatment.rationale}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {treatmentSuggestions.medications && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8B5CF6', mb: 1 }}>
+                                  💊 İlaç Önerileri:
+                                </Typography>
+                                {treatmentSuggestions.medications.map((med, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(139, 92, 246, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {med.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      Doz: {med.dosage} | Süre: {med.duration}
+                                    </Typography>
+                                    {med.notes && (
+                                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                        Not: {med.notes}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {treatmentSuggestions.monitoring && treatmentSuggestions.monitoring.length > 0 && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#F59E0B', mb: 1 }}>
+                                  📊 İzleme:
+                                </Typography>
+                                {treatmentSuggestions.monitoring.map((item, index) => (
+                                  <Typography key={index} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                    • {item}
+                                  </Typography>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {treatmentSuggestions.follow_up && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#06B6D4', mb: 1 }}>
+                                  📅 Takip:
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {treatmentSuggestions.follow_up}
+                                </Typography>
+                              </Box>
+                            )}
+                            
+                            {treatmentSuggestions.prognosis && (
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#059669', mb: 1 }}>
+                                  🔮 Prognoz:
+                                </Typography>
+                                <Typography variant="body2" sx={{ 
+                                  color: treatmentSuggestions.prognosis === 'iyi' ? '#059669' : 
+                                         treatmentSuggestions.prognosis === 'orta' ? '#D97706' : '#DC2626',
+                                  fontWeight: 600
+                                }}>
+                                  {treatmentSuggestions.prognosis === 'iyi' ? 'İyi' : 
+                                   treatmentSuggestions.prognosis === 'orta' ? 'Orta' : 'Kötü'}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
+                        )}
                       </AccordionDetails>
                     </Accordion>
                   )}
@@ -457,30 +574,89 @@ const AIAnalysis = ({ patientId }) => {
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            whiteSpace: 'pre-line',
-                            color: '#1F2937',
-                            lineHeight: 1.6,
-                            '&::-webkit-scrollbar': {
-                              width: '8px'
-                            },
-                            '&::-webkit-scrollbar-track': {
-                              background: 'rgba(0,0,0,0.1)',
-                              borderRadius: '4px'
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(99, 102, 241, 0.5)',
-                              borderRadius: '4px',
-                              '&:hover': {
-                                background: 'rgba(99, 102, 241, 0.7)'
-                              }
-                            }
-                          }}
-                        >
-                          {labAnalysis}
-                        </Typography>
+                        {labAnalysis.error ? (
+                          <Typography variant="body2" color="error">
+                            {labAnalysis.rawResponse}
+                          </Typography>
+                        ) : (
+                          <Box>
+                            {labAnalysis.abnormalities && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#EF4444', mb: 1 }}>
+                                  ⚠️ Anormallikler:
+                                </Typography>
+                                {labAnalysis.abnormalities.map((abnormality, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(239, 68, 68, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {abnormality.parameter}: {abnormality.value}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      Normal: {abnormality.reference_range}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {abnormality.significance}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {labAnalysis.interpretation && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#6366F1', mb: 1 }}>
+                                  📋 Yorum:
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {labAnalysis.interpretation}
+                                </Typography>
+                              </Box>
+                            )}
+                            
+                            {labAnalysis.recommendations && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#10B981', mb: 1 }}>
+                                  💡 Öneriler:
+                                </Typography>
+                                {labAnalysis.recommendations.map((rec, index) => (
+                                  <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'rgba(16, 185, 129, 0.05)', borderRadius: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {rec.action}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {rec.reason}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {labAnalysis.differential_diagnosis && labAnalysis.differential_diagnosis.length > 0 && (
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8B5CF6', mb: 1 }}>
+                                  🎯 Diferansiyel Tanı:
+                                </Typography>
+                                {labAnalysis.differential_diagnosis.map((dx, index) => (
+                                  <Typography key={index} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                    • {dx}
+                                  </Typography>
+                                ))}
+                              </Box>
+                            )}
+                            
+                            {labAnalysis.next_steps && labAnalysis.next_steps.length > 0 && (
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#F59E0B', mb: 1 }}>
+                                  ➡️ Sonraki Adımlar:
+                                </Typography>
+                                {labAnalysis.next_steps.map((step, index) => (
+                                  <Typography key={index} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                    • {step}
+                                  </Typography>
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        )}
                       </AccordionDetails>
                     </Accordion>
                   )}
