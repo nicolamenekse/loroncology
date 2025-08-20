@@ -435,7 +435,28 @@ const AIAnalysis = ({ patientId }) => {
                 </Alert>
               )}
 
-                             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+              {/* Uyarı İbaresi */}
+              <Box sx={{ 
+                p: 1.5, 
+                mb: 2, 
+                backgroundColor: '#fff3cd', 
+                border: '1px solid #ffeaa7', 
+                borderRadius: '8px',
+                borderLeft: '4px solid #f39c12'
+              }}>
+                <Typography variant="caption" sx={{ 
+                  color: '#856404', 
+                  fontSize: '0.7rem', 
+                  fontWeight: 600,
+                  lineHeight: 1.4,
+                  display: 'block',
+                  textAlign: 'center'
+                }}>
+                  ⚠️ Yapay Zekâ Analizi yalnızca ek bir destek aracıdır. Sistem, hekimlere hızlı değerlendirme ve öneriler sunar; ancak sonuçların doğruluğu garanti edilmez. Tanı, tedavi ve takip süreçlerinde son söz hekimindir.
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                 <AIButton
                   variant="contained"
                   onClick={generateAnalysis}

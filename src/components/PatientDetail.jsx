@@ -1456,24 +1456,24 @@ const PatientDetail = () => {
               </Box>
                         )}
             
-            {/* AI Klinik Asistan - Sayfanın En Sağında */}
+            {/* AI Klinik Asistan - Sayfanın Sağ Üst Köşesinde */}
             <Box sx={{ 
               position: 'fixed',
               right: '24px',
-              top: '50%',
-              transform: 'translateY(-50%)',
+              top: '100px',
               zIndex: 1000,
               '@media (max-width: 1200px)': {
                 right: '20px',
+                top: '90px',
               },
               '@media (max-width: 900px)': {
                 right: '16px',
+                top: '80px',
               },
               '@media (max-width: 600px)': {
                 position: 'relative',
                 right: 'auto',
                 top: 'auto',
-                transform: 'none',
                 mt: 3,
                 display: 'flex',
                 justifyContent: 'center'
