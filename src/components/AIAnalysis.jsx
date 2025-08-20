@@ -31,26 +31,33 @@ const API_URL = import.meta.env.VITE_API_URL ||
 
 // Styled components for modern Facebook-like design
 const AIAnalysisContainer = styled(Box)({
-  position: 'fixed',
-  top: '20%',
-  left: 20,
-  maxWidth: '400px',
-  width: '100%',
-  zIndex: 1000,
+  position: 'relative',
+  maxWidth: '320px',
+  width: '320px',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   opacity: 1,
+  '@keyframes pulse': {
+    '0%': {
+      transform: 'scale(1)',
+    },
+    '50%': {
+      transform: 'scale(1.1)',
+    },
+    '100%': {
+      transform: 'scale(1)',
+    },
+  },
   '@media (max-width: 1200px)': {
-    maxWidth: '350px',
+    maxWidth: '280px',
+    width: '280px',
   },
   '@media (max-width: 900px)': {
-    top: 'auto',
-    bottom: 20,
-    left: 20,
-    maxWidth: '320px'
+    maxWidth: '260px',
+    width: '260px'
   },
   '@media (max-width: 600px)': {
-    left: 10,
-    maxWidth: '300px'
+    maxWidth: '240px',
+    width: '240px'
   }
 });
 
@@ -59,20 +66,21 @@ const AIAnalysisPaper = styled(Paper)({
   overflow: 'hidden',
   cursor: 'pointer',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  background: '#ffffff',
-  border: '1px solid #e4e6ea',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  background: 'rgba(255, 255, 255, 0.95)',
+  border: '2px solid rgba(255, 255, 255, 0.3)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+  backdropFilter: 'blur(10px)',
   '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 20px 40px rgba(24, 119, 242, 0.15)',
-    border: '1px solid rgba(24, 119, 242, 0.2)'
+    transform: 'translateY(-3px)',
+    boxShadow: '0 12px 30px rgba(24, 119, 242, 0.25)',
+    border: '2px solid rgba(255, 255, 255, 0.5)'
   }
 });
 
 const AIHeader = styled(Box)({
   background: 'linear-gradient(135deg, #1877f2 0%, #3b82f6 100%)',
   color: '#ffffff',
-  padding: '20px',
+  padding: '12px 16px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -87,7 +95,7 @@ const AIHeader = styled(Box)({
     right: 0,
     bottom: 0,
     background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-    opacity: 0.3,
+    opacity: 0.2,
   },
   '&:hover': {
     background: 'linear-gradient(135deg, #166fe5 0%, #2563eb 100%)'
@@ -104,12 +112,12 @@ const AIHeaderContent = styled(Box)({
 });
 
 const AIHeaderTitle = styled(Typography)({
-  fontSize: '1.25rem',
+  fontSize: '1rem',
   fontWeight: 700,
   textShadow: '0 2px 4px rgba(0,0,0,0.1)',
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '6px',
 });
 
 const AIHeaderActions = styled(Box)({
@@ -118,18 +126,18 @@ const AIHeaderActions = styled(Box)({
 });
 
 const AIButton = styled(Button)(({ variant, color }) => ({
-  borderRadius: '12px',
+  borderRadius: '8px',
   textTransform: 'none',
   fontWeight: 600,
-  fontSize: '0.875rem',
-  padding: '10px 16px',
-  minHeight: '40px',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  fontSize: '0.75rem',
+  padding: '6px 12px',
+  minHeight: '32px',
+  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
   transition: 'all 0.2s ease-in-out',
   border: '1px solid transparent',
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 6px 12px rgba(0,0,0,0.15)',
   },
   ...(variant === 'contained' && {
     background: color === 'primary' ? 'linear-gradient(135deg, #1877f2 0%, #3b82f6 100%)' :
@@ -156,17 +164,17 @@ const AIButton = styled(Button)(({ variant, color }) => ({
 const AIAccordion = styled(Accordion)({
   backgroundColor: '#ffffff',
   border: '1px solid #e4e6ea',
-  borderRadius: '12px',
+  borderRadius: '8px',
   boxShadow: 'none',
-  marginBottom: '16px',
+  marginBottom: '12px',
   overflow: 'hidden',
   '&:before': {
     display: 'none',
   },
   '& .MuiAccordionSummary-root': {
     backgroundColor: '#f8f9fa',
-    borderRadius: '12px',
-    padding: '16px 20px',
+    borderRadius: '8px',
+    padding: '12px 16px',
     '&:hover': {
       backgroundColor: '#e4e6ea',
     },
@@ -175,13 +183,13 @@ const AIAccordion = styled(Accordion)({
     }
   },
   '& .MuiAccordionDetails-root': {
-    padding: '20px',
+    padding: '16px',
     backgroundColor: '#ffffff',
   },
 });
 
 const AnalysisSection = styled(Box)({
-  marginBottom: '20px',
+  marginBottom: '16px',
   '&:last-child': {
     marginBottom: 0,
   },
@@ -189,16 +197,16 @@ const AnalysisSection = styled(Box)({
 
 const SectionTitle = styled(Typography)(({ color = '#1877f2' }) => ({
   fontWeight: 700,
-  fontSize: '0.95rem',
-  marginBottom: '12px',
+  fontSize: '0.85rem',
+  marginBottom: '8px',
   color: color,
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '6px',
 }));
 
 const AnalysisCard = styled(Box)(({ color = '#1877f2' }) => ({
-  padding: '16px',
+  padding: '12px',
   backgroundColor: `rgba(${color === '#1877f2' ? '24, 119, 242' : 
                            color === '#10b981' ? '16, 185, 129' : 
                            color === '#ef4444' ? '239, 68, 68' : 
@@ -209,8 +217,8 @@ const AnalysisCard = styled(Box)(({ color = '#1877f2' }) => ({
                            color === '#ef4444' ? '239, 68, 68' : 
                            color === '#8b5cf6' ? '139, 92, 246' : 
                            color === '#f59e0b' ? '245, 158, 11' : '99, 102, 241'}, 0.1)`,
-  borderRadius: '8px',
-  marginBottom: '12px',
+  borderRadius: '6px',
+  marginBottom: '8px',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
     backgroundColor: `rgba(${color === '#1877f2' ? '24, 119, 242' : 
@@ -384,13 +392,20 @@ const AIAnalysis = ({ patientId }) => {
           elevation={0}
           onClick={() => setMinimized(false)}
         >
-          <AIHeader onClick={() => setMinimized(false)}>
-            <AIHeaderContent>
-              <SmartToyIcon sx={{ fontSize: '1.5rem' }} />
-              <AIHeaderTitle variant="h6">
-                AI Klinik Asistan
-              </AIHeaderTitle>
-            </AIHeaderContent>
+                     <AIHeader onClick={() => setMinimized(false)}>
+             <AIHeaderContent>
+               <Box sx={{ 
+                 fontSize: '1.5rem', 
+                 display: 'flex', 
+                 alignItems: 'center',
+                 animation: 'pulse 2s infinite'
+               }}>
+                 🤖
+               </Box>
+               <AIHeaderTitle variant="h6">
+                 AI Klinik Asistan
+               </AIHeaderTitle>
+             </AIHeaderContent>
             <AIHeaderActions>
               <Tooltip title={minimized ? "Genişlet" : "Küçült"}>
                 <IconButton
@@ -412,15 +427,15 @@ const AIAnalysis = ({ patientId }) => {
             </AIHeaderActions>
           </AIHeader>
 
-          <Fade in={!minimized}>
-            <Box sx={{ p: 3, display: minimized ? 'none' : 'block' }}>
+                     <Fade in={!minimized}>
+             <Box sx={{ p: 2, display: minimized ? 'none' : 'block' }}>
               {error && (
                 <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
                   {error}
                 </Alert>
               )}
 
-              <Box sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
+                             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                 <AIButton
                   variant="contained"
                   onClick={generateAnalysis}
@@ -453,8 +468,8 @@ const AIAnalysis = ({ patientId }) => {
                 </AIButton>
               </Box>
 
-              {loading && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 3 }}>
+                             {loading && (
+                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
                   <CircularProgress size={32} sx={{ color: '#1877f2', mr: 2 }} />
                   <Typography variant="body2" color="text.secondary">
                     AI analizi yapılıyor...
@@ -462,17 +477,17 @@ const AIAnalysis = ({ patientId }) => {
                 </Box>
               )}
 
-              {(analysis || treatmentSuggestions || labAnalysis) && (
-                <Box sx={{ mt: 3 }}>
+                             {(analysis || treatmentSuggestions || labAnalysis) && (
+                 <Box sx={{ mt: 2 }}>
                   {analysis && (
-                    <AIAccordion defaultExpanded>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#1877f2' }} />}>
-                        <SectionTitle color="#1877f2">
-                          <PsychologyIcon fontSize="small" />
-                          Genel Analiz
-                        </SectionTitle>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                         <AIAccordion defaultExpanded>
+                       <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#1877f2' }} />}>
+                         <SectionTitle color="#1877f2">
+                           <PsychologyIcon fontSize="small" />
+                           Genel Analiz
+                         </SectionTitle>
+                       </AccordionSummary>
+                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                         {analysis.error ? (
                           <Typography variant="body2" color="error">
                             {analysis.rawResponse}
@@ -545,14 +560,14 @@ const AIAnalysis = ({ patientId }) => {
                   )}
 
                   {treatmentSuggestions && (
-                    <AIAccordion defaultExpanded>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#10b981' }} />}>
-                        <SectionTitle color="#10b981">
-                          <MedicalServicesIcon fontSize="small" />
-                          Tedavi Önerileri
-                        </SectionTitle>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                         <AIAccordion defaultExpanded>
+                       <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#10b981' }} />}>
+                         <SectionTitle color="#10b981">
+                           <MedicalServicesIcon fontSize="small" />
+                           Tedavi Önerileri
+                         </SectionTitle>
+                       </AccordionSummary>
+                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                         {treatmentSuggestions.error ? (
                           <Typography variant="body2" color="error">
                             {treatmentSuggestions.rawResponse}
@@ -672,14 +687,14 @@ const AIAnalysis = ({ patientId }) => {
                   )}
 
                   {labAnalysis && (
-                    <AIAccordion defaultExpanded>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#6366f1' }} />}>
-                        <SectionTitle color="#6366f1">
-                          <ScienceIcon fontSize="small" />
-                          Laboratuvar Analizi
-                        </SectionTitle>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                         <AIAccordion defaultExpanded>
+                       <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#6366f1' }} />}>
+                         <SectionTitle color="#6366f1">
+                           <ScienceIcon fontSize="small" />
+                           Laboratuvar Analizi
+                         </SectionTitle>
+                       </AccordionSummary>
+                       <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                         {labAnalysis.error ? (
                           <Typography variant="body2" color="error">
                             {labAnalysis.rawResponse}

@@ -70,7 +70,7 @@ const StyledPaper = styled(Paper)({
 const HeaderSection = styled(Box)({
   background: 'linear-gradient(135deg, #1877f2 0%, #3b82f6 100%)',
   color: '#ffffff',
-  padding: '32px',
+  padding: '24px',
   position: 'relative',
   '&::before': {
     content: '""',
@@ -80,10 +80,10 @@ const HeaderSection = styled(Box)({
     right: 0,
     bottom: 0,
     background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-    opacity: 0.3,
+    opacity: 0.2,
   },
   '@media (max-width: 600px)': {
-    padding: '24px',
+    padding: '20px',
   },
 });
 
@@ -97,19 +97,20 @@ const HeaderContent = styled(Box)({
   gap: '16px',
   '@media (max-width: 600px)': {
     flexDirection: 'column',
+    alignItems: 'center',
   },
 });
 
 const HeaderTitle = styled(Typography)({
-  fontSize: '2.5rem',
+  fontSize: '2rem',
   fontWeight: 700,
   textShadow: '0 2px 4px rgba(0,0,0,0.1)',
   '@media (max-width: 600px)': {
-    fontSize: '2rem',
+    fontSize: '1.75rem',
     textAlign: 'center',
   },
   '@media (max-width: 480px)': {
-    fontSize: '1.75rem',
+    fontSize: '1.5rem',
   },
 });
 
@@ -143,9 +144,9 @@ const StyledButton = styled(Button)(({ variant }) => ({
 }));
 
 const ContentSection = styled(Box)({
-  padding: '32px',
+  padding: '24px',
   '@media (max-width: 600px)': {
-    padding: '24px',
+    padding: '16px',
   },
 });
 
@@ -173,9 +174,9 @@ const StyledTabs = styled(Tabs)({
 const SectionTitle = styled(Typography)({
   color: '#1877f2',
   fontWeight: 700,
-  fontSize: '1.25rem',
-  marginBottom: '16px',
-  paddingBottom: '8px',
+  fontSize: '1.1rem',
+  marginBottom: '12px',
+  paddingBottom: '6px',
   borderBottom: '2px solid #e4e6ea',
   position: 'relative',
   '&::after': {
@@ -183,12 +184,13 @@ const SectionTitle = styled(Typography)({
     position: 'absolute',
     bottom: '-2px',
     left: 0,
-    width: '40px',
+    width: '30px',
     height: '2px',
     backgroundColor: '#1877f2',
   },
   '@media (max-width: 600px)': {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
+    marginBottom: '8px',
   },
 });
 
@@ -206,9 +208,9 @@ const InfoCard = styled(Card)({
 });
 
 const InfoCardContent = styled(CardContent)({
-  padding: '16px',
+  padding: '12px',
   '&:last-child': {
-    paddingBottom: '16px',
+    paddingBottom: '12px',
   },
 });
 
@@ -396,41 +398,47 @@ const PatientDetail = () => {
               Lökosit Parametreleri
             </Typography>
           </Grid>
-          {[
-            'WBC', 'Neu#', 'Lym#', 'Mon#', 'Eos#',
-            'Neu%', 'Lym%', 'Mon%', 'Eos%'
-          ].map((param) => (
-            <Grid item xs={6} key={param}>
-              <Box sx={{ 
-                p: 1, 
-                border: '1px solid #e0e0e0', 
-                borderRadius: 1,
-                backgroundColor: '#fafafa'
-              }}>
-                <Typography variant="caption" sx={{ color: '#666', fontWeight: 600 }}>
-                  {param}
-                </Typography>
-                <Typography variant="body2" sx={{ 
-                  color: getValueColor(patient?.hemogram?.[param], param, 'hemogram'),
-                  fontWeight: patient?.tur === 'Kedi' ? 500 : 400,
-                  fontSize: '0.9rem'
-                }}>
-                  {patient?.hemogram?.[param] || '-'}
-                </Typography>
-                {patient?.tur === 'Kedi' && patient?.hemogram?.[param] && (
-                  <Typography variant="caption" sx={{ 
-                    color: getValueColor(patient?.hemogram?.[param], param, 'hemogram'),
-                    fontSize: '0.7rem',
-                    fontWeight: 'bold',
-                    display: 'block',
-                    mt: 0.5
-                  }}>
-                    {getReferenceRangeText(param, 'hemogram')}
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
-          ))}
+                     {[
+             'WBC', 'Neu#', 'Lym#', 'Mon#', 'Eos#',
+             'Neu%', 'Lym%', 'Mon%', 'Eos%'
+           ].map((param) => (
+             <Grid item xs={6} key={param}>
+               <Box sx={{ 
+                 p: 0.8, 
+                 border: '1px solid #e0e0e0', 
+                 borderRadius: 1,
+                 backgroundColor: '#fafafa',
+                 minHeight: '60px',
+                 display: 'flex',
+                 flexDirection: 'column',
+                 justifyContent: 'space-between'
+               }}>
+                 <Typography variant="caption" sx={{ color: '#666', fontWeight: 600, fontSize: '0.7rem' }}>
+                   {param}
+                 </Typography>
+                 <Typography variant="body2" sx={{ 
+                   color: getValueColor(patient?.hemogram?.[param], param, 'hemogram'),
+                   fontWeight: patient?.tur === 'Kedi' ? 500 : 400,
+                   fontSize: '0.85rem',
+                   textAlign: 'center',
+                   my: 0.5
+                 }}>
+                   {patient?.hemogram?.[param] || '-'}
+                 </Typography>
+                 {patient?.tur === 'Kedi' && patient?.hemogram?.[param] && (
+                   <Typography variant="caption" sx={{ 
+                     color: getValueColor(patient?.hemogram?.[param], param, 'hemogram'),
+                     fontSize: '0.65rem',
+                     fontWeight: 'bold',
+                     textAlign: 'center',
+                     display: 'block'
+                   }}>
+                     {getReferenceRangeText(param, 'hemogram')}
+                   </Typography>
+                 )}
+               </Box>
+             </Grid>
+           ))}
 
           {/* Eritrosit Parametreleri */}
           <Grid item xs={12}>
@@ -575,40 +583,46 @@ const PatientDetail = () => {
               Protein Parametreleri
             </Typography>
           </Grid>
-          {[
-            'TP', 'ALB', 'GLD', 'A/G'
-          ].map((param) => (
-            <Grid item xs={6} key={param}>
-              <Box sx={{ 
-                p: 1, 
-                border: '1px solid #e0e0e0', 
-                borderRadius: 1,
-                backgroundColor: '#fafafa'
-              }}>
-                <Typography variant="caption" sx={{ color: '#666', fontWeight: 600 }}>
-                  {param}
-                </Typography>
-                <Typography variant="body2" sx={{ 
-                  color: getValueColor(patient?.biyokimya?.[param], param, 'biyokimya'),
-                  fontWeight: patient?.tur === 'Kedi' ? 500 : 400,
-                  fontSize: '0.9rem'
-                }}>
-                  {patient?.biyokimya?.[param] || '-'}
-                </Typography>
-                {patient?.tur === 'Kedi' && patient?.biyokimya?.[param] && (
-                  <Typography variant="caption" sx={{ 
-                    color: getValueColor(patient?.biyokimya?.[param], param, 'biyokimya'),
-                    fontSize: '0.7rem',
-                    fontWeight: 'bold',
-                    display: 'block',
-                    mt: 0.5
-                  }}>
-                    {getReferenceRangeText(param, 'biyokimya')}
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
-          ))}
+                     {[
+             'TP', 'ALB', 'GLD', 'A/G'
+           ].map((param) => (
+             <Grid item xs={6} key={param}>
+               <Box sx={{ 
+                 p: 0.8, 
+                 border: '1px solid #e0e0e0', 
+                 borderRadius: 1,
+                 backgroundColor: '#fafafa',
+                 minHeight: '60px',
+                 display: 'flex',
+                 flexDirection: 'column',
+                 justifyContent: 'space-between'
+               }}>
+                 <Typography variant="caption" sx={{ color: '#666', fontWeight: 600, fontSize: '0.7rem' }}>
+                   {param}
+                 </Typography>
+                 <Typography variant="body2" sx={{ 
+                   color: getValueColor(patient?.biyokimya?.[param], param, 'biyokimya'),
+                   fontWeight: patient?.tur === 'Kedi' ? 500 : 400,
+                   fontSize: '0.85rem',
+                   textAlign: 'center',
+                   my: 0.5
+                 }}>
+                   {patient?.biyokimya?.[param] || '-'}
+                 </Typography>
+                 {patient?.tur === 'Kedi' && patient?.biyokimya?.[param] && (
+                   <Typography variant="caption" sx={{ 
+                     color: getValueColor(patient?.biyokimya?.[param], param, 'biyokimya'),
+                     fontSize: '0.65rem',
+                     fontWeight: 'bold',
+                     textAlign: 'center',
+                     display: 'block'
+                   }}>
+                     {getReferenceRangeText(param, 'biyokimya')}
+                   </Typography>
+                 )}
+               </Box>
+             </Grid>
+           ))}
 
           {/* Karaciğer Enzimleri */}
           <Grid item xs={12}>
@@ -742,67 +756,69 @@ const PatientDetail = () => {
                   Protokol No: {patient.protokolNo} • {patient.tur} • {patient.cinsiyet}
                 </Typography>
               </Box>
-              <ActionButtons>
-                <StyledButton
-                  variant="outlined"
-                  onClick={() => navigate('/hastalar')}
-                  sx={{ 
-                    color: '#ffffff', 
-                    borderColor: '#ffffff',
-                    '&:hover': {
-                      borderColor: '#ffffff',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                    }
-                  }}
-                >
-                  <ArrowBackIcon sx={{ mr: 1 }} />
-                  Geri Dön
-                </StyledButton>
-                <StyledButton
-                  variant="outlined"
-                  onClick={handlePrint}
-                  startIcon={<PrintIcon />}
-                  sx={{ 
-                    color: '#ffffff', 
-                    borderColor: '#ffffff',
-                    '&:hover': {
-                      borderColor: '#ffffff',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                    }
-                  }}
-                >
-                  Yazdır
-                </StyledButton>
-                <StyledButton
-                  variant="contained"
-                  onClick={() => navigate(`/hasta-duzenle/${id}`)}
-                  startIcon={<EditIcon />}
-                  sx={{ 
-                    backgroundColor: '#ffffff',
-                    color: '#1877f2',
-                    '&:hover': {
-                      backgroundColor: '#f8f9fa',
-                    }
-                  }}
-                >
-                  Düzenle
-                </StyledButton>
-                <StyledButton
-                  variant="outlined"
-                  onClick={() => setConsultationDialog(true)}
-                  startIcon={<ShareIcon />}
-                  sx={{ 
-                    color: '#ffffff', 
-                    borderColor: '#ffffff',
-                    '&:hover': {
-                      borderColor: '#ffffff',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                    }
-                  }}
-                >
-                  Konsültasyon
-                </StyledButton>
-              </ActionButtons>
+                             <ActionButtons>
+                 <StyledButton
+                   variant="outlined"
+                   onClick={() => navigate('/hastalar')}
+                   sx={{ 
+                     color: '#ffffff', 
+                     borderColor: '#ffffff',
+                     '&:hover': {
+                       borderColor: '#ffffff',
+                       backgroundColor: 'rgba(255,255,255,0.1)',
+                     }
+                   }}
+                 >
+                   <ArrowBackIcon sx={{ mr: 1 }} />
+                   Geri Dön
+                 </StyledButton>
+                 <StyledButton
+                   variant="outlined"
+                   onClick={handlePrint}
+                   startIcon={<PrintIcon />}
+                   sx={{ 
+                     color: '#ffffff', 
+                     borderColor: '#ffffff',
+                     '&:hover': {
+                       borderColor: '#ffffff',
+                       backgroundColor: 'rgba(255,255,255,0.1)',
+                     }
+                   }}
+                 >
+                   Yazdır
+                 </StyledButton>
+                 <StyledButton
+                   variant="contained"
+                   onClick={() => navigate(`/hasta-duzenle/${id}`)}
+                   startIcon={<EditIcon />}
+                   sx={{ 
+                     backgroundColor: '#ffffff',
+                     color: '#1877f2',
+                     '&:hover': {
+                       backgroundColor: '#f8f9fa',
+                     }
+                   }}
+                 >
+                   Düzenle
+                 </StyledButton>
+                 <StyledButton
+                   variant="outlined"
+                   onClick={() => setConsultationDialog(true)}
+                   startIcon={<ShareIcon />}
+                   sx={{ 
+                     color: '#ffffff', 
+                     borderColor: '#ffffff',
+                     '&:hover': {
+                       borderColor: '#ffffff',
+                       backgroundColor: 'rgba(255,255,255,0.1)',
+                     }
+                   }}
+                 >
+                   Konsültasyon
+                 </StyledButton>
+               </ActionButtons>
+               
+               
             </HeaderContent>
           </HeaderSection>
 
@@ -818,7 +834,7 @@ const PatientDetail = () => {
 
             {/* Tab Panel 1: Hasta Bilgileri */}
             {tabValue === 0 && (
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 {/* Sol Panel - Biyokimya */}
                 <Grid item xs={12} lg={3} md={4}>
                   {renderBiyokimyaPanel()}
@@ -826,7 +842,7 @@ const PatientDetail = () => {
 
                 {/* Orta Panel - Ana Form */}
                 <Grid item xs={12} lg={6} md={8}>
-                  <Grid container spacing={2}>
+                  <Grid container spacing={1.5}>
                     {/* Hasta Bilgileri */}
                     <Grid item xs={12}>
                       <SectionTitle variant="h6">
@@ -1096,11 +1112,13 @@ const PatientDetail = () => {
                   </Grid>
                 </Grid>
 
-                {/* Sağ Panel - Hemogram */}
-                <Grid item xs={12} lg={3} md={12}>
-                  {renderHemogramPanel()}
-                </Grid>
-              </Grid>
+                 {/* Sağ Panel - Hemogram */}
+                 <Grid item xs={12} lg={3} md={12}>
+                   {renderHemogramPanel()}
+                 </Grid>
+               </Grid>
+               
+
             )}
 
             {/* Tab Panel 2: Değişiklik Geçmişi */}
@@ -1436,14 +1454,39 @@ const PatientDetail = () => {
                   </Box>
                 )}
               </Box>
-            )}
+                        )}
+            
+            {/* AI Klinik Asistan - Sayfanın En Sağında */}
+            <Box sx={{ 
+              position: 'fixed',
+              right: '24px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 1000,
+              '@media (max-width: 1200px)': {
+                right: '20px',
+              },
+              '@media (max-width: 900px)': {
+                right: '16px',
+              },
+              '@media (max-width: 600px)': {
+                position: 'relative',
+                right: 'auto',
+                top: 'auto',
+                transform: 'none',
+                mt: 3,
+                display: 'flex',
+                justifyContent: 'center'
+              }
+            }}>
+              <AIAnalysis patientId={id} />
+            </Box>
           </ContentSection>
         </StyledPaper>
+        
+ 
       </StyledContainer>
       
-      {/* AI Analiz Bölümü */}
-      <AIAnalysis patientId={id} />
-
       {/* Konsültasyon Dialog'u */}
       <ConsultationDialog
         open={consultationDialog}
